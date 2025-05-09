@@ -220,7 +220,11 @@ button:hover {
 
 .login-card .form-label {
   font-weight: 500;
+  text-align: left; /* Left align the text */
+  display: block;  /* Make sure it takes the full width */
+  margin-bottom: 0.5rem; /* Optional: Add spacing below the label */
 }
+
 
 .login-card .form-control {
   padding: 0.75rem;
