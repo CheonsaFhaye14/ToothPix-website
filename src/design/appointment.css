@@ -1,0 +1,67 @@
+.appointment-management-container {
+    padding: 20px;
+  }
+  
+  h2 {
+    color: #6bb8fa;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .filter-section {
+    margin-bottom: 30px;
+  }
+  
+  .filter-section label {
+    font-weight: bold;
+  }
+  
+  .filter-section select, .filter-section input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .appointments-list {
+    margin-bottom: 30px;
+  }
+  
+  table {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  table th {
+    background-color: #f0f8ff;
+    color: #6bb8fa;
+  }
+  
+  table td {
+    padding: 12px;
+    text-align: center;
+  }
+  
+  .status {
+    font-weight: bold;
+  }
+  
+  .status.scheduled {
+    color: green;
+  }
+  
+  .status.completed {
+    color: blue;
+  }
+  
+  .status.cancelled {
+    color: red;
+  }
+  
+  .actions-section {
+    text-align: right;
+  }
+  
+  .btn {
+    margin-left: 10px;
+  }
+  

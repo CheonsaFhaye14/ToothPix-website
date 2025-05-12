@@ -1,57 +1,35 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../index.css';
+import { Link } from 'react-router-dom';
+import logo from '../logo.png'; // Replace with actual logo path
+import '../design/page1.css';
 
 const Page1 = () => {
-  const [maximized, setMaximized] = useState(null);
-
-  const handleBackgroundClick = (side) => {
-    setMaximized(maximized === side ? null : side);
-  };
-
   return (
-    <div className={`split-page-container ${maximized === 'left' ? 'maximized-left' : ''} ${maximized === 'right' ? 'maximized-right' : ''}`}>
-      {/* LEFT PANEL */}
-      <div className="left-panel" onClick={() => handleBackgroundClick('left')}>
-        <h1>ToothPix here</h1>
-        <h2>WELCOME!</h2>
-        <p>Click the button to download the app</p>
-        <a
-          className="custom-button"
-          href="https://drive.google.com/uc?export=download&id=1QEQevmMs22I5wjWP3p083QGJAVRC1Dbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Download
-        </a>
-      </div>
-
-      {/* RIGHT PANEL */}
-      <div className="right-panel">
-        {/* This div is ONLY the background area, receives the click */}
-        <div className="right-background" onClick={() => handleBackgroundClick('right')}>
-          {/* Stop clicks inside the card from bubbling up to the background */}
-          <div className="login-card" onClick={(e) => e.stopPropagation()}>
-            <h1 className='big-text-with-border'>Admin Login</h1>
-            <form>
-              <div className="mb-3">
-                <label htmlFor="username" className="form-label">Username</label>
-                <input type="text" id="username" className="form-control" placeholder="Enter your username" />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">Password</label>
-                <input type="password" id="password" className="form-control" placeholder="Enter your password" />
-              </div>
-
-              <div className="d-grid">
-                <button type="submit" className="btn btn-primary">Login</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+    <div className="page1-container">
+  <div className="content-container">
+    <img src={logo} alt="ToothPix Logo" className="logo" />
+    <h1 className="title">Welcome to <span className="highlight">ToothPix</span></h1>
+    <p className="intro-text">
+      Smart Dental Clinic Management System with AR-Based Dental Visualization.
+    </p>
+    <div className="about-section">
+      <h4 className="about-title">What is ToothPix?</h4>
+      <p>
+        ToothPix is a cutting-edge dental clinic management system designed to make dental practices more efficient and accessible.
+        It integrates augmented reality (AR) technology to provide real-time dental visualization, helping both patients and dentists understand
+        treatment plans and oral health in an interactive way.
+      </p>
+      <p>
+        Our platform allows dental professionals to manage appointments, keep track of patient records, and provide personalized care with advanced features and tools.
+        With ToothPix, we aim to improve the patient experience and optimize the clinic workflow.
+      </p>
     </div>
+    <Link to="/login">
+  <button className="btn-primary">Get Started</button>
+</Link>
+
+  </div>
+</div>
+
   );
 };
 
