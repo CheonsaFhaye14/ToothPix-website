@@ -1,0 +1,38 @@
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background-color: #6bb8fa;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 25px 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  
+  .sidebar-nav {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar-nav .nav-link {
+    display: block;
+    color: white;
+    padding: 10px 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.3s ease;
+  }
+  
+  .sidebar-nav .nav-link:hover,
+  .sidebar-nav .nav-link.active {
+    background-color: #549fdb;
+  }
+  

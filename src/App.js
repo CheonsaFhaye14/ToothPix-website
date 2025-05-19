@@ -12,7 +12,7 @@ import Record from './pages/record';
 import Service from './pages/service';
 import Settings from './pages/settings';
 import Help from './pages/help';
-
+import ResetPassword from './pages/resetpassword';
 // Layout wrapper for pages that need the sidebar
 const DashboardLayout = ({ component: Component, ...rest }) => {
   return (
@@ -76,6 +76,7 @@ function App() {
         <Switch>
           <Route exact path="/" component={Page1} />
           <Route path="/login" component={Login} />
+          <Route path="/resetpassword" component={ResetPassword} />
           <DashboardLayout path="/dashboard" component={Dashboard} />
           <DashboardLayout path="/appointments" component={Appointment} /> {/* Add the Appointment route */}
           <DashboardLayout path="/users" component={Users} />

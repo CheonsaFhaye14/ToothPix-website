@@ -1,0 +1,64 @@
+.dashboard {
+    padding: 20px;
+  }
+  
+  .dashboard h2 {
+    color: #6bb8fa;
+    font-weight: bold;
+    margin-bottom: 20px; /* Reduce space under the heading */
+  }
+  
+  .dashboard .row {
+    display: flex;
+    justify-content: space-evenly; /* Distribute evenly with equal space between the cards */
+    gap: 0px; /* Reduce gap between cards */
+  }
+  
+  .dashboard-card {
+    text-align: center;
+    background-color: #f0f8ff;
+    padding: 20px;
+    border-radius: 10px;
+    height: 200px; /* Ensure all cards are the same height */
+    width: 100%; /* Make cards take up equal width within the column */
+    max-width: 220px; /* Set a max width to make them consistent */
+    display: flex;
+    flex-direction: column; /* Align items vertically */
+    justify-content: center; /* Center the content */
+    align-items: center; /* Center the content horizontally */
+    margin-left: 0px;  /* Adjust left margin */
+  margin-right: 0px; /* Adjust right margin */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Slight shadow for better separation */
+  }
+  
+  .dashboard-number {
+    color: #87cefa;
+    font-weight: bold;
+    font-size: 28px; /* Slightly larger font size */
+    margin-top: 10px; /* Reduced space between icon and number */
+    margin-bottom: 5px;
+  }
+  
+  .dashboard-label {
+    font-size: 14px;
+    color: #808080;
+  }
+  
+  .dashboard .col-md-3,
+  .dashboard .col-sm-6 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  
+  .dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .dashboard-content {
+    overflow-y: auto;
+  }
+  
