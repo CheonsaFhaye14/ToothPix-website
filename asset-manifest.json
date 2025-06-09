@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/ToothPix-website/static/css/main.2632a537.css",
-    "main.js": "/ToothPix-website/static/js/main.2a3f0dbb.js",
+    "main.css": "/ToothPix-website/static/css/main.94dd62c1.css",
+    "main.js": "/ToothPix-website/static/js/main.2ce07674.js",
     "static/js/453.881f10a2.chunk.js": "/ToothPix-website/static/js/453.881f10a2.chunk.js",
     "static/media/logo.png": "/ToothPix-website/static/media/logo.72281aef831f59520b31.png",
     "index.html": "/ToothPix-website/index.html",
-    "main.2632a537.css.map": "/ToothPix-website/static/css/main.2632a537.css.map",
-    "main.2a3f0dbb.js.map": "/ToothPix-website/static/js/main.2a3f0dbb.js.map",
+    "main.94dd62c1.css.map": "/ToothPix-website/static/css/main.94dd62c1.css.map",
+    "main.2ce07674.js.map": "/ToothPix-website/static/js/main.2ce07674.js.map",
     "453.881f10a2.chunk.js.map": "/ToothPix-website/static/js/453.881f10a2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.2632a537.css",
-    "static/js/main.2a3f0dbb.js"
+    "static/css/main.94dd62c1.css",
+    "static/js/main.2ce07674.js"
   ]
 }
