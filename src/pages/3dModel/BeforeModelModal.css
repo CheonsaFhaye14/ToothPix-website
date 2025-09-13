@@ -1,0 +1,75 @@
+  /* Overlay covering the screen */
+  .unity-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;   /* horizontally center */
+    align-items: center;       /* vertically center */
+    z-index: 1000;
+    overflow: hidden;          /* prevent scrolling */
+  }
+
+
+
+/* Modal content wrapping Unity */
+.unity-content {
+  background: #e6f0ff;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(135, 206, 250, 0.4);
+  text-align: center;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  flex-direction: column;
+  width: 700px;
+  height: 500px;
+  margin-left: 230px;        /* shift modal 100px to the right */
+    /* Center content vertically, move slightly to the right */
+  justify-content: center;  
+  align-items: center;       
+}
+
+
+
+  /* Close button */
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+
+.unity-container { 
+  display: flex;
+  width: 1030px;       /* actual Unity build width */
+  height: 700px;       /* actual Unity build height */
+  border-radius: 12px;
+  overflow: hidden;
+  margin-left: -160px;
+  margin-top: -150px;    /* adjust vertical position */
+  position: relative;  
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+  background-color: #d0e7ff; 
+  transform: scale(0.6); /* scale down */
+}
+
+
+
+  /* Unity iframe fills container exactly */
+  .unity-container iframe {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: none;
+    
+  }

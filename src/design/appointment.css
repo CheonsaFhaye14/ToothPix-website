@@ -1,0 +1,91 @@
+/* appointment.css */
+
+.filter-controls input[type="date"] {
+  height: 38px; /* Bootstrap default for form-select */
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.375rem;
+  border: 1px solid #ced4da;
+}
+
+.filter-controls .form-select {
+  height: 38px;
+}
+
+/* Move date fields up slightly */
+.filter-controls .d-flex.flex-column {
+  margin-top: -5px; /* adjust as needed (e.g. -2px to -6px) */
+}
+
+.selected-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%; /* make sure it fits modal */
+  overflow-wrap: break-word;
+}
+
+.service-tag {
+  position: relative; /* allow absolute positioning inside */
+  background: #cce4ff;
+  color: #004a99;
+  border-radius: 10px;
+  padding: 6px 20px 6px 10px; /* add right padding for the close button */
+  font-size: 0.75em;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 74, 153, 0.2);
+  white-space: nowrap;
+  right: -220px;
+}
+.service-tagedit {
+  position: relative; /* allow absolute positioning inside */
+  background: #cce4ff;
+  color: #004a99;
+  border-radius: 10px;
+  padding: 6px 20px 6px 10px; /* add right padding for the close button */
+  font-size: 0.75em;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 74, 153, 0.2);
+  white-space: nowrap;
+  right: -10px;
+  top: -10px;
+}
+
+.service-tag button {
+  position: absolute;
+  top: -11px;
+  right: -14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: bold;
+  color: #004a99;
+  font-size: 0.9em;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.service-tag button:hover {
+  color: #002d66;
+}
+
+.service-tagedit button {
+  position: absolute;
+  top: -11px;
+  right: -14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: bold;
+  color: #004a99;
+  font-size: 0.9em;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.service-tagedit button:hover {
+  color: #002d66;
+}

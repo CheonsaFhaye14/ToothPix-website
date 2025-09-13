@@ -1,0 +1,39 @@
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background-color: #6bb8fa;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 25px 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebar-nav {
+    list-style: none;
+    padding: 0;
+  }
+  .nav-link.active {
+  background-color: #dbeafe; /* light blue highlight */
+  color: #1e3a8a;            /* dark blue text */
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+  .sidebar-nav .nav-link {
+    display: block;
+    color: white;
+    padding: 10px 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: 0.3s ease;
+  }
+  
+  .sidebar-nav .nav-link:hover,
+  .sidebar-nav .nav-link.active {
+    background-color: #549fdb;
+  }
+  
