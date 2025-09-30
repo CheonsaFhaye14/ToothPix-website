@@ -11,7 +11,9 @@ export default function TodayAppointmentsReport({ onClose }) {
   useEffect(() => {
     const fetchTodayAppointments = async () => {
       try {
-        const res = await fetch('https://toothpix-backend.onrender.com/api/reports/today-appointments');
+        const res = await fetch(
+          'https://toothpix-backend.onrender.com/api/reports/today-appointments'
+        );
         if (!res.ok) throw new Error('Failed to fetch today appointments');
         const data = await res.json();
         setAppointments(data.appointmentsToday || []);
@@ -26,15 +28,18 @@ export default function TodayAppointmentsReport({ onClose }) {
   }, []);
 
   const exportCSV = () => {
-    if (!appointments.length) return alert('No data to export');
+    if (!appointments.length) return;
     const csv = Papa.unparse(
       appointments.map((a) => ({
-Time: new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
-  hour: 'numeric',
-  minute: '2-digit',
-  hour12: true,
-  timeZone: 'Asia/Manila',
-}),
+        Time: new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString(
+          'en-US',
+          {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Manila',
+          }
+        ),
         'Patient Name': a.patient_name,
         Services: a.services,
       }))
@@ -49,21 +54,21 @@ Time: new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
   };
 
   const exportPDF = () => {
-    if (!appointments.length) return alert('No data to export');
+    if (!appointments.length) return;
     const doc = new jsPDF('portrait');
     doc.text('Today Appointments Report', 14, 15);
     autoTable(doc, {
       head: [['Time', 'Patient Name', 'Services']],
-body: appointments.map((a) => [
-  new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Asia/Manila',
-  }),
-  a.patient_name,
-  a.services
-]),
+      body: appointments.map((a) => [
+        new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'Asia/Manila',
+        }),
+        a.patient_name,
+        a.services,
+      ]),
     });
     doc.save('today_appointments_report.pdf');
   };
@@ -79,7 +84,10 @@ body: appointments.map((a) => [
         {!loading && !error && (
           <>
             {appointments.length > 0 ? (
-              <table className="table" style={{ width: '100%', marginBottom: '1rem' }}>
+              <table
+                className="table"
+                style={{ width: '100%', marginBottom: '1rem' }}
+              >
                 <thead>
                   <tr>
                     <th>Time</th>
@@ -91,14 +99,15 @@ body: appointments.map((a) => [
                   {appointments.map((a) => (
                     <tr key={a.idappointment}>
                       <td>
-  {new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Asia/Manila',
-  })}
-</td>
-
+                        {new Date(
+                          `1970-01-01T${a.time}:00+08:00`
+                        ).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                          timeZone: 'Asia/Manila',
+                        })}
+                      </td>
                       <td>{a.patient_name}</td>
                       <td>{a.services}</td>
                     </tr>
@@ -106,7 +115,13 @@ body: appointments.map((a) => [
                 </tbody>
               </table>
             ) : (
-              <p style={{ textAlign: 'center', margin: '1rem 0', fontStyle: 'italic' }}>
+              <p
+                style={{
+                  textAlign: 'center',
+                  margin: '1rem 0',
+                  fontStyle: 'italic',
+                }}
+              >
                 No appointments for today.
               </p>
             )}
@@ -120,15 +135,31 @@ body: appointments.map((a) => [
                 marginBottom: '1rem',
               }}
             >
-              <button className="btn btn-primary" onClick={exportCSV} style={{ minWidth: 120 }}>
-                Download CSV
-              </button>
+              {appointments.length > 0 && (
+                <>
+                  <button
+                    className="btn btn-primary"
+                    onClick={exportCSV}
+                    style={{ minWidth: 120 }}
+                  >
+                    Download CSV
+                  </button>
 
-              <button className="btn btn-danger" onClick={exportPDF} style={{ minWidth: 120 }}>
-                Download PDF
-              </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={exportPDF}
+                    style={{ minWidth: 120 }}
+                  >
+                    Download PDF
+                  </button>
+                </>
+              )}
 
-              <button className="btn btn-secondary" onClick={onClose} style={{ minWidth: 120 }}>
+              <button
+                className="btn btn-secondary"
+                onClick={onClose}
+                style={{ minWidth: 120 }}
+              >
                 Close
               </button>
             </div>
