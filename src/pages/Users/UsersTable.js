@@ -32,7 +32,7 @@ export default function UsersTable({
               colSpan={visibleColumn === 'all' ? 3 : 2}
               style={{ textAlign: 'center', fontStyle: 'italic' }}
             >
-              No users found matching your search.
+              No users found.
             </td>
           </tr>
         ) : (

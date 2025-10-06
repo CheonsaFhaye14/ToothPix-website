@@ -12,6 +12,7 @@ import Service from './pages/Services/service';
 import ResetPassword from './pages/resetpassword';
 import Payment from './pages/Payment/payment';
 import ThreeDModelManager from './pages/3dModel/3dmodel';
+import ActivityLog from './pages/ActivityLog/activitylog';
 import { useHistory } from 'react-router-dom';
 
 // Layout wrapper for pages that need the sidebar
@@ -82,6 +83,7 @@ function App() {
           <DashboardLayout path="/payment" component={Payment} />
           <DashboardLayout path="/service" component={Service} />
           <DashboardLayout path="/3dmodel" component={ThreeDModelManager} />
+          <DashboardLayout path="/activitylog" component={ActivityLog} />   
           </Switch>
       </div>
     </Router>

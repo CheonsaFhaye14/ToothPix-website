@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
+
 const Login = () => {
   const [maximized, setMaximized] = useState(null);
   const [username, setUsername] = useState('');
@@ -16,28 +17,38 @@ const Login = () => {
   const [email, setEmail] = useState(''); // State for email input in the modal
   const history = useHistory();
 
+
   const handleBackgroundClick = (side) => {
     setMaximized(maximized === side ? null : side);
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setIsLoggingIn(true); // Set loading state
-  
+ 
     try {
       const response = await fetch('https://toothpix-backend.onrender.com/api/website/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-  
+ 
       const data = await response.json();
-  
+ 
       if (response.ok) {
-        localStorage.setItem('adminToken', data.token);
-        history.push('/dashboard');
-      } else {
+  // Store token and admin info
+   console.log('Admin ID:', data.user.idusers);
+  localStorage.setItem('adminToken', data.token);
+  localStorage.setItem('adminId', data.user.idusers);  // ✅ store admin id
+  localStorage.setItem('adminUsername', data.user.username); // optional
+  
+  history.push('/dashboard');
+}
+
+
+else {
         setMessage(data.message || 'Login failed.');
       }
     } catch (error) {
@@ -47,18 +58,19 @@ const Login = () => {
       setIsLoggingIn(false); // Reset loading state
     }
   };
-  
+ 
+
 
 // Forgot Password form (onSubmit) – send token-based reset request:
 const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setMessage2(''); // Clear any previous message
-    
+   
     try {
       // Step 1: Verify admin email exists in the backend
       const response = await fetch('https://toothpix-backend.onrender.com/api/admin');
       const data = await response.json();
-  
+ 
       if (response.ok) {
         const adminEmails = data.admin.map(admin => admin.email.toLowerCase());
 if (adminEmails.includes(email.toLowerCase())) {
@@ -68,7 +80,7 @@ if (adminEmails.includes(email.toLowerCase())) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
           });
-  
+ 
           const resetData = await resetResponse.json();
 if (resetResponse.ok) {
   setMessage2('Password reset link sent to your email!');
@@ -82,6 +94,7 @@ if (resetResponse.ok) {
   );
 }
 
+
         } else {
   setMessage2('Email does not match any admin account.');
 }
@@ -93,8 +106,9 @@ if (resetResponse.ok) {
       setMessage2('An error occurred. Please try again.');
     }
   };
-  
-  
+ 
+ 
+
 
   return (
     <div className={`split-page-container ${maximized === 'left' ? 'maximized-left' : ''} ${maximized === 'right' ? 'maximized-right' : ''}`}>
@@ -111,7 +125,9 @@ if (resetResponse.ok) {
   Download
 </a>
 
+
       </div>
+
 
       {/* RIGHT PANEL */}
       <div className="right-panel">
@@ -130,6 +146,7 @@ if (resetResponse.ok) {
                   onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
+
 
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">Password</label>
@@ -151,6 +168,7 @@ if (resetResponse.ok) {
               </div>
               </div>
 
+
              {/* Forgot Password link */}
              <div className="forgot-password">
   <button
@@ -164,18 +182,24 @@ if (resetResponse.ok) {
 
 
 
+
+
+
               <div className="d-grid">
               <button type="submit" className="btn-primary" disabled={isLoggingIn}>
   {isLoggingIn ? 'Logging in...' : 'Login'}
 </button>
 
+
               </div>
             </form>
+
 
             {message && <div className="alert alert-info mt-3">{message}</div>}
           </div>
         </div>
       </div>
+
 
 {/* Modal for Forgot Password */}
 {showModal && (
@@ -201,14 +225,21 @@ if (resetResponse.ok) {
       </form>
       <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
 
+
       {message2 && <div className="alert alert-info mt-3">{message2}</div>}
     </div>
   </div>
 )}
 
 
+
+
     </div>
   );
 };
 
+
 export default Login;
+
+
+

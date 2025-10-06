@@ -65,6 +65,14 @@ const Sidebar = () => {
             3d Model
           </Link>
         </li>
+         <li>
+          <Link 
+            to="/activitylog" 
+            className={`nav-link ${location.pathname === '/activitylog' ? 'active' : ''}`}
+          >
+            Activity Log
+          </Link>
+        </li>
       </ul>
     </div>
   );

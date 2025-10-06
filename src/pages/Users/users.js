@@ -7,7 +7,7 @@ import EditUserModal from './EditUserModal';
 import UsersReportExport from './UsersReportExport'; // adjust path as needed
 
 const Users = () => {
-  const baseUrl = 'https://toothpix-backend.onrender.com/api/app/users';
+  const baseUrl = 'https://toothpix-backend.onrender.com/api/website/users';
   const columns = ['idusers', 'fullname', 'usertype'];
   const [users, setUsers] = useState([]);
   const [visibleColumn, setVisibleColumn] = useState('all');
@@ -17,7 +17,7 @@ const Users = () => {
   const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
   const existingGender = ["female","male"];
   const [editFormData, setEditFormData] = useState({  username: '',email: '', password: '',usertype: '',firstname: '',lastname: '', birthdate: '', contact: '',address: '',   gender: '', allergies: '', medicalhistory: '', });  // Holds the form data
-
+  
   useEffect(() => {
                  fetchUsers();
              }, []);
@@ -80,25 +80,26 @@ const [isAdding, setIsAdding] = React.useState(false);
          });
          
         
-             const fetchUsers = async () => {
-                try {
-                  const token = localStorage.getItem('jwt_token');
-                  console.log('Token:', token);
-                  const response = await axios.get(baseUrl, {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                  });
-                  console.log('API Response:', response);
-                  console.log('Data:', response.data);
-                  setUsers(response.data.records);
-            
-                } catch (error) {
-                  console.error('Error fetching users:', error.response || error.message);
-                } finally {
-                  setIsLoading(false);
-                }
-              };
+           const fetchUsers = async () => {
+  try {
+    const token = localStorage.getItem('adminToken'); // make sure key matches
+    const response = await axios.get('https://toothpix-backend.onrender.com/api/website/users', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('API Response:', response);
+    console.log('Data:', response.data);
+
+    setUsers(response.data.records); // set users state
+  } catch (error) {
+    console.error('Error fetching users:', error.response || error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
               
 
            
@@ -363,7 +364,7 @@ if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
             updatedUser,
             {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+                Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
               },
             }
           );
@@ -537,15 +538,16 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
           gender: addFormData.gender.trim(),
           allergies: addFormData.allergies.trim(),
           medicalhistory: addFormData.medicalhistory.trim(),
+          adminId: localStorage.getItem('adminId')
         };
-      
+
         try {
           const response = await axios.post(baseUrl, newUser, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+              Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
             },
           });
-      
+
           if (response.status === 201) {
             setUsers((prevUsers) => [...prevUsers, response.data.user]);
             showTemporaryModal('User added successfully.', 'success');

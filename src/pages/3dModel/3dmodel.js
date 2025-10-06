@@ -8,7 +8,7 @@ const ThreeDModelManager = () => {
   const [expandedPatient, setExpandedPatient] = useState(null);
   const [showModelModal, setShowModelModal] = useState(false);
   const [modelType, setModelType] = useState('');
-  const [selectedModelUrl, setSelectedModelUrl] = useState('');
+ // const [selectedModelUrl, setSelectedModelUrl] = useState('');
 const [selectedIdRecord, setSelectedIdRecord] = useState('');
 
   useEffect(() => {
@@ -62,7 +62,7 @@ const handleViewModel = (type, url, idrecord) => {
   const recordIdStr = String(idrecord);
 
   setModelType(type);
-  setSelectedModelUrl(url);
+  //setSelectedModelUrl(url);
   setSelectedIdRecord(recordIdStr);
   setShowModelModal(true);
 };

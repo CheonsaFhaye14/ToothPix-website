@@ -3,12 +3,14 @@ import '../../design/appointment.css';
 import axios from 'axios';
 import AppointmentReportExport from './AppointmentReportExport';
 
+
+
 const Appointment = () => {
   const [appointments, setAppointments] = useState([]);
   const [filters, setFilters] = useState({ dentist: '', patient: '', startDate: '', endDate: '', status: '' });
   const [dentists, setDentists] = useState([]);
   const [patients, setPatients] = useState([]);
-
+  const adminId = localStorage.getItem("adminId");
   
          const filteredAppointments = appointments.filter(appointment => {
   // Filter by date range (if any)
@@ -341,7 +343,7 @@ const handleAddFormChange = (e) => {
 
 const handleAddSubmit = async (e) => {  
   e.preventDefault();
-
+  
   const patientName = addFormData.patient.trim();
   const dentistName = addFormData.dentist.trim();
 
@@ -432,6 +434,7 @@ const handleAddSubmit = async (e) => {
     ...(patientObj
       ? { idpatient: patientObj.idusers }
       : { patient_name: patientName }),
+      adminId,
   };
 
   console.log(newAppointment);
