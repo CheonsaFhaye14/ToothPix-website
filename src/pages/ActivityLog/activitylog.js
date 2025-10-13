@@ -84,7 +84,8 @@ function ActivityLog() {
                 </tr>
               ) : (
                 logs.map((log) => {
-                  const undoDisabled = log.action === 'UNDO' || log.is_deleted;
+                  // Disable Undo if the action has already been undone
+                  const undoDisabled = log.is_undone;
 
                   return (
                     <tr key={log.id}>
@@ -101,7 +102,7 @@ function ActivityLog() {
                           disabled={undoDisabled}
                           title={
                             undoDisabled
-                              ? 'Cannot undo this action'
+                              ? 'This action has already been undone'
                               : 'Undo this action'
                           }
                         >

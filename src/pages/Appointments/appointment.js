@@ -58,7 +58,7 @@ const Appointment = () => {
             notes: '',
           });
             const [services, setServices] = useState([]);
-      const baseUrl2 = 'https://toothpix-backend.onrender.com/api/app/services';
+      const baseUrl2 = 'https://toothpix-backend.onrender.com/api/website/services';
       const API_BASE= 'https://toothpix-backend.onrender.com';
       const [isLoading, setIsLoading] = useState(true);
   const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
@@ -229,7 +229,7 @@ const formatAppointmentDate = (utcDateString) => {
   const handleDelete = (id) => {
     setConfirmDeleteId(id);
     setMessageType('error');
-    setConfirmMessage("Are you sure you want to delete this user?");
+    setConfirmMessage("Are you sure you want to delete this appointment?");
     setShowModal(true);
   };
    
@@ -237,7 +237,7 @@ const formatAppointmentDate = (utcDateString) => {
 const fetchAppointments = async (filters = {}) => {
   try {
     setIsLoading(true);
-    const response = await axios.get('https://toothpix-backend.onrender.com/api/app/appointments');
+    const response = await axios.get('https://toothpix-backend.onrender.com/api/website/appointments');
 
     const now = Date.now();
     console.log('Current Time:', new Date(now).toString());
@@ -299,7 +299,7 @@ const fetchAppointments = async (filters = {}) => {
   };
 
  
-  const baseUrl = 'https://toothpix-backend.onrender.com/api/app/appointments';
+  const baseUrl = 'https://toothpix-backend.onrender.com/api/website/appointments';
 
   const confirmDeletion = async () => {
     if (!confirmDeleteId) {
@@ -484,14 +484,6 @@ const handleAddSubmit = async (e) => {
     fetchServices();
   }
 };
-
-
-
-
-
-
-  
-
 
 const showTemporaryModal = (msg, type) => {
     setMessage(msg);

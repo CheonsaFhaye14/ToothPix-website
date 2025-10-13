@@ -39,7 +39,7 @@ const [sortDirection, setSortDirection] = useState('asc');
         return () => document.removeEventListener('click', handleClickOutside);
       }, []);
       
-    const baseUrl = 'https://toothpix-backend.onrender.com/api/app/services';
+    const baseUrl = 'https://toothpix-backend.onrender.com/api/website/services';
 
 
     useEffect(() => {
