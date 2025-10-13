@@ -301,36 +301,47 @@ const fetchAppointments = async (filters = {}) => {
  
   const baseUrl = 'https://toothpix-backend.onrender.com/api/website/appointments';
 
-  const confirmDeletion = async () => {
-    if (!confirmDeleteId) {
-      showTemporaryModal('No appointment selected for deletion.', 'error');
-      setShowModal(false);
+const confirmDeletion = async () => {
+  if (!confirmDeleteId) {
+    showTemporaryModal('No appointment selected for deletion.', 'error');
+    setShowModal(false);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/${confirmDeleteId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        adminId: localStorage.getItem('adminId') // <-- send adminId here
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      showTemporaryModal(error.message || 'Failed to delete appointment.', 'error');
       return;
     }
-  
-    try {
-      const response = await fetch(`${baseUrl}/${confirmDeleteId}`, {
-        method: 'DELETE',
-      });
-  
-      if (!response.ok) {
-        const error = await response.json();
-        showTemporaryModal(error.message || 'Failed to delete appointment.', 'error');
-        return;
-      }
-  
-      setAppointments(prevAppointments =>
-        prevAppointments.filter(appointment => appointment.idappointment !== confirmDeleteId)
-      );
-      showTemporaryModal('Appointment deleted successfully.', 'success');
-    } catch (error) {
-      console.error("Error deleting appointment:", error);
-      showTemporaryModal('An error occurred while deleting the appointment.', 'error');
-    } finally {
-      setConfirmDeleteId(null);
-      setShowModal(false);
-    }
-  };
+
+    setAppointments(prevAppointments =>
+      prevAppointments.filter(appointment => appointment.idappointment !== confirmDeleteId)
+    );
+    showTemporaryModal('Appointment deleted successfully.', 'success');
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    showTemporaryModal('An error occurred while deleting the appointment.', 'error');
+  } finally {
+    setConfirmDeleteId(null);
+    setShowModal(false);
+  }
+};
+
+
+
+
   
   
 const handleAddFormChange = (e) => {
@@ -598,6 +609,7 @@ const handleEditSubmit = async (e) => {
     ...(patientObj
       ? { idpatient: patientObj.idusers }
       : { patient_name: patientName }),
+      adminId,
   };
 
   try {

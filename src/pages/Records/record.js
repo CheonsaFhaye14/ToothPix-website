@@ -61,7 +61,7 @@ const showTemporaryModal = (msg, type) => {
   };
 
   //edit
-
+ const adminId = localStorage.getItem("adminId");
  const [isEditing, setIsEditing] = useState(false);
 const [editFormData, setEditFormData] = useState({
   idappointment: "", // ✅ Add this
@@ -487,6 +487,7 @@ const handleAddSubmit = async (e) => {
     ...(patientObj
       ? { idpatient: patientObj.idusers }
       : { patient_name: patientName }),
+      adminId,
   };
 
   console.log(newAppointment);

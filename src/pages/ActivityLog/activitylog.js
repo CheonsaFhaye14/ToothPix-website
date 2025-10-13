@@ -38,7 +38,7 @@ function ActivityLog() {
 
   function handleUndo(logId) {
     const token = localStorage.getItem('adminToken');
-    const adminId = localStorage.getItem('adminId'); // send admin ID from frontend or JWT
+    const adminId = localStorage.getItem('adminId');
     axios
       .post(
         `https://toothpix-backend.onrender.com/api/activity_logs/undo/${logId}`,
@@ -53,7 +53,6 @@ function ActivityLog() {
     <div className="container py-4">
       <h2 className="mb-2">Activity Log</h2>
 
-      {/* Info text */}
       <div className="alert alert-info">
         Logs are automatically deleted after 30 days. Actions that have already been undone or deleted cannot be undone.
       </div>
@@ -78,14 +77,14 @@ function ActivityLog() {
             <tbody>
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center">
+                  <td colSpan="7" className="text-center">
                     No activity logs found.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => {
-                  // Disable Undo if the action has already been undone
-                  const undoDisabled = log.is_undone;
+                  // Hide Undo if action is 'UNDO' OR if is_undone is true
+                  const hideUndoButton = log.action === 'UNDO' || log.is_undone;
 
                   return (
                     <tr key={log.id}>
@@ -95,26 +94,28 @@ function ActivityLog() {
                       <td>{log.record_id}</td>
                       <td>{log.description}</td>
                       <td>{new Date(log.created_at).toLocaleString()}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-warning me-2"
-                          onClick={() => handleUndo(log.id)}
-                          disabled={undoDisabled}
-                          title={
-                            undoDisabled
-                              ? 'This action has already been undone'
-                              : 'Undo this action'
-                          }
-                        >
-                          Undo
-                        </button>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDelete(log.id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
+           <td>
+  <div className="d-flex justify-content-center gap-1">
+    {!hideUndoButton && (
+      <button
+        className="btn-edit btn-sm"
+        onClick={() => handleUndo(log.id)}
+        title="Undo this action"
+      >
+        ↩️ Undo
+      </button>
+    )}
+    <button
+      className="btn-delete btn-sm"
+      onClick={() => handleDelete(log.id)}
+      title="Delete this record"
+    >
+      🗑️ Delete
+    </button>
+  </div>
+</td>
+
+
                     </tr>
                   );
                 })
