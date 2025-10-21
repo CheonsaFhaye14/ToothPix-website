@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../../design/users.css';
 import { BASE_URL } from '../../config';
 import PaymentReportExport from './PaymentReportExport';
 const Payment = () => {

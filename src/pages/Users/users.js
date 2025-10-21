@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../../design/users.css';
 import axios from 'axios';
 import UsersTable from './UsersTable'; // adjust path if needed
 import AddUserModal from './AddUserModal';

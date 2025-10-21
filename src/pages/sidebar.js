@@ -1,6 +1,12 @@
-import '../design/sidebar.css'; 
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom'; // Import useLocation
+import '../design/sidebar.css';
+import '../design/users.css';
+import '../design/dashboard.css';
+import '../design/service.css';
+import '../design/record.css'; 
+import '../design/page1.css';
+import '../design/login.css';
+import '../design/appointment.css';
 
 const Sidebar = () => {
   const location = useLocation(); // Get current route

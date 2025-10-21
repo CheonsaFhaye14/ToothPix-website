@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import '../design/login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { BASE_URL } from '../config';

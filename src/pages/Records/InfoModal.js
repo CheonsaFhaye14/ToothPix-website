@@ -32,7 +32,11 @@ export default function InfoModal({
           </div>
           <div className="modal-info-row">
             <span className="label">Service:</span>
-            <span>{modalAppointment.services}</span>
+<span>
+  {Array.isArray(modalAppointment.services)
+    ? modalAppointment.services.map(s => s.name).join(', ')
+    : modalAppointment.services?.name || 'None'}
+</span>
           </div>
           <div className="modal-info-row">
             <span className="label">Total Price:</span>

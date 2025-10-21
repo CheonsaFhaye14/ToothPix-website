@@ -1,4 +1,4 @@
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../config';
 
 /**
  * Fetches all 3D models from the backend.

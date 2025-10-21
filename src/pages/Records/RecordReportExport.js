@@ -43,7 +43,10 @@ export default function RecordReportExport({ records = [] }) {
       Patient: r.patient_name?.trim() || 'Unknown',
       Dentist: r.dentist_name || 'Unknown',
       'Appointment Date': formatDateTime(r.appointment_date || r.date),
-      Services: r.services || 'None',
+      Services: Array.isArray(r.services)
+  ? r.services.map(s => s.name).join(', ')
+  : r.services?.name || 'None',
+
       'Treatment Notes': r.treatment_notes?.replace(/\n/g, ' ') || '',
     }));
 
@@ -66,13 +69,16 @@ export default function RecordReportExport({ records = [] }) {
       [ 'Patient', 'Dentist', 'Appointment Date', 'Services', 'Treatment Notes'],
     ];
 
-    const data = sortedRecords.map(r => [
-      r.patient_name?.trim() || 'Unknown',
-      r.dentist_name || 'Unknown',
-      formatDateTime(r.appointment_date || r.date),
-      r.services || 'None',
-      r.treatment_notes?.replace(/\n/g, ' ') || '',
-    ]);
+   const data = sortedRecords.map(r => [
+  r.patient_name?.trim() || 'Unknown',
+  r.dentist_name || 'Unknown',
+  formatDateTime(r.appointment_date || r.date),
+  Array.isArray(r.services)
+    ? r.services.map(s => s.name).join(', ')
+    : r.services?.name || 'None',
+  r.treatment_notes?.replace(/\n/g, ' ') || '',
+]);
+
 
     autoTable(doc, {
       startY: 20,

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import logo from '../logo.png'; // Replace with actual logo path
-import '../design/page1.css';
 
 const Page1 = () => {
   return (

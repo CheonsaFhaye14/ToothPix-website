@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import '../../design/users.css';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { BASE_URL } from '../../config';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import '../../design/record.css'; 
 import RecordReportExport from './RecordReportExport';
-import '../../design/appointment.css';
 import EditAppointmentModal from './EditAppointmentModal';
 import AddAppointmentModal from './AddAppointmentModal';
 import InfoModal from './InfoModal';
@@ -249,7 +246,7 @@ useEffect(() => {
       const fetchServices = async () => {
                 try {
                 const token = localStorage.getItem('jwt_token');
-                const response = await axios.get(`${BASE_URL}/api/app/services`, {
+                const response = await axios.get(`${BASE_URL}/api/website/services`, {
                     headers: {
                     Authorization: `Bearer ${token}`,
                     },

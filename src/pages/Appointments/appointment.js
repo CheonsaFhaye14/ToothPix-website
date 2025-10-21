@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'; 
-import '../../design/appointment.css';
 import axios from 'axios';
 import AppointmentReportExport from './AppointmentReportExport';
 import { BASE_URL } from '../../config';

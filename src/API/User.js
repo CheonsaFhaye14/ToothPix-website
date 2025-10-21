@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../config';
 
 export function useUsers() {
   const [users, setUsers] = useState([]);
