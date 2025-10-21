@@ -3,7 +3,7 @@ import '../design/login.css';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
+import { BASE_URL } from '../config';
 
 const Login = () => {
   const [maximized, setMaximized] = useState(null);
@@ -25,11 +25,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
+    setMessage(''); 
     setIsLoggingIn(true); // Set loading state
  
     try {
-      const response = await fetch('https://toothpix-backend.onrender.com/api/website/login', {
+      const response = await fetch(`${BASE_URL}/api/website/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -39,7 +39,6 @@ const Login = () => {
  
       if (response.ok) {
   // Store token and admin info
-   console.log('Admin ID:', data.user.idusers);
   localStorage.setItem('adminToken', data.token);
   localStorage.setItem('adminId', data.user.idusers);  // ✅ store admin id
   localStorage.setItem('adminUsername', data.user.username); // optional
@@ -68,14 +67,14 @@ const handleForgotPasswordSubmit = async (e) => {
    
     try {
       // Step 1: Verify admin email exists in the backend
-      const response = await fetch('https://toothpix-backend.onrender.com/api/admin');
+      const response = await fetch(`${BASE_URL}/api/admin`);
       const data = await response.json();
  
       if (response.ok) {
         const adminEmails = data.admin.map(admin => admin.email.toLowerCase());
 if (adminEmails.includes(email.toLowerCase())) {
           // Step 2: Generate and send password reset link to the admin's email
-          const resetResponse = await fetch('https://toothpix-backend.onrender.com/api/request-reset-password', {
+          const resetResponse = await fetch(`${BASE_URL}/api/request-reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),

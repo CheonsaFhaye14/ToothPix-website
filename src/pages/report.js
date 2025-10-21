@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../design/dashboard.css'; // Importing the separate CSS file
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeartbeat, faCalendar, faUserDoctor, faUser } from '@fortawesome/free-solid-svg-icons';
+import { BASE_URL } from './config';
 
 const Dashboard = () => {
   const [summary, setSummary] = useState({
@@ -51,25 +52,25 @@ const formatLocalDateTime = (isoDateStr) => {
     const fetchSummaryData = async () => {
       try {
         // Fetching data from backend APIs
-        const servicesRes = await fetch('https://toothpix-backend.onrender.com/api/app/services');
+        const servicesRes = await fetch(`${BASE_URL}/api/app/services`);
         const servicesData = await servicesRes.json();
         if (servicesRes.ok) {
           setSummary(prev => ({ ...prev, totalServices: servicesData.services.length }));
         }
 
-        const appointmentsRes = await fetch('https://toothpix-backend.onrender.com/api/app/appointments');
+        const appointmentsRes = await fetch(`${BASE_URL}/api/app/appointments`);
         const appointmentsData = await appointmentsRes.json();
         if (appointmentsRes.ok) {
           setSummary(prev => ({ ...prev, totalAppointments: appointmentsData.appointments.length }));
         }
 
-        const dentistsRes = await fetch('https://toothpix-backend.onrender.com/api/app/dentists');
+        const dentistsRes = await fetch(`${BASE_URL}/api/app/dentists`);
         const dentistsData = await dentistsRes.json();
         if (dentistsRes.ok) {
           setSummary(prev => ({ ...prev, totalDentists: dentistsData.dentists.length }));
         }
 
-        const patientsRes = await fetch('https://toothpix-backend.onrender.com/api/app/patients');
+        const patientsRes = await fetch(`${BASE_URL}/api/app/patients`);
         const patientsData = await patientsRes.json();
         if (patientsRes.ok) {
           setSummary(prev => ({ ...prev, totalPatients: patientsData.patients.length }));
@@ -84,7 +85,7 @@ const formatLocalDateTime = (isoDateStr) => {
   }, []);
 const handlePatientsClick = async () => {
   try {
-    const response = await fetch(`https://toothpix-backend.onrender.com/api/website/report/patients`);
+    const response = await fetch(`${BASE_URL}/api/website/report/patients`);
     const data = await response.json();
     setAllPatientData(data);
     setShowReport(true);

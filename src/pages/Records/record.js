@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../../design/users.css';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import { BASE_URL } from '../../config';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import '../../design/record.css'; 
@@ -85,103 +86,63 @@ const handleEditFormChange = (e) => {
 const handleEditSubmit = async (e) => {
   e.preventDefault();
 
-  if (!editFormData.dentist.trim()) {
-    showTemporaryModal('Dentist is required.', 'error');
-    return;
-  }
-  const isExistingDentist = existingDentist.includes(editFormData.dentist);
-  if (!isExistingDentist) {
-    showTemporaryModal('Dentist does not exist.', 'error');
-    return;
-  }
+  // basic validations (keep as you had)
+  if (!editFormData.dentist?.trim()) { showTemporaryModal('Dentist is required.', 'error'); return; }
+  if (!existingDentist.includes(editFormData.dentist)) { showTemporaryModal('Dentist does not exist.', 'error'); return; }
+  if (!editFormData.date) { showTemporaryModal('Date is required.', 'error'); return; }
+  if (!editFormData.time?.trim()) { showTemporaryModal('Time is required.', 'error'); return; }
+  if (!existingTimes.includes(editFormData.time)) { showTemporaryModal('Time is not in the allowed time slots.', 'error'); return; }
+  if (!Array.isArray(editFormData.service) || editFormData.service.length === 0) { showTemporaryModal('At least one service must be selected.', 'error'); return; }
 
-  if (!editFormData.date) {
-    showTemporaryModal('Date is required.', 'error');
-    return;
-  }
+  // map dentist and services to ids
+  const dentistObj = dentists.find((d) => `${d.firstname} ${d.lastname}` === editFormData.dentist);
+  if (!dentistObj) { showTemporaryModal('Dentist not found in records.', 'error'); return; }
 
-  if (!editFormData.time.trim()) {
-    showTemporaryModal('Time is required.', 'error');
-    return;
-  }
-
-  // New validation for time against existingTimes
-  if (!existingTimes.includes(editFormData.time)) {
-    showTemporaryModal('Time is not in the allowed time slots.', 'error');
-    return;
-  }
-
-  if (!editFormData.service.length) {
-    showTemporaryModal('At least one service must be selected.', 'error');
-    return;
-  }
-
-  for (const serviceName of editFormData.service) {
-    if (!existingService.includes(serviceName)) {
-      showTemporaryModal(`Service "${serviceName}" does not exist.`, 'error');
-      return;
-    }
-  }
-
-  const dentistObj = dentists.find(
-    (d) => `${d.firstname} ${d.lastname}` === editFormData.dentist
-  );
-  if (!dentistObj) {
-    showTemporaryModal('Dentist not found in records.', 'error');
-    return;
-  }
-
-  // Parse time (12-hour format) to 24-hour
+  // parse time (12-hour) and build UTC ISO string
   const [timePart, modifier] = editFormData.time.split(' ');
   let [hours, minutes] = timePart.split(':').map(Number);
   if (modifier === 'PM' && hours < 12) hours += 12;
   if (modifier === 'AM' && hours === 12) hours = 0;
-
-  // Create local Date object in Manila timezone (UTC+8)
   const [year, month, day] = editFormData.date.split('-').map(Number);
   const localDate = new Date(year, month - 1, day, hours, minutes, 0);
-
-  // Convert to UTC ISO string
   const combinedDateTime = localDate.toISOString();
 
-  const selectedDateTime = new Date(combinedDateTime);
-  const now = new Date();
-
-  // Only allow past datetime, reject if selected datetime is in the future
-  if (selectedDateTime > now) {
-    showTemporaryModal('Selected date and time cannot be in the future.', 'error');
-    return;
-  }
-
+  // ensure services are numeric ids and unique
   const selectedServiceIds = [...new Set(
     editFormData.service
       .map((serviceName) => {
-        const serviceObj = services.find((s) => s.name === serviceName);
-        return serviceObj ? serviceObj.idservice : null;
+        const s = services.find(serv => serv.name === serviceName || String(serv.idservice) === String(serviceName));
+        return s ? Number(s.idservice) : null;
       })
-      .filter((id) => id !== null)
+      .filter(id => id !== null)
   )];
 
+  if (selectedServiceIds.length === 0) { showTemporaryModal('No valid services selected.', 'error'); return; }
+
+  // build payload matching required shape
   const payload = {
-    idappointment: editFormData.idappointment,
-    iddentist: dentistObj.idusers,
-    date: combinedDateTime, // UTC ISO string sent here
+    idappointment: Number(editFormData.idappointment),
+    iddentist: Number(dentistObj.idusers),
+    date: combinedDateTime,
     services: selectedServiceIds,
-    treatment_notes: editFormData.treatment_notes || ''
+    treatment_notes: String(editFormData.treatment_notes || ''),
+    adminId
   };
-  console.log(payload);
+
+  console.log('PUT payload:', payload);
 
   try {
     const response = await axios.put(
-      `https://toothpix-backend.onrender.com/api/website/record/${editFormData.idappointment}`,
+      `${BASE_URL}/api/website/record/${payload.idappointment}`,
       payload,
       {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt_token')}`
-        }
+          headers: {
+          Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+        },
       }
     );
 
+    console.log('PUT response:', response.data);
     if (response.status === 200) {
       showTemporaryModal('Record updated successfully.', 'success');
       setIsEditing(false);
@@ -195,17 +156,17 @@ const handleEditSubmit = async (e) => {
         service: [],
         treatment_notes: ""
       });
-      fetchRecords(); // Refresh data
-      fetchReport();
+      await fetchRecords();
+      await fetchReport();
+    } else {
+      showTemporaryModal('Unexpected response while updating.', 'error');
     }
   } catch (error) {
-    if (error.response) {
-      const msg = error.response.data.message;
-      showTemporaryModal(msg || 'Error occurred while updating.', 'error');
-    } else {
-      showTemporaryModal('Failed to connect to server.', 'error');
-    }
+    console.error('PUT /record error:', error?.response || error);
+    const serverMsg = error?.response?.data?.message || JSON.stringify(error?.response?.data) || error.message;
+    showTemporaryModal(serverMsg || 'Error occurred while updating.', 'error');
   } finally {
+    // refresh lookups
     fetchPatients();
     fetchDentists();
     fetchServices();
@@ -269,7 +230,7 @@ useEffect(() => {
 ];
   const fetchPatients = async () => {
         try {
-          const res = await fetch('https://toothpix-backend.onrender.com/api/app/patients');
+          const res = await fetch(`${BASE_URL}/api/app/patients`);
           const data = await res.json();
           if (res.ok) setPatients(data.patients);
         } catch (error) {
@@ -278,7 +239,7 @@ useEffect(() => {
       };
    const fetchDentists = async () => {
         try {
-          const res = await fetch('https://toothpix-backend.onrender.com/api/app/dentists');
+          const res = await fetch(`${BASE_URL}/api/app/dentists`);
           const data = await res.json();
           if (res.ok) setDentists(data.dentists);
         } catch (error) {
@@ -288,7 +249,7 @@ useEffect(() => {
       const fetchServices = async () => {
                 try {
                 const token = localStorage.getItem('jwt_token');
-                const response = await axios.get('https://toothpix-backend.onrender.com/api/app/services', {
+                const response = await axios.get(`${BASE_URL}/api/app/services`, {
                     headers: {
                     Authorization: `Bearer ${token}`,
                     },
@@ -304,7 +265,7 @@ useEffect(() => {
   const fetchRecords = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('https://toothpix-backend.onrender.com/api/website/record');
+      const response = await axios.get(`${BASE_URL}/api/website/record`);
       setRecords(response.data.records || []);
     } catch (error) {
     } finally {
@@ -314,7 +275,7 @@ useEffect(() => {
 const fetchReport = async () => {
   try {
     setIsLoading(true);
-    const response = await axios.get('https://toothpix-backend.onrender.com/api/reports/records');
+    const response = await axios.get(`${BASE_URL}/api/reports/records`);
     setReport(response.data.records || []);
   } catch (error) {
     console.error('Error fetching record report:', error);
@@ -344,11 +305,15 @@ fetchReport();
   }
 
   try {
-    const response = await fetch(`https://toothpix-backend.onrender.com/api/website/record/${confirmDeleteId}`, {
+    const response = await fetch(`${BASE_URL}/api/website/record/${confirmDeleteId}`, {
       method: 'DELETE',
-      headers: {
+       headers: {
         Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+        'Content-Type': 'application/json',
       },
+        body: JSON.stringify({
+        adminId: localStorage.getItem('adminId') // <-- send adminId here
+      }),
     });
 
     if (!response.ok) {
@@ -494,7 +459,7 @@ const handleAddSubmit = async (e) => {
 
   try {
     const response = await axios.post(
-      'https://toothpix-backend.onrender.com/api/website/record',
+      `${BASE_URL}/api/website/record`,
       newAppointment,
       {
         headers: {

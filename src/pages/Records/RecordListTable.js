@@ -170,17 +170,24 @@ export default function RecordListTable({
                                       <button
                                         className="btn-edit me-2"
                                         onClick={() => {
-                                          setEditFormData({
+                                           const editData = {
                                             idappointment: appt.idappointment,
                                             patient: appt.patient_name,
                                             dentist: appt.dentist_name,
                                             date: localDateStr,
                                             time: formatTime12Hour(rawDate),
-                                            service: appt.services ? appt.services.split(',').map((s) => s.trim()) : [],
+                                            // store names (strings) so modal/inputs can render safely
+                                            service: Array.isArray(appt.services)
+                                              ? appt.services.map(s => typeof s === 'string' ? s : (s.name ?? String(s.idservice)))
+                                              : (typeof appt.services === 'string'
+                                                  ? appt.services.split(',').map(s => s.trim())
+                                                  : []),
                                             serviceInput: '',
                                             treatment_notes: appt.treatment_notes || '',
-                                          });
+                                          };
+                                          setEditFormData(editData);
                                           setIsEditing(true);
+                                          console.log('EditFormData', editData);
                                         }}
                                       >
                                         ✏️ Edit

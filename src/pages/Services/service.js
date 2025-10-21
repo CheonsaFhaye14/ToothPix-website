@@ -1,6 +1,7 @@
     import React, { useState, useEffect } from 'react';
     import axios from 'axios';
     import '../../design/service.css';
+    import { BASE_URL } from '../../config';
 import ServicesReportExport from './ServicesReportExport';
     const Services = () => {
     const [services, setServices] = useState([]);
@@ -39,18 +40,15 @@ const [sortDirection, setSortDirection] = useState('asc');
         return () => document.removeEventListener('click', handleClickOutside);
       }, []);
       
-    const baseUrl = 'https://toothpix-backend.onrender.com/api/website/services';
-
 
     useEffect(() => {
         fetchServices();
     }, []);
 
-
-    const fetchServices = async () => {
+     const fetchServices = async () => {
         try {
         const token = localStorage.getItem('jwt_token');
-        const response = await axios.get(baseUrl, {
+        const response = await axios.get(`${BASE_URL}/api/website/services`, {
             headers: {
             Authorization: `Bearer ${token}`,
             },
@@ -106,16 +104,16 @@ const [sortDirection, setSortDirection] = useState('asc');
         };
       
         try {
-          const response = await axios.post(baseUrl, newService, {
+          const response = await axios.post(`${BASE_URL}/api/website/services`, newService, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
             },
           });
-      
+
           if (response.status === 201) {
             // Add the newly created service to your list
             setServices((prevServices) => [...prevServices, response.data.service]);
-      
+
             showTemporaryModal('Service added successfully.', 'success');
             setIsAdding(false);
             setAddFormData({ name: '', description: '', price: '', category: '' });
@@ -139,9 +137,9 @@ const [sortDirection, setSortDirection] = useState('asc');
         setConfirmMessage("Are you sure you want to delete this service?");
         setShowModal(true);
     };
-    const confirmDeletion = async () => {
+   const confirmDeletion = async () => {
         try {
-        const response = await fetch(`${baseUrl}/${confirmDeleteId}`, {
+        const response = await fetch(`${BASE_URL}/api/website/services/${confirmDeleteId}`, {
             method: 'DELETE',
         });
     
@@ -163,7 +161,6 @@ const [sortDirection, setSortDirection] = useState('asc');
             setShowModal(false);
         }
     };
-        
     
     
 
@@ -262,8 +259,8 @@ const handleShowAll = () => {
         };
       
         try {
-          const response = await axios.put(
-            `${baseUrl}/${editingService.idservice}`,
+           const response = await axios.put(
+            `${BASE_URL}/api/website/services/${editingService.idservice}`,
             updatedService,
             {
               headers: {

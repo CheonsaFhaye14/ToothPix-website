@@ -5,9 +5,9 @@ import UsersTable from './UsersTable'; // adjust path if needed
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import UsersReportExport from './UsersReportExport'; // adjust path as needed
+import { BASE_URL } from '../../config';
 
 const Users = () => {
-  const baseUrl = 'https://toothpix-backend.onrender.com/api/website/users';
   const columns = ['idusers', 'fullname', 'usertype'];
   const [users, setUsers] = useState([]);
   const [visibleColumn, setVisibleColumn] = useState('all');
@@ -79,11 +79,10 @@ const [isAdding, setIsAdding] = React.useState(false);
         medicalhistory: '',
          });
          
-        
-           const fetchUsers = async () => {
+    const fetchUsers = async () => {
   try {
     const token = localStorage.getItem('adminToken'); // make sure key matches
-    const response = await axios.get('https://toothpix-backend.onrender.com/api/website/users', {
+    const response = await axios.get(`${BASE_URL}/api/website/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -99,7 +98,6 @@ const [isAdding, setIsAdding] = React.useState(false);
     setIsLoading(false);
   }
 };
-
               
 
            
@@ -159,10 +157,14 @@ let bVal = sortKey === 'fullname' ? getFullName(b) : b[sortKey];
                 setShowModal(true);
             };    
 
-             const confirmDeletion = async () => {
+           const confirmDeletion = async () => {
         try {
-        const response = await fetch(`${baseUrl}/${confirmDeleteId}`, {
+        const response = await fetch(`${BASE_URL}/api/website/users/${confirmDeleteId}`, {
             method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+              'Content-Type': 'application/json'
+            }
         });
     
         if (!response.ok) {
@@ -358,9 +360,9 @@ if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
           medicalhistory: editFormData.medicalhistory.trim(),
         };
       
-        try {
+       try {
           const response = await axios.put(
-            `${baseUrl}/${editingUser.idusers}`,
+            `${BASE_URL}/api/website/users/${editingUser.idusers}`,
             updatedUser,
             {
               headers: {
@@ -541,8 +543,8 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
           adminId: localStorage.getItem('adminId')
         };
 
-        try {
-          const response = await axios.post(baseUrl, newUser, {
+         try {
+          const response = await axios.post(`${BASE_URL}/api/website/users`, newUser, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
             },

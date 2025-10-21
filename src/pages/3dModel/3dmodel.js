@@ -1,3 +1,4 @@
+import { BASE_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import BeforeModelModal from './BeforeModelModal';
 import AfterModelModal from './AfterModelModal';
@@ -15,7 +16,7 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
     async function fetchData() {
       setIsLoading(true);
       try {
-        const res = await fetch('https://toothpix-backend.onrender.com/api/website/3dmodels');
+        const res = await fetch(`${BASE_URL}/api/website/3dmodels`);
         const json = await res.json();
 
         const grouped = json.models.reduce((acc, model) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../design/users.css';
+import { BASE_URL } from '../../config';
 import PaymentReportExport from './PaymentReportExport';
 const Payment = () => {
   const [payments, setPayments] = useState([]);
@@ -30,9 +31,9 @@ const [report, setReport] = useState([]);
             setMessageType('');
             }, 2000);
         };
-   const fetchPaymentReport = async () => {
+const fetchPaymentReport = async () => {
   try {
-    const response = await fetch('https://toothpix-backend.onrender.com/api/reports/payments');
+    const response = await fetch(`${BASE_URL}/api/reports/payments`);
     if (!response.ok) {
       throw new Error('Failed to fetch payment report');
     }
@@ -46,7 +47,7 @@ const [report, setReport] = useState([]);
         const fetchPayments = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('https://toothpix-backend.onrender.com/api/website/payment');
+      const response = await fetch(`${BASE_URL}/api/website/payment`);
       if (!response.ok) {
         throw new Error('Failed to fetch payment data');
       }
@@ -121,16 +122,21 @@ const formatAppointmentDate = (isoDateStr) => {
     [name]: value,
   }));
 };
+
 const handleMarkAsPaid = async (payment) => {
   const { idappointment, total_price } = payment;
 
   try {
-    const response = await fetch(`https://toothpix-backend.onrender.com/api/website/payment/${idappointment}`, {
+    const response = await fetch(`${BASE_URL}/api/website/payment/${idappointment}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('jwt_token')}`, // optional if your backend uses auth
+      },
       body: JSON.stringify({
         total_paid: total_price,
         total_price: total_price,
+        admin_id: localStorage.getItem('adminId') // send adminId for logging
       }),
     });
 
@@ -159,8 +165,6 @@ const handleMarkAsPaid = async (payment) => {
     console.error('Error marking as paid:', error);
   }
 };
-
-
 
 const openEditModal = (payment) => {
   setEditFormData({

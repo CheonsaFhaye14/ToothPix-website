@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../../design/dashboard.css';
+import { BASE_URL } from '../../config';
 
 import AppointmentTodayCard from './AppointmentTodayCard';
 import EarningsCard from './EarningsCard';
@@ -20,7 +21,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get('https://toothpix-backend.onrender.com/api/website/admindashboard');
+        const response = await axios.get(`${BASE_URL}/api/website/admindashboard`);
         setDashboardData(response.data);
       } catch (err) {
         setError('Failed to load dashboard data');

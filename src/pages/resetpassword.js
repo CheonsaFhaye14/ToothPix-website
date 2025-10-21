@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import '../design/login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { BASE_URL } from '../config';
 
 const ResetPassword = () => {
   const history = useHistory();
@@ -40,7 +41,7 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const response = await fetch('https://toothpix-backend.onrender.com/api/reset-password', {
+    const response = await fetch(`${BASE_URL}/api/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, newPassword }),

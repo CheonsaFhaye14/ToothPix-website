@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
+import { BASE_URL } from '../../config';
 
 export default function TodayAppointmentsReport({ onClose }) {
   const [appointments, setAppointments] = useState([]);
@@ -12,7 +13,7 @@ export default function TodayAppointmentsReport({ onClose }) {
     const fetchTodayAppointments = async () => {
       try {
         const res = await fetch(
-          'https://toothpix-backend.onrender.com/api/reports/today-appointments'
+          `${BASE_URL}/api/reports/today-appointments`
         );
         if (!res.ok) throw new Error('Failed to fetch today appointments');
         const data = await res.json();

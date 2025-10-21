@@ -4,6 +4,7 @@ import autoTable from 'jspdf-autotable';
 import Papa from 'papaparse';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { BASE_URL } from '../../config';
 
 export default function TopServicesReport({ onClose }) {
   const [services, setServices] = useState([]);
@@ -14,7 +15,7 @@ export default function TopServicesReport({ onClose }) {
     const fetchTopServicesReport = async () => {
       try {
         const res = await fetch(
-          'https://toothpix-backend.onrender.com/api/reports/top-services'
+          `${BASE_URL}/api/reports/top-services`
         );
         if (!res.ok) throw new Error('Failed to fetch top services report');
         const data = await res.json();

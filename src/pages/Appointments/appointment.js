@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../design/appointment.css';
 import axios from 'axios';
 import AppointmentReportExport from './AppointmentReportExport';
-
+import { BASE_URL } from '../../config';
 
 
 const Appointment = () => {
@@ -58,8 +58,6 @@ const Appointment = () => {
             notes: '',
           });
             const [services, setServices] = useState([]);
-      const baseUrl2 = 'https://toothpix-backend.onrender.com/api/website/services';
-      const API_BASE= 'https://toothpix-backend.onrender.com';
       const [isLoading, setIsLoading] = useState(true);
   const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
  const [confirmDeleteId, setConfirmDeleteId] = useState(null); // holds id to delete
@@ -152,7 +150,7 @@ const sortedAppointments = React.useMemo(() => {
 
     const fetchDentists = async () => {
         try {
-          const res = await fetch('https://toothpix-backend.onrender.com/api/app/dentists');
+          const res = await fetch(`${BASE_URL}/api/app/dentists`);
           const data = await res.json();
           if (res.ok) setDentists(data.dentists);
         } catch (error) {
@@ -161,24 +159,24 @@ const sortedAppointments = React.useMemo(() => {
       };
   
     const fetchServices = async () => {
-          try {
-          const token = localStorage.getItem('jwt_token');
-          const response = await axios.get(baseUrl2, {
-              headers: {
-              Authorization: `Bearer ${token}`,
-              },
-          });
-          setServices(response.data.services);
-          } catch (error) {
-          console.error('Error fetching services:', error);
-          } finally {
-          setIsLoading(false);
-          }
-      };
+        try {
+        const token = localStorage.getItem('jwt_token');
+        const response = await axios.get(`${BASE_URL}/api/website/services`, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            },
+        });
+        setServices(response.data.services);
+        } catch (error) {
+        console.error('Error fetching services:', error);
+        } finally {
+        setIsLoading(false);
+        }
+    };
   
       const fetchPatients = async () => {
         try {
-          const res = await fetch('https://toothpix-backend.onrender.com/api/app/patients');
+          const res = await fetch(`${BASE_URL}/api/app/patients`);
           const data = await res.json();
           if (res.ok) setPatients(data.patients);
         } catch (error) {
@@ -237,7 +235,7 @@ const formatAppointmentDate = (utcDateString) => {
 const fetchAppointments = async (filters = {}) => {
   try {
     setIsLoading(true);
-    const response = await axios.get('https://toothpix-backend.onrender.com/api/website/appointments');
+    const response = await axios.get(`${BASE_URL}/api/website/appointments`);
 
     const now = Date.now();
     console.log('Current Time:', new Date(now).toString());
@@ -298,9 +296,6 @@ const fetchAppointments = async (filters = {}) => {
     setAppointments(enriched);
   };
 
- 
-  const baseUrl = 'https://toothpix-backend.onrender.com/api/website/appointments';
-
 const confirmDeletion = async () => {
   if (!confirmDeleteId) {
     showTemporaryModal('No appointment selected for deletion.', 'error');
@@ -309,7 +304,7 @@ const confirmDeletion = async () => {
   }
 
   try {
-    const response = await fetch(`${baseUrl}/${confirmDeleteId}`, {
+    const response = await fetch(`${BASE_URL}/api/website/appointments{confirmDeleteId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
@@ -452,7 +447,7 @@ const handleAddSubmit = async (e) => {
 
   try {
     const response = await axios.post(
-      'https://toothpix-backend.onrender.com/api/website/appointments',
+      `${BASE_URL}/api/website/appointments`,
       newAppointment,
       {
         headers: {
@@ -613,7 +608,7 @@ const handleEditSubmit = async (e) => {
   };
 
   try {
-    const response = await axios.put(`${baseUrl}/${editFormData.id}`, updatedAppointment, {
+    const response = await axios.put(`${BASE_URL}/api/website/appointments/${editFormData.id}`, updatedAppointment, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
       },
@@ -660,7 +655,7 @@ const handleEditSubmit = async (e) => {
 
 const handleEdit = async (appointment) => {
   try {
-    const response = await axios.get(`${API_BASE}/appointment-services/${appointment.idappointment}`);
+    const response = await axios.get(`${BASE_URL}/appointment-services/${appointment.idappointment}`);
     const servicesData = response.data.services || [];
 
     const serviceNames = servicesData.map(service => service.name);

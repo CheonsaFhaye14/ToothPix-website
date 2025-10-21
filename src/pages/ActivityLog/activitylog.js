@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BASE_URL } from '../../config';
 
 function ActivityLog() {
   const [logs, setLogs] = useState([]);
@@ -9,7 +10,7 @@ function ActivityLog() {
   function fetchLogs() {
     const token = localStorage.getItem('adminToken');
     axios
-      .get('https://toothpix-backend.onrender.com/api/website/activity_logs', {
+      .get(`${BASE_URL}/api/website/activity_logs`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -29,7 +30,7 @@ function ActivityLog() {
   function handleDelete(logId) {
     const token = localStorage.getItem('adminToken');
     axios
-      .delete(`https://toothpix-backend.onrender.com/api/website/activity_logs/${logId}`, {
+      .delete(`${BASE_URL}/api/website/activity_logs/${logId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => fetchLogs())
@@ -41,7 +42,7 @@ function ActivityLog() {
     const adminId = localStorage.getItem('adminId');
     axios
       .post(
-        `https://toothpix-backend.onrender.com/api/activity_logs/undo/${logId}`,
+        `${BASE_URL}/api/activity_logs/undo/${logId}`,
         { admin_id: adminId },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -65,10 +66,8 @@ function ActivityLog() {
           <table className="table table-bordered table-hover">
             <thead className="table-light">
               <tr>
-                <th>ID</th>
                 <th>Action</th>
                 <th>Table</th>
-                <th>Target ID</th>
                 <th>Description</th>
                 <th>Created At</th>
                 <th>Actions</th>
@@ -88,10 +87,8 @@ function ActivityLog() {
 
                   return (
                     <tr key={log.id}>
-                      <td>{log.id}</td>
                       <td>{log.action}</td>
                       <td>{log.table_name}</td>
-                      <td>{log.record_id}</td>
                       <td>{log.description}</td>
                       <td>{new Date(log.created_at).toLocaleString()}</td>
            <td>
