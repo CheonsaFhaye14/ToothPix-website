@@ -2,7 +2,7 @@ import { BASE_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import BeforeModelModal from './BeforeModelModal';
 import AfterModelModal from './AfterModelModal';
-import '../../design/users.css';
+
 const ThreeDModelManager = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
