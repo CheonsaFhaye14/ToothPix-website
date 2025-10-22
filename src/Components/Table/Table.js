@@ -75,16 +75,16 @@ const CommonTable = ({
                       {onEdit && (
                         <button
                           className="btn-edit btn-sm"
-                          onClick={() => onEdit(row)}
-                        >
-                          ✏️ Edit
-                        </button>
+                            onClick={() => onEdit(row)}
+                          >
+                            ✏️ Edit
+                          </button>
                       )}
 
                       {onDelete && (
                         <button
                           className="btn-delete btn-sm"
-                          onClick={() => onDelete(row.id)}
+                       onClick={() => onDelete(row.id ?? row.idservice)}
                         >
                           🗑️ Delete
                         </button>
