@@ -1,4 +1,5 @@
-          import React, { useState, useEffect } from 'react';
+import '../../design/service.css';
+import React, { useState, useEffect } from 'react';
               import axios from 'axios';
               import { BASE_URL } from '../../config';
               import CommonTable from '../../Components/Table/Table';
@@ -26,16 +27,7 @@
                 price: '',
                 category: '',
               });
-            const columns = [
-  { key: 'name', label: 'Service Name' },
-  { key: 'description', label: 'Description' },
-  { 
-    key: 'price', 
-    label: 'Price', 
-    render: (value) => `₱${parseFloat(value).toFixed(2)}` 
-  },
-  { key: 'category', label: 'Category' },
-];
+
 
               const existingCategories = [...new Set(services.map(service => service.category).filter(Boolean))];
 
@@ -140,38 +132,47 @@
             setSearchTerm(term);
           };
 
+const handleDelete = (id) => {
+  setConfirmDeleteId(id);
+  setMessageType("error");
+  setConfirmMessage("Are you sure you want to delete this service?");
+  setShowModal(true);
+  
+};
 
-              const handleDelete = (id) => {
-                  setConfirmDeleteId(id);
-                  setMessageType('error');
-                  setConfirmMessage("Are you sure you want to delete this service?");
-                  setShowModal(true);
-              };
-            const confirmDeletion = async () => {
-                  try {
-                  const response = await fetch(`${BASE_URL}/api/website/services/${confirmDeleteId}`, {
-                      method: 'DELETE',
-                  });
-              
-                  if (!response.ok) {
-                      const error = await response.json();
-                      showTemporaryModal(error.message || 'Failed to delete service.', 'error');
-                      return;
-                  }
-              
-                  setServices(prevServices =>
-                      prevServices.filter(service => service.idservice !== confirmDeleteId)
-                  );
-                  showTemporaryModal('Service deleted successfully.', 'success');
-                  } catch (error) {
-                  console.error("Error deleting service:", error);
-                  showTemporaryModal('An error occurred while deleting the service.', 'error');
-                  } finally {
-                  setConfirmDeleteId(null);
-                      setShowModal(false);
-                  }
-              };
-              
+const confirmDeletion = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/website/services/${confirmDeleteId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      setMessage(error.message || "Failed to delete service.");
+      setMessageType("error");
+      return;
+    }
+
+    // remove from UI
+    setServices((prev) =>
+      prev.filter((s) => s.idservice !== confirmDeleteId)
+    );
+
+    setMessage("Service deleted successfully.");
+    setMessageType("success");
+
+    // keep modal open for a moment to show message
+    setTimeout(() => {
+      setShowModal(false);
+      setConfirmDeleteId(null);
+    }, 1500);
+  } catch (error) {
+    console.error("Error deleting service:", error);
+    setMessage("An error occurred while deleting the service.");
+    setMessageType("error");
+  }
+};
+
               
 
 
@@ -525,22 +526,37 @@
             </div>
           )}
 
-                  {showModal && (
-              <div className="modal-overlay">
-                  <div className={`modal-box ${messageType}`}>
-                  <p>{confirmDeleteId ? confirmMessage : message}</p>
-                  {confirmDeleteId ? (
-                      <div style={{ marginTop: '1rem' }}>
-                      <button className="btn btn-danger me-2" onClick={confirmDeletion}>Yes</button>
-                      <button className="btn btn-secondary" onClick={() => {
-                          setShowModal(false);
-                          setConfirmDeleteId(null);
-                      }}>Cancel</button>
-                      </div>
-                  ) : null}
-                  </div>
-              </div>
-              )}
+  {showModal && (
+  <div className="modal-overlay">
+    <div className={`modal-box ${messageType}`}>
+      <p className="modal-message text-center mb-3">
+        {confirmMessage || message}
+      </p>
+
+      {confirmDeleteId && (
+        <div className="modal-actions text-center">
+          <button
+            className="btn btn-danger me-3 px-4"
+            onClick={confirmDeletion}
+          >
+            Yes
+          </button>
+          <button
+            className="btn btn-secondary px-4"
+            onClick={() => {
+              setShowModal(false);
+              setConfirmDeleteId(null);
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+
                 {showModal2 && (
             <div className="modal-overlay">
               <div className={`modal-box ${messageType}`}>
@@ -617,26 +633,26 @@
 
               </div>
 
-          <CommonTable
-  columns={[
-    { key: 'name', label: 'Service Name' },
-    { key: 'description', label: 'Description' },
-    { 
-      key: 'price', 
-      label: 'Price', 
-      render: (value) => `₱${parseFloat(value).toFixed(2)}` 
-    },
-    { key: 'category', label: 'Category' },
-  ]}
-  data={sortedFilteredServices}
-  onEdit={handleEdit}
-  onDelete={(id) => handleDelete(id)}
-  emptyMessage={
-    <div className="text-muted py-3 text-center">
-      <i className="bi bi-search"></i> No services found.
-    </div>
-  }
-/>
+            <CommonTable
+    columns={[
+      { key: 'name', label: 'Service Name' },
+      { key: 'description', label: 'Description' },
+      { 
+        key: 'price', 
+        label: 'Price', 
+        render: (value) => `₱${parseFloat(value).toFixed(2)}` 
+      },
+      { key: 'category', label: 'Category' },
+    ]}
+    data={sortedFilteredServices}
+    onEdit={handleEdit}
+    onDelete={(id) => handleDelete(id)}
+    emptyMessage={
+      <div className="text-muted py-3 text-center">
+        <i className="bi bi-search"></i> No services found.
+      </div>
+    }
+  />
 
             </>
           )}
