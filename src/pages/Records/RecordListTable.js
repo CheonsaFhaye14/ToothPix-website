@@ -77,30 +77,31 @@ export default function RecordListTable({
           </tr>
         </thead>
         <tbody>
+          
           {sortedList.length === 0 ? (
             <tr>
               <td className="text-center">No records found</td>
             </tr>
           ) : (
-            sortedList.map((nameKey) => {
-              const displayName = records.find(rec =>
-                (groupBy === 'patient' ? rec.patient_name : rec.dentist_name).toLowerCase() === nameKey
-              )?.[groupBy === 'patient' ? 'patient_name' : 'dentist_name'];
+          sortedList.map((nameKey) => {
+  const displayName = records.find(rec => {
+    const name = groupBy === 'patient' ? rec?.patient_name : rec?.dentist_name;
+    return name?.toLowerCase() === nameKey;
+  })?.[groupBy === 'patient' ? 'patient_name' : 'dentist_name'] || 'Unknown';
 
-              const isExpanded = expandedPatient === nameKey;
-              const now = new Date();
+  const isExpanded = expandedPatient === nameKey;
+  const now = new Date();
 
-              let appointments = records.filter((rec) => {
-                const matchName = groupBy === 'patient' ? rec.patient_name : rec.dentist_name;
-                if (!matchName || matchName.toLowerCase() !== nameKey) return false;
+  let appointments = records.filter((rec) => {
+    const matchName = groupBy === 'patient' ? rec?.patient_name : rec?.dentist_name;
+    if (!matchName || matchName.toLowerCase() !== nameKey) return false;
 
-                const apptDate = new Date(rec.date);
-                if (isNaN(apptDate)) return false;
+    const apptDate = new Date(rec.date);
+    if (isNaN(apptDate)) return false;
 
-                rec._parsedDate = apptDate;
-                return apptDate < now;
-              });
-
+    rec._parsedDate = apptDate;
+    return apptDate < now;
+  });
               appointments.sort((a, b) => {
                 if (sortKey === 'name') {
                   const nameA = groupBy === 'patient' ? a.dentist_name : a.patient_name;

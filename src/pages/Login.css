@@ -1,0 +1,86 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  position: relative;
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 3rem 5rem;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.login-card h1 {
+  color: #0d3b66;
+  margin-bottom: 1.5rem;
+}
+
+/* Removed .login-card input styles to rely on utils design */
+
+.login-card button {
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 30px;
+  border: none;
+  background-color: #75c5f1;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(117, 197, 241, 0.5);
+}
+
+.login-card button:hover {
+  background-color: #4aa3e0;
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 15px rgba(74, 163, 224, 0.6);
+}
+
+.error-text {
+  color: #b30000;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+button[disabled] {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+button svg {
+  vertical-align: middle;
+}
+
+/* Forgot Password link inside login form */
+.forgot-password {
+  font-size: 0.9rem;
+}
+
+.forgot-password span {
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.forgot-password span:hover {
+  color: #4aa3e0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes fadeout {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}

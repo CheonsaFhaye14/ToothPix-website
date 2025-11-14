@@ -1,0 +1,110 @@
+/* Main navbar container */
+.admin-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #75c5f1; /* soft light blue */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: "Varela Round", sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  border-bottom: 2px solid #a6d4f5;
+}
+
+/* Admin title */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo span {
+  font-size: 1.6rem;
+  color: #fff;
+  font-weight: 500;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-logo span:hover {
+  color: #ffffff;
+  text-shadow:
+    0 0 8px #a6e0ff,
+    0 0 16px #a6e0ff,
+    0 0 24px #99d6ff,
+    0 0 32px #75c5f1;
+  transform: scale(1.05);
+}
+
+/* Right-side actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* Logout button — icon that expands to text */
+.logout-btn {
+  background-color: transparent;
+  color: #d84343; /* soft red text */
+  border: 2px solid #d84343; /* red border */
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  width: 45px; /* icon only */
+  transition: all 0.3s ease;
+}
+
+.logout-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+  margin-left: 10px;
+}
+
+.logout-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+/* Hover animation */
+.logout-btn:hover {
+  width: 115px;
+  background-color: #d84343;
+  color: #fff;
+}
+
+.logout-btn:hover .logout-icon {
+  transform: translateX(-3px);
+}
+
+.logout-btn:hover .logout-text {
+  opacity: 1;
+  width: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .navbar-logo span {
+    font-size: 1.4rem;
+  }
+
+  .logout-btn {
+    width: 40px;
+    padding: 6px 8px;
+  }
+
+  .logout-btn:hover {
+    width: 95px;
+  }
+}

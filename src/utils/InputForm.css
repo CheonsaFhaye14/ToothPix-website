@@ -1,0 +1,43 @@
+.input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #bfdbfe; /* blue-200 */
+  border-radius: 25px;
+  /* background: #fff; */
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.floating-input:focus {
+  border-color: #60a5fa; /* blue-400 */
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+}
+
+.floating-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.floating-input:focus + .floating-label,
+.has-value {
+  top: 0.1rem;
+  left: 1rem;
+  font-size: 0.85rem;
+  color: #60a5fa; /* blue-400 */
+  /* background: #fff; */
+  padding: 0 0.25rem;
+}

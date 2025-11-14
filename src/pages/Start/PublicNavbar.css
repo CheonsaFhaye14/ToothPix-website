@@ -1,0 +1,155 @@
+/* Navbar container */
+.public-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #75c5f1; /* soft light blue */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: 'Varela Round', sans-serif;
+  position: fixed; /* always on top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  border-bottom: 2px solid #a6d4f5; /* subtle border for cuteness */
+}
+
+/* Logo section */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+/* Logo hover */
+.navbar-logo img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  object-fit: cover;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar-logo img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(173, 216, 230, 0.8); /* soft light blue glow */
+}
+
+/* Title hover */
+.navbar-logo span {
+  font-size: 1.6rem;
+  color: #fff;
+  font-weight: 500;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Cute hover effect with contrast */
+.navbar-logo span:hover {
+  color: #ffffff; /* pure white for contrast */
+  text-shadow: 
+    0 0 8px #a6e0ff,
+    0 0 16px #a6e0ff,
+    0 0 24px #99d6ff,
+    0 0 32px #75c5f1; /* layered glow with soft blue tones */
+  transform: scale(1.05); /* subtle zoom for playful effect */
+}
+
+/* Links section */
+.navbar-links {
+  display: flex;
+  gap: 18px;
+}
+
+/* Navbar links */
+.navbar-links a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect for links */
+.navbar-links a:hover {
+  background-color: #e0f3ff; /* very light blue */
+  color: #365280; /* medium blue for contrast */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(173, 216, 230, 0.5);
+}
+
+/* Active page indicator */
+.navbar-links a.active {
+  background-color: #365280;
+  color: #fff;
+}
+
+/* Hamburger menu (show on mobile) */
+.hamburger-menu {
+  display: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+
+/* Cute tap animation */
+.hamburger-menu:active {
+  transform: scale(0.85);
+}
+
+@media (max-width: 768px) { 
+  .navbar-links {
+    flex-direction: column;
+    gap: 12px;
+    position: absolute;
+    top: 70px;
+    right: 15px;
+
+    background-color: #75c5f1;
+    border-radius: 22px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+
+    /* Slide animation (open + close) */
+    max-height: 0;
+    padding: 0 20px; /* keep side padding; collapse vertical padding */
+    overflow: hidden;
+    opacity: 0;
+
+    transition:
+      max-height 0.35s ease,
+      padding 0.35s ease,
+      opacity 0.25s ease;
+  }
+
+  /* When active, show it */
+  .public-navbar.active .navbar-links {
+    max-height: 300px; /* enough for the menu */
+    padding: 18px 20px; /* animate padding instead of jumping */
+    opacity: 1;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Mobile link styling */
+  .navbar-links a {
+    padding: 10px 14px;
+    border-radius: 16px;
+    background-color: #e8f6ff;
+    color: #365280;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+    text-align: center;
+  }
+
+  .navbar-links a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(117, 197, 241, 0.4);
+  }
+}
+

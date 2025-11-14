@@ -1,119 +1,138 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | My project</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Unity Web Player | Teeth Editor</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
   </head>
+
+
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
-      <div id="unity-warning"> </div>
+      <div id="unity-warning"></div>
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">My project</div>
+        <div id="unity-build-title">Teeth Editor</div>
       </div>
     </div>
+
+
     <script>
-  function unityShowBanner(msg, type) {
-    var warningBanner = document.querySelector("#unity-warning");
-    function updateBannerVisibility() {
-      warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-    }
-    var div = document.createElement('div');
-    div.innerHTML = msg;
-    warningBanner.appendChild(div);
-    if (type == 'error') div.style = 'background: red; padding: 10px;';
-    else {
-      if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-      setTimeout(function () {
-        warningBanner.removeChild(div);
+      // ✅ Define banner handler FIRST
+      function unityShowBanner(msg, type) {
+        const warningBanner = document.querySelector("#unity-warning");
+
+
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+
+
+        const div = document.createElement("div");
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+
+
+        if (type === "error") {
+          div.style = "background: red; padding: 10px;";
+        } else {
+          if (type === "warning") div.style = "background: yellow; padding: 10px;";
+          setTimeout(() => {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
         updateBannerVisibility();
-      }, 5000);
-    }
-    updateBannerVisibility();
-  }
+      }
 
-  var canvas = document.querySelector("#unity-canvas");
-  var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/TeethEditor.loader.js";
-  var config = {
-    arguments: [],
-    dataUrl: buildUrl + "/TeethEditor.data",
-    frameworkUrl: buildUrl + "/TeethEditor.framework.js",
-    codeUrl: buildUrl + "/TeethEditor.wasm",
-    streamingAssetsUrl: "StreamingAssets",
-    companyName: "DefaultCompany",
-    productName: "My project",
-    productVersion: "0.1.0",
-    showBanner: unityShowBanner,
-  };
 
-  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-    document.getElementsByTagName('head')[0].appendChild(meta);
-    document.querySelector("#unity-container").className = "unity-mobile";
-    canvas.className = "unity-mobile";
-  } else {
-    canvas.style.width = "960px";
-    canvas.style.height = "600px";
-  }
+      const canvas = document.querySelector("#unity-canvas");
+const buildUrl = "TeethEditor/Build";
+const loaderUrl = buildUrl + "/TeethEditor.loader.js";
 
-  document.querySelector("#unity-loading-bar").style.display = "block";
+const config = {
+  dataUrl: buildUrl + "/TeethEditor.data",
+  frameworkUrl: buildUrl + "/TeethEditor.framework.js",
+  codeUrl: buildUrl + "/TeethEditor.wasm",
+  streamingAssetsUrl: "StreamingAssets",
+  companyName: "DefaultCompany",
+  productName: "Teeth Editor",
+  productVersion: "1.0.0",
+  showBanner: unityShowBanner,
+};
 
-  let unityInstance = null; 
-  let pendingRecordId = null; // 🚨 store recordId if sent early
 
-  var script = document.createElement("script");
-  script.src = loaderUrl;
-  script.onload = () => {
-    createUnityInstance(canvas, config, (progress) => {
-      document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-    }).then((instance) => {
-      unityInstance = instance;
-      document.querySelector("#unity-loading-bar").style.display = "none";
-      document.querySelector("#unity-fullscreen-button").onclick = () => {
-        unityInstance.SetFullscreen(1);
+
+
+      let unityInstance = null;
+      let pendingRecordData = null;
+      let authToken = "";
+
+
+      // ✅ Load Unity
+      const script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width =
+            100 * progress + "%";
+        })
+          .then((instance) => {
+            unityInstance = instance;
+            document.querySelector("#unity-loading-bar").style.display = "none";
+
+
+            // ✅ If we got record data before Unity loaded, send now
+            if (pendingRecordData) {
+              console.log("[WebGL] Sending queued record data:", pendingRecordData);
+              unityInstance.SendMessage("WebBridge", "SetRecordInfo", pendingRecordData);
+              pendingRecordData = null;
+            }
+          })
+          .catch((message) => alert(message));
       };
+      document.body.appendChild(script);
 
-      // 🚨 If React already sent a recordId, send it now
-      if (pendingRecordId) {
-        console.log("[WebGL] Sending queued recordId:", pendingRecordId);
-        unityInstance.SendMessage("WebBridge", "SetIdRecord", String(pendingRecordId));
-        pendingRecordId = null;
-      }
 
-    }).catch((message) => {
-      alert(message);
-    });
-  };
-  document.body.appendChild(script);
+      // ✅ React → Unity bridge
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "SET_AUTH_TOKEN") {
+          console.log("[WebGL] ✅ Received auth token");
+          authToken = event.data.token;
+        }
 
-  // ✅ Listen for messages from React
-  window.addEventListener("message", (event) => {
-    if (event.data.type === "SET_RECORD_ID") {
-      console.log("[WebGL] Received recordId:", event.data.recordId);
 
-      if (unityInstance) {
-        unityInstance.SendMessage("WebBridge", "SetIdRecord", String(event.data.recordId));
-      } else {
-        console.warn("[WebGL] Unity not ready yet, queuing recordId");
-        pendingRecordId = event.data.recordId; // 🚨 save until ready
-      }
-    }
-  });
-</script>
+        if (event.data.type === "SET_RECORD_ID") {
+          console.log("[WebGL] Received recordId:", event.data.recordId);
+          const jsonData = JSON.stringify({
+            recordId: String(event.data.recordId),
+            token: authToken || "",
+          });
 
+
+          if (unityInstance) {
+            unityInstance.SendMessage("WebBridge", "SetRecordInfo", jsonData);
+            console.log("[WebGL] ✅ Sent recordId + token to Unity:", jsonData);
+          } else {
+            console.warn("[WebGL] Unity not ready yet, queuing record info");
+            pendingRecordData = jsonData;
+          }
+        }
+      });
+    </script>
   </body>
 </html>
+
+
+
+

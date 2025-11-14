@@ -1,0 +1,98 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* --- Sidebar --- */
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 60px; /* collapsed */
+  transition: width 0.3s ease;
+  z-index: 900; /* BELOW navbar now */
+}
+
+.admin-sidebar:hover {
+  width: 220px;
+}
+
+/* --- Navbar --- */
+.admin-navbar {
+  position: fixed;
+  top: 0;
+  left: 0; /* stays full width */
+  width: 100%;
+  z-index: 1001; /* 🔼 higher than sidebar */
+}
+
+/* --- Content --- */
+.admin-content {
+  margin-left: 60px; /* match collapsed sidebar */
+  margin-top: 80px; /* height of navbar */
+  padding: 20px 40px;
+  flex: 1;
+  transition: margin-left 0.3s ease;
+}
+
+/* Move content when sidebar expands (navbar stays fixed) */
+.admin-sidebar:hover ~ .admin-content {
+  margin-left: 220px;
+}
+
+/* --- Page Titles inside content --- */
+.admin-content h1 {
+  display: inline-block; /* underline fits the text width only */
+  font-size: 2rem;
+  padding-right: 15px;
+  color: #087aaa; /* deep navy blue */
+  font-weight: 700;
+  border-color: white;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 6px rgba(117, 197, 241, 0.3); /* soft glow */
+  border-bottom: 2px solid #a6d4f5;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* --- Add Button --- */
+.btn-add {
+  background-color: #6bb8fa;
+  margin-left: 15px;
+  margin-top: 11px;
+  color: white;
+  border: none;
+  border-radius: 50%; /* makes it circular */
+  width: 45px;
+  height: 45px;
+  font-size: 1.8rem; /* makes the '+' large */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(107, 184, 250, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+  background-color: #3ea5ff;
+  box-shadow: 0 6px 12px rgba(62, 165, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.btn-add:active {
+  transform: scale(0.95);
+}
+/* --- Same Row (title + button) --- */
+.same-row {
+  display: flex;
+  flex-wrap: wrap; 
+  
+}
+

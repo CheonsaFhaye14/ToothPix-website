@@ -1,0 +1,120 @@
+/* AdminSidebar.css */
+
+.admin-sidebar {
+  width: 60px; /* collapsed width */
+  background-color: #75c5f1; /* light blue */
+  color: #03396c; /* dark blue text */
+  height: 100vh;
+  position: fixed;
+  transition: width 0.3s;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-sidebar:hover {
+  width: 220px; /* expanded width */
+  align-items: flex-start;
+}
+
+.admin-sidebar .sidebar-header {
+  padding: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #b0d4ff;
+  transition: justify-content 0.3s;
+}
+
+.admin-sidebar:hover .sidebar-header {
+  justify-content: flex-start;
+}
+
+.admin-sidebar .sidebar-header h2 {
+  margin-left: 10px;
+  font-size: 1.3rem;
+  white-space: nowrap;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* Each nav item styled like a card */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: #03396c;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.6); /* subtle border */
+  border-left: 4px solid transparent;
+  margin: 5px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s, color 0.3s, border-left 0.3s, box-shadow 0.3s;
+}
+
+.sidebar-link:hover {
+  background-color: #b0d4ff;
+  color: #001f3f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #0074d9;
+}
+
+/* Active state */
+.sidebar-link.active {
+  background-color: #30a3f0; /* darker blue for active */
+  color: white;
+  border-left: 4px solid #ffffff;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.sidebar-link.active .sidebar-icon {
+  color: #ffffff;
+}
+
+.sidebar-link.active:hover {
+  background-color: #30a3f0;
+  color: white;
+}
+
+/* Icon and text styling */
+.sidebar-icon {
+  font-size: 1.4rem;
+  min-width: 20px; /* gives breathing room */
+  text-align: left; /* keep centered horizontally */
+  margin-left: -10px; /* move slightly left inside the box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.sidebar-text {
+  margin-left: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Hide text when collapsed */
+.admin-sidebar:not(:hover) .sidebar-text {
+  opacity: 0;
+  width: 0;
+  margin-left: 0;
+  transition: opacity 0.3s, width 0.3s, margin-left 0.3s;
+}
+
+/* Show text when expanded */
+.admin-sidebar:hover .sidebar-text {
+  opacity: 1;
+  width: auto;
+  margin-left: 15px;
+}

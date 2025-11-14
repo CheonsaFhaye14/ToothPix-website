@@ -1,0 +1,99 @@
+/* CustomDate.css */
+
+.custom-date-container {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 0.4rem;   /* slightly smaller padding */
+  font-size: 0.85rem; /* smaller text */
+  box-sizing: border-box;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #3c4c60;
+  font-size: 0.9rem; /* smaller icon */
+}
+
+.calendar-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  border-radius: 20px;
+  border: 1px solid #cce5ff;
+  padding: 0.4rem;  /* smaller padding */
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(96,165,250,0.2);
+  width: 100%;       
+  max-height: 150px; 
+  overflow-y: auto;  
+  box-sizing: border-box;
+  font-size: 0.8rem; /* smaller text in popup */
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  padding-bottom: 5px;
+  margin-bottom: 0.2rem;
+  cursor: pointer;
+  font-size: 0.85rem; /* smaller header text */
+  border-bottom: #96c1da 1px solid;
+}
+
+.weekdays, .days-grid, .months-grid, .years-grid {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 0.4rem;
+  text-align: center;
+  font-size: 0.8rem; /* smaller text */
+}
+
+.weekdays {
+  grid-template-columns: repeat(7, 1fr);
+  font-weight: bold;
+  font-size: 0.7rem; /* smaller text */
+}
+
+
+.days-grid {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.months-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.years-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.day, .month, .year {
+  text-align: center;
+  padding: 3px 0; /* smaller padding */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  word-wrap: break-word; 
+  font-size: 0.75rem; /* smaller text */
+}
+
+.day.selected, .month.selected, .year.selected {
+  background: #60a5fa;
+  color: #fff;
+}
+
+.day.today {
+  border: 1px solid #60a5fa;
+  border-radius: 50%;
+}

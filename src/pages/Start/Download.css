@@ -1,0 +1,47 @@
+.download-container {
+  padding: 2rem;
+  font-family: 'Varela Round', sans-serif;
+  color: #0d3b66;
+  text-align: center;
+}
+
+.download-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.download-container p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #3d6b81;
+}
+
+.download-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.download-button {
+  background-color: #75c5f1;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(117, 197, 241, 0.5);
+}
+
+.download-button:hover {
+  background-color: #4aa3e0;
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 15px rgba(74, 163, 224, 0.6);
+}
+
+.note {
+  font-size: 0.85rem;
+  color: #3d6b81;
+}
