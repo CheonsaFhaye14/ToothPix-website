@@ -1,17 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { BASE_URL } from '../config';
-import FloatingInput from '../utils/InputForm';
+import PasswordInput from '../utils/PasswordInput'; // import the combined component
 // import './ResetPassword.css'; // assuming you have styles
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -67,33 +63,31 @@ const ResetPassword = () => {
       <div className="right-panel">
         <div className="login-card">
           <h2>Reset Password</h2>
-          {message && <div className={`message ${message.startsWith('✅') ? 'success-text' : 'error-text'}`}>{message}</div>}
+          {message && (
+            <div className={`message ${message.startsWith('✅') ? 'success-text' : 'error-text'}`}>
+              {message}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
-            
+
             {/* New Password */}
             <div className="mb-3 input-wrapper">
-              <FloatingInput
+              <PasswordInput
                 placeholder="New Password"
-                type={showNewPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                name="newPassword"
               />
-              <span className="toggle-password" onClick={() => setShowNewPassword(!showNewPassword)}>
-                <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
-              </span>
             </div>
 
             {/* Confirm Password */}
             <div className="mb-3 input-wrapper">
-              <FloatingInput
+              <PasswordInput
                 placeholder="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                name="confirmPassword"
               />
-              <span className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
-              </span>
             </div>
 
             <button type="submit" className="btn-primary" disabled={loading || !token}>

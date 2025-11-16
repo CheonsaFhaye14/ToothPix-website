@@ -34,7 +34,7 @@ function ActivityLog() {
 
   return (
     <div className="container py-4">
-      <h2 className="mb-2">Activity Log</h2>
+      <h1>Activity Log</h1>
       <div className="alert alert-info">
         Logs are automatically deleted after 30 days. Actions that have already been undone or deleted cannot be undone.
       </div>

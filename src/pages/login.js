@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../config";
 import FloatingInput from "../utils/InputForm";
-import CustomPasswordInput from "../utils/CustomPasswordInput";
+import PasswordInput from "../utils/PasswordInput"; // ✅ use combined component
 import ForgotPasswordModal from "../Components/ForgotPasswordModal";
-import { useAdminAuth } from "../pages/Start/useAdminAuth"; // ✅ import context
+import { useAdminAuth } from "../pages/Start/useAdminAuth";
 import "./Login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -16,8 +16,8 @@ const Login = () => {
   const [showModal, setShowModal] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
-  
-  const { login } = useAdminAuth(); // ✅ get login function from context
+
+  const { login } = useAdminAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,10 +34,8 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // ✅ store token in context
         login(data.token);
-
-        setMessage(""); // no error message
+        setMessage("");
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setMessage(data.message || "Login failed.");
@@ -63,7 +61,8 @@ const Login = () => {
             name="username"
           />
 
-          <CustomPasswordInput
+          {/* Password field using combined component */}
+          <PasswordInput
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

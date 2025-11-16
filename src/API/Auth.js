@@ -71,7 +71,7 @@ export function useAuth() {
       }
 
       // Step 2: Request reset
-      const resetRes = await fetch(`${BASE_URL}/api/request-reset-password`, {
+      const resetRes = await fetch(`${BASE_URL}/api/Reset Password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

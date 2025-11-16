@@ -1,0 +1,312 @@
+
+  .suggestions-list {
+    position: absolute;
+    z-index: 1000;
+    background-color: #e6f0ff; /* Light blue background */
+    border: 1px solid #a3c1ff; /* Softer blue border */
+    border-radius: 12px; /* More rounded corners */
+    width: 100%;
+    max-height: 151px;
+    overflow-y: auto;
+    margin-top: 40px; /* Move down a bit */
+    list-style: none;
+    padding: 4px 0; /* Small vertical padding */
+    box-shadow: 0 4px 8px rgba(163, 193, 255, 0.3); /* Soft blue shadow */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .suggestions-list-edit {
+    position: absolute;
+    z-index: 1000;
+    background-color: #e6f0ff; /* Light blue background */
+    border: 1px solid #a3c1ff; /* Softer blue border */
+    border-radius: 12px; /* More rounded corners */
+    width: 100%;
+    max-height: 151px;
+    overflow-y: auto;
+    margin-top: 63px; /* Move down a bit */
+    list-style: none;
+    padding: 4px 0; /* Small vertical padding */
+    box-shadow: 0 4px 8px rgba(163, 193, 255, 0.3); /* Soft blue shadow */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .suggestion-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #c9d9ff; /* lighter border between items */
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    color: #113f6d; /* Dark blue text */
+    font-weight: 500;
+    margin: 0 8px 4px 8px; /* Add horizontal margin and small gap */
+  }
+  
+  .suggestion-item:last-child {
+    border-bottom: none; /* Remove border on last item */
+  }
+  
+  .suggestion-item:hover {
+    background-color: #a3c1ff; /* Medium blue highlight on hover */
+    color: white;
+  }
+  
+  .usertype-input-wrapper {
+    position: relative;
+  }
+  .btn {
+    padding: 8px 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }  
+  /* Edit and Delete buttons */
+  .btn-edit,
+  .btn-delete {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: none;
+    min-width: 80px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Edit button */
+  .btn-edit {
+    background-color: #a4d7ff;
+    color: #004a75;
+  }
+  
+  .btn-edit:hover {
+    background-color: #7ccfff;
+    color: #003b5c;
+  }
+  
+  /* Delete button */
+  .btn-delete {
+    background-color: #ffc7ce;
+    color: #912d3b;
+  }
+  
+  .btn-delete:hover {
+    background-color: #ffacb6;
+    color: #6e1f2a;
+  }
+  
+  .actions-column {
+    text-align: right;
+    white-space: nowrap;
+  }
+  /* Form container with flexbox */
+.form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    align-items: center;
+  }
+  /* Form group styling */
+  .form-group {
+    flex: 1;
+    min-width: 180px; /* Ensure a minimum width */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .form-group .form-control {
+    height: 38px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }  
+  /* Button styles */
+ .form-actions {
+  display: flex;
+  gap: 10px; /* space between buttons */
+  justify-content: center; /* align buttons left; change to center or right if needed */
+}
+  
+      /* Modal styles */
+      .modal-box.success {
+        border-left: 6px solid #5cc9f5;
+        color: #1e88e5;
+      }
+      
+      .modal-box.error {
+        border-left: 6px solid #f38ba0;
+        color: #d32f2f;
+      }
+      
+      .modal-box button {
+        margin: 0.5rem 0.3rem 0 0.3rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: background-color 0.2s ease;
+      }
+      
+      .modal-box .btn-danger {
+        background-color: #ff8e9e;
+        color: white;
+      }
+      
+      .modal-box .btn-danger:hover {
+        background-color: #ff6b81;
+      }
+      
+      .modal-box .btn-secondary {
+        background-color: #a2d4f4;
+        color: #1e3a5f;
+      }
+      
+     
+      .modal-box .btn-secondary:hover {
+        background-color: #87c7f0;
+      }
+      
+      @keyframes fadeInScale {
+        0% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .add-user-btn {
+        all: unset;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;      /* smaller size */
+        height: 34px;
+        font-size: 1.4rem; /* smaller plus sign */
+        font-weight: 700;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        color: white;
+        background: linear-gradient(135deg, #7ec8f5, #4a90e2);
+        border-radius: 50%;
+        box-shadow: 0 4px 8px rgba(126, 200, 245, 0.5);
+        cursor: pointer;
+        outline: none;
+        transition: background 0.4s ease, transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+      }
+      
+      .add-user-btn::before {
+        content: '+';
+        animation: bounce 1.5s infinite;
+        line-height: 1;
+      }
+      
+      .add-user-btn:hover {
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(74, 144, 226, 0.7);
+      }
+      
+      .add-user-btn:active {
+        transform: scale(0.95);
+      }
+      
+      .add-user-btn:focus {
+        box-shadow: 0 0 0 3px rgba(126, 200, 245, 0.8);
+      } 
+      /* Search and sort controls */
+      .search-sort-wrapper {
+        display: flex;
+        gap: 10px;
+        flex-grow: 1; /* Take up remaining space */
+        max-width: 60%; /* Limit the width */
+      }
+      
+      @media (max-width: 768px) {
+        .search-sort-wrapper,
+        .filter-controls,
+        .form-row {
+          flex-direction: column;
+          max-width: 100%;
+        }
+      
+        .form-actions {
+          flex-direction: column;
+        }
+      }
+      
+      /* Filter controls */
+      .filter-controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      
+      .search-input {
+        flex: 3;
+        min-width: 200px;
+        height: 38px;
+      }
+      
+      .search-margin-top {
+        margin-top: 16px;
+      }
+      
+      .sort-select,
+      .sort-direction {
+        flex: 1;
+        min-width: 120px;
+        height: 38px;
+      }/* Loading text */
+.loading-text {
+    font-style: italic;
+    color: gray;
+  }
+
+  .group-row {
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: #f8fbff;
+  border-radius: 8px;
+}
+
+.group-row:hover {
+  background-color: #e4f0ff;
+  box-shadow: 0 2px 8px rgba(173, 216, 230, 0.3);
+}
+
+/* 👇 This is your ACTIVE style when clicked */
+.group-row.active-group {
+  background-color: hsl(207, 82%, 4%) !important; /* Stronger light blue */
+  font-weight: 600 !important;
+  border: 2px solid #8bc5ff !important;
+  box-shadow: 0 2px 12px rgba(70, 130, 180, 0.4) !important;
+  border-radius: 8px;
+}
+
+.group-row.active-group td {
+  color: #0f3e66 !important; /* Slightly darker blue text */
+  background-color: rgb(204, 227, 243) !important; /* More opaque soft blue */
+}
+
+
+.group-row td {
+  border: none;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 16px;
+}

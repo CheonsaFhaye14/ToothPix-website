@@ -1,0 +1,121 @@
+/* --- Modal Overlay --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25); /* semi-transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px); /* subtle blur */
+  padding: 15px; /* spacing on small screens */
+  overflow-y: auto; /* scroll if content is taller */
+}
+
+/* --- Modal Box / Card --- */
+.modal-box {
+  margin-top: 12vh;
+  position: relative;
+  background-color: #ffffff; /* pure white */
+  border: 2px solid #cde8ff; /* soft light blue border */
+  border-radius: 22px; /* cute round corners */
+  padding: 30px 25px;
+  box-shadow: 0 10px 25px rgba(107, 184, 250, 0.25);
+  width: 600px;
+  max-width: 100%; /* responsive */
+  max-height: 80vh; /* fit the screen height */
+  overflow-y: auto; /* scroll if content exceeds max-height */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  pointer-events: all;
+}
+
+/* hover lift effect */
+.modal-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(107, 184, 250, 0.35);
+}
+
+/* --- Modal Header --- */
+.modal-box h2 {
+  font-size: 28px;
+  color: #4ca6ff; /* pastel blue */
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+/* --- Chart / Content Container --- */
+.modal-box > .mb-3 {
+  background-color: #f0f8ff; /* very light blue */
+  border: 1px solid #b3e0ff;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(107, 184, 250, 0.15);
+  margin-bottom: 15px;
+}
+
+/* --- Modal Buttons --- */
+.modal-actions .btn {
+  border-radius: 16px;
+  padding: 10px 22px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+/* hover effect */
+.modal-actions .btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(107, 184, 250, 0.3);
+}
+
+/* --- Button Colors --- */
+.btn-primary {
+  background-color: #6bb8fa; /* light blue */
+  border: none;
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background-color: #5aa6e0;
+}
+
+.btn-danger {
+  background-color: #ff9aa2; /* soft pink-red */
+  border: none;
+  color: #ffffff;
+}
+.btn-danger:hover {
+  background-color: #ff7f85;
+}
+
+.btn-secondary {
+  background-color: #cce6ff; /* pastel blue */
+  border: none;
+  color: #045388;
+}
+.btn-secondary:hover {
+  background-color: #b3d9ff;
+}
+
+/* --- Close Button --- */
+.modal-box .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 22px;
+  color: #4ca6ff;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.modal-box .close-btn:hover {
+  transform: scale(1.2);
+  color: #1d7ce0;
+}

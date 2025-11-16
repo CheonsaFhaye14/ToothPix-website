@@ -73,7 +73,7 @@ const handleViewModel = (type, url, idrecord) => {
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-3">3D Model Management</h2>
+      <h1>3D Model Management</h1>
 
       {isLoading ? (
         <div>Loading...</div>

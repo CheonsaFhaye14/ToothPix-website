@@ -706,13 +706,13 @@ const handleEdit = async (appointment) => {
 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
   {/* Left side: Title + Add Button */}
   <div className="d-flex align-items-center gap-3">
-    <h2 className="m-0">Appointment Management</h2>
-    <button
-      className="add-user-btn"
-      onClick={() => setIsAdding(true)}
-      title="Add Appointment"
-    />
+    <div className="same-row">
+<h1>Appointment Management</h1>
+<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
   </div>
+  </div>
+
+
 
   {/* Right side: Export buttons (PASS enriched data) */}
   <AppointmentReportExport appointments={appointments} />
@@ -814,47 +814,65 @@ const handleEdit = async (appointment) => {
       </div>
 
       
-          <table className="table table-bordered users-table">
-  <thead>
-    <tr>
-      {/* Removed Appointment ID */}
-      <th>Patient Name</th>
-      <th>Dentist Name</th>
-      <th>Scheduled Date</th>
-      <th>Status</th>
-      <th className="actions-column"> </th>
-    </tr>
-  </thead>
-  <tbody>
-    {sortedAppointments.length === 0 ? (
+        <div className="table-responsive">
+  <table className="table">
+    <thead>
       <tr>
-        <td colSpan="5" className="text-center">No appointments found</td>
+        <th>Patient Name</th>
+        <th>Dentist Name</th>
+        <th>Scheduled Date</th>
+        <th>Status</th>
+        <th className="actions-column"></th>
       </tr>
-    ) : (
-      sortedAppointments.map((appointment) => (
-        <tr key={appointment.idappointment}>
-          {/* Use patient_name for walk-ins, patientFullname for registered */}
-          <td>
-            {appointment.idpatient
-              ? appointment.patientFullname
-              : appointment.patient_name || 'Unknown'}
-          </td>
-          <td>{appointment.dentistFullname}</td>
-          <td>{formatAppointmentDate(appointment.date)}</td>
-          <td>
-            <span className={`status ${appointment.status.toLowerCase()}`}>
-              {appointment.status}
-            </span>
-          </td>
-          <td className="actions-column">
-            <button className="btn-edit me-2" onClick={() => handleEdit(appointment)}>✏️ Edit</button>
-            <button className="btn-delete" onClick={() => handleDelete(appointment.idappointment)}>🗑️ Delete</button>
-          </td>
+    </thead>
+
+    <tbody>
+      {sortedAppointments.length === 0 ? (
+        <tr>
+          <td colSpan="5" className="text-center">No appointments found</td>
         </tr>
-      ))
-    )}
-  </tbody>
-</table>
+      ) : (
+        sortedAppointments.map((appointment) => (
+          <tr key={appointment.idappointment}>
+            {/* Use patient_name for walk-ins, patientFullname for registered */}
+            <td>
+              {appointment.idpatient
+                ? appointment.patientFullname
+                : appointment.patient_name || 'Unknown'}
+            </td>
+
+            <td>{appointment.dentistFullname}</td>
+
+            <td>{formatAppointmentDate(appointment.date)}</td>
+
+            <td>
+              <span className={`status ${appointment.status.toLowerCase()}`}>
+                {appointment.status}
+              </span>
+            </td>
+
+            <td className="actions-column">
+              <button
+                className="btn-edit me-2"
+                onClick={() => handleEdit(appointment)}
+              >
+                ✏️ Edit
+              </button>
+
+              <button
+                className="btn-delete"
+                onClick={() => handleDelete(appointment.idappointment)}
+              >
+                🗑️ Delete
+              </button>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
+
 
     
         </>

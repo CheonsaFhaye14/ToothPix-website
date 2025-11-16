@@ -97,7 +97,7 @@ export default function TopServicesReport({ onClose }) {
         {!loading && !error && (
           <>
             {services.length > 0 ? (
-              <div className="mb-3" style={{ height: 350, width: 500 }}>
+              <div className="mb-3" style={{ height: 350 }}>
                 <Bar
                   data={barData}
                   options={{
@@ -151,16 +151,15 @@ export default function TopServicesReport({ onClose }) {
                 </>
               )}
 
-              <button
-                className="btn btn-secondary"
-                onClick={onClose}
-                style={{ minWidth: 120 }}
-              >
-                Close
-              </button>
+             
             </div>
           </>
         )}
+         <div className="modal-actions" style={{ marginTop: '1.5rem' }}> 
+        <button className="btn btn-secondary" onClick={onClose}>
+                Close
+              </button>
+      </div>
       </div>
     </div>
   );

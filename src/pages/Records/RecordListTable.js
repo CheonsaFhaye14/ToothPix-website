@@ -59,7 +59,7 @@ export default function RecordListTable({
           <option value="desc">Desc</option>
         </select>
       </div>
-
+<div className="table-responsive">
       <table className="table table-bordered users-table">
         <thead>
           <tr>
@@ -214,7 +214,7 @@ export default function RecordListTable({
             })
           )}
         </tbody>
-      </table>
+      </table></div>
     </>
   );
 }

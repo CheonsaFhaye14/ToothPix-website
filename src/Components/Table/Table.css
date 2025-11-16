@@ -15,6 +15,28 @@
   background: transparent;
 }
 
+.group-row {
+  background-color: #d8ecff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.group-row.active-group {
+  background-color: #b0d8ff;
+}
+.expanded-inner-table tbody tr {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.expanded-inner-table tbody tr:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(170,200,255,0.4);
+}
+
 /* 💎 Header styling */
 .table thead tr {
   background-color: #d8ecff;
@@ -94,3 +116,50 @@
   background-color: transparent;
 }
 
+.btn-edit {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-edit:hover {
+  background-color: #bae6fd;
+}
+
+.btn-delete {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-delete:hover {
+  background-color: #fecaca;
+}
+
+.btn-export {
+  background-color: #cde9ff;
+  color: #0369a1;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-export:hover {
+  background-color: #a0dbff;
+}

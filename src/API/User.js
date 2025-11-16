@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../config';
+import '../design/users.css'
 
 export function useUsers() {
   const [users, setUsers] = useState([]);

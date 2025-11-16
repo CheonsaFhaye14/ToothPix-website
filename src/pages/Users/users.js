@@ -5,6 +5,7 @@ import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import UsersReportExport from './UsersReportExport'; // adjust path as needed
 import { BASE_URL } from '../../config';
+import './users.css';
 
 const Users = () => {
   const columns = ['idusers', 'fullname', 'usertype'];
@@ -601,13 +602,16 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
 <div className="d-flex align-items-center justify-content-between mb-3">
   {/* Left side: Title and Add User */}
   <div className="d-flex align-items-center gap-3">
-    <h2 className="m-0">User Management</h2>
-    <button className="add-user-btn" onClick={() => setIsAdding(true)}>
-    </button>
+   <div className="same-row">
+<h1>User Management</h1>
+<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+   {/* Right side: Export buttons */}
+  <UsersReportExport users={users} />
+  </div>
   </div>
 
-  {/* Right side: Export buttons */}
-  <UsersReportExport users={users} />
+
+ 
 </div>
 
 

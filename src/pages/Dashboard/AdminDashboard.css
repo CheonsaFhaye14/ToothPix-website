@@ -1,0 +1,84 @@
+/* --- Dashboard Rows --- */
+.row {
+  display: grid;
+  gap: 20px; /* space between cards */
+  margin-bottom: 30px;
+  justify-content: center; /* center cards */
+}
+
+/* Specific rows with number of columns */
+.row:first-of-type { /* First row: 2 cards */
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.row:nth-of-type(2) { /* Second row: 1 card */
+  grid-template-columns: 1fr;
+}
+
+.row:last-of-type { /* Third row: 2 cards */
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* --- Dashboard Cards --- */
+.dashboard-card,
+.graph-card {
+  background-color: #e6f4ff;
+  border: 1px solid #b3e0ff;
+  border-radius: 18px;
+  padding: 25px 20px;
+  box-shadow: 0 6px 15px rgba(107, 184, 250, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.dashboard-card:hover,
+.graph-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(107, 184, 250, 0.3);
+}
+
+/* --- Numbers and Labels --- */
+.dashboard-number {
+  font-size: 30px;
+  font-weight: bold;
+  color: #0275d8;
+  margin-bottom: 10px;
+}
+
+.dashboard-label {
+  font-size: 16px;
+  color: #045388;
+}
+
+/* --- Lists in Cards --- */
+.dashboard-card ul.list-group {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-card .list-group-item {
+  background-color: #ffffff;
+  border: 1px solid #cde8ff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.dashboard-card .list-group-item:hover {
+  background-color: #f0faff;
+  transform: translateX(3px);
+}
+
+.dashboard-card .badge.bg-primary {
+  background-color: #5ab2ff;
+  font-size: 13px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+  .row {
+    grid-template-columns: 1fr; /* stack cards on small screens */
+  }
+}

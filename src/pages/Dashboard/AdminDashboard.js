@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../../config';
-import '../../design/dashboard.css'
+import './AdminDashboard.css';
+import '../../design/Modal.css';
 
 import AppointmentTodayCard from './AppointmentTodayCard';
 import EarningsCard from './EarningsCard';
@@ -10,6 +11,7 @@ import TopDentists from './TopDentists';
 import GraphSales from './GraphSales';
 import TopServicesReport from './TopServicesReport';
 import TodayAppointmentsReport from './TodayAppointmentsReport'; // Import modal for today's appointments
+import TopDentistsReport from './TopDentistReport';
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -17,6 +19,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [showTopServicesReport, setShowTopServicesReport] = useState(false);
   const [showTodayAppointmentsReport, setShowTodayAppointmentsReport] = useState(false); // new state
+  const [showTopDentistsReport, setShowTopDentistsReport] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -38,32 +41,46 @@ export default function AdminDashboard() {
 
   return (
     <div className="dashboard container">
-      <h2>Overview</h2>
-      <div className="row gy-4 gx-2">
-        {/* Pass onClick handler to AppointmentTodayCard */}
-        <AppointmentTodayCard
-          count={dashboardData.totalAppointmentsToday}
-          onClick={() => setShowTodayAppointmentsReport(true)}
-        />
-        <EarningsCard earnings={dashboardData.thisMonthEarnings} />
-        <GraphSales monthlySales={dashboardData.monthlySales} />
-      </div>
+    <h1>Dashboard</h1>
 
-      <div className="row mt-4">
-        <TopServices
-          services={dashboardData.topServices}
-          onOpenReport={() => setShowTopServicesReport(true)}
-        />
-        <TopDentists dentists={dashboardData.topDentists} />
-      </div>
-
-      {showTopServicesReport && (
-        <TopServicesReport onClose={() => setShowTopServicesReport(false)} />
-      )}
-
-      {showTodayAppointmentsReport && (
-        <TodayAppointmentsReport onClose={() => setShowTodayAppointmentsReport(false)} />
-      )}
+    {/* --- First Row: 2 cards --- */}
+    <div className="row">
+      <AppointmentTodayCard
+        count={dashboardData.totalAppointmentsToday}
+        onClick={() => setShowTodayAppointmentsReport(true)}
+      />
+      <EarningsCard earnings={dashboardData.thisMonthEarnings} />
     </div>
+
+    {/* --- Second Row: 1 card --- */}
+    <div className="row">
+      <GraphSales monthlySales={dashboardData.monthlySales} />
+    </div>
+
+    {/* --- Third Row: 2 cards --- */}
+    <div className="row">
+      <TopServices
+        services={dashboardData.topServices}
+        onOpenReport={() => setShowTopServicesReport(true)}
+      />
+      <TopDentists 
+        dentists={dashboardData.topDentists} 
+        onOpenReport={() => setShowTopDentistsReport(true)}  
+      />
+    </div>
+
+    {showTopServicesReport && (
+      <TopServicesReport onClose={() => setShowTopServicesReport(false)} />
+    )}
+    
+    {showTopDentistsReport && (
+      <TopDentistsReport onClose={() => setShowTopDentistsReport(false)} />
+    )}
+
+    {showTodayAppointmentsReport && (
+      <TodayAppointmentsReport onClose={() => setShowTodayAppointmentsReport(false)} />
+    )}
+  </div>
+
   );
 }

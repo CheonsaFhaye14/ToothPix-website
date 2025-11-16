@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import { BASE_URL } from '../../config';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import RecordReportExport from './RecordReportExport';
 import EditAppointmentModal from './EditAppointmentModal';
 import AddAppointmentModal from './AddAppointmentModal';
 import InfoModal from './InfoModal';
@@ -571,12 +570,10 @@ const toggleExpanded = (nameKey) => {
     <div className="container py-4">
       <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
         <div className="d-flex align-items-center gap-3">
-          <h2 className="m-0">Record Management</h2>
-          <button
-            className="add-user-btn"
-            onClick={() => setIsAdding(true)}
-            title="Add Record"
-          />
+          <div className="same-row">
+<h1>Record Management</h1>
+<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+  </div>
         </div>
       </div>
       {isLoading ? (

@@ -103,7 +103,7 @@ const handlePatientSelect = (e) => {
 
   return (
     <div className="dashboard container py-4">
-      <h2>Overview</h2>
+      <h1>Overview</h1>
       <br></br>
       <div className="row gy-4 gx-2">
       <div className="col-md-3 col-sm-6">

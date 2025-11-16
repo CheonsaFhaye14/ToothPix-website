@@ -9,24 +9,37 @@ export default function TodayAppointmentsReport({ onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchTodayAppointments = async () => {
-      try {
-        const res = await fetch(
-          `${BASE_URL}/api/reports/today-appointments`
-        );
-        if (!res.ok) throw new Error('Failed to fetch today appointments');
-        const data = await res.json();
-        setAppointments(data.appointmentsToday || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const fetchTodayAppointments = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/reports/today-appointments`);
+      const data = await res.json();
 
-    fetchTodayAppointments();
-  }, []);
+      // If the API returns appointments, set them
+      if (data.appointments) {
+        setAppointments(data.appointments);
+        setError(null); // clear any previous error
+      } 
+      // If the API returns a message like "No appointments found for today"
+      else if (data.message) {
+        setAppointments([]);
+        setError(data.message); // show the API message
+      } 
+      else {
+        setAppointments([]);
+        setError(null);
+      }
+
+    } catch (err) {
+      setError("Failed to fetch today appointments");
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchTodayAppointments();
+}, []);
 
   const exportCSV = () => {
     if (!appointments.length) return;
@@ -34,12 +47,7 @@ export default function TodayAppointmentsReport({ onClose }) {
       appointments.map((a) => ({
         Time: new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString(
           'en-US',
-          {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-            timeZone: 'Asia/Manila',
-          }
+          { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' }
         ),
         'Patient Name': a.patient_name,
         Services: a.services,
@@ -57,7 +65,7 @@ export default function TodayAppointmentsReport({ onClose }) {
   const exportPDF = () => {
     if (!appointments.length) return;
     const doc = new jsPDF('portrait');
-    doc.text('Today Appointments Report', 14, 15);
+    doc.text("Today Appointments Report", 14, 15);
     autoTable(doc, {
       head: [['Time', 'Patient Name', 'Services']],
       body: appointments.map((a) => [
@@ -76,7 +84,7 @@ export default function TodayAppointmentsReport({ onClose }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-box" style={{ maxWidth: 700 }}>
+      <div className="modal-box">
         <h2>Today's Appointments Report</h2>
 
         {loading && <p>Loading...</p>}
@@ -85,10 +93,7 @@ export default function TodayAppointmentsReport({ onClose }) {
         {!loading && !error && (
           <>
             {appointments.length > 0 ? (
-              <table
-                className="table"
-                style={{ width: '100%', marginBottom: '1rem' }}
-              >
+              <table className="table">
                 <thead>
                   <tr>
                     <th>Time</th>
@@ -100,9 +105,7 @@ export default function TodayAppointmentsReport({ onClose }) {
                   {appointments.map((a) => (
                     <tr key={a.idappointment}>
                       <td>
-                        {new Date(
-                          `1970-01-01T${a.time}:00+08:00`
-                        ).toLocaleTimeString('en-US', {
+                        {new Date(`1970-01-01T${a.time}:00+08:00`).toLocaleTimeString('en-US', {
                           hour: 'numeric',
                           minute: '2-digit',
                           hour12: true,
@@ -116,56 +119,35 @@ export default function TodayAppointmentsReport({ onClose }) {
                 </tbody>
               </table>
             ) : (
-              <p
-                style={{
-                  textAlign: 'center',
-                  margin: '1rem 0',
-                  fontStyle: 'italic',
-                }}
-              >
-                No appointments for today.
-              </p>
+              <p className="no-data">No appointments for today.</p>
             )}
 
-            <div
-              className="modal-actions"
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '1rem',
-                marginBottom: '1rem',
-              }}
-            >
+            <div className="modal-actions">
               {appointments.length > 0 && (
                 <>
-                  <button
-                    className="btn btn-primary"
-                    onClick={exportCSV}
-                    style={{ minWidth: 120 }}
-                  >
+                  <button className="btn btn-primary" onClick={exportCSV}>
                     Download CSV
                   </button>
-
-                  <button
-                    className="btn btn-danger"
-                    onClick={exportPDF}
-                    style={{ minWidth: 120 }}
-                  >
+                  <button className="btn btn-danger" onClick={exportPDF}>
                     Download PDF
                   </button>
                 </>
               )}
 
-              <button
-                className="btn btn-secondary"
-                onClick={onClose}
-                style={{ minWidth: 120 }}
-              >
-                Close
-              </button>
+             
             </div>
           </>
         )}
+
+          <div className="modal-actions" style={{ marginTop: '1.5rem' }}>
+  <button
+    className="btn btn-secondary"
+    onClick={onClose}
+  >
+    Close
+  </button>
+</div>
+
       </div>
     </div>
   );

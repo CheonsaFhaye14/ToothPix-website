@@ -227,7 +227,7 @@ return (
    <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
      {/* Left side: Title + Add Button */}
      <div className="d-flex align-items-center gap-3">
-       <h2 className="m-0">Payment Management</h2>
+       <h1>Payment Management</h1>
      </div>
    
      {/* Right side: Export buttons (PASS enriched data) */}
