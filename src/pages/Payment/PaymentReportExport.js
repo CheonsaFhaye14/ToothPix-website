@@ -79,14 +79,14 @@ export default function PaymentReportExport({ payments = [] }) {
     doc.save('payment_report.pdf');
   };
 
-  return (
-    <div className="mb-3">
-      <button onClick={handleDownloadCSV} className="btn btn-primary me-2">
-        Export CSV
-      </button>
-      <button onClick={handleDownloadPDF} className="btn btn-danger">
-        Export PDF
-      </button>
-    </div>
-  );
+ return (
+  <div className="mb-3" style={{ display: 'flex', gap: '12px' }}>
+    <button onClick={handleDownloadCSV} className="btn btn-primary">
+      Export CSV
+    </button>
+    <button onClick={handleDownloadPDF} className="btn btn-danger">
+      Export PDF
+    </button>
+  </div>
+);
 }

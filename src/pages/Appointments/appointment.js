@@ -709,16 +709,16 @@ const handleEdit = async (appointment) => {
     <div className="same-row">
 <h1>Appointment Management</h1>
 <button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
-  </div>
-  </div>
-
-
+ 
+ 
+<div className='report-section'>
 
   {/* Right side: Export buttons (PASS enriched data) */}
   <AppointmentReportExport appointments={appointments} />
 </div>
-
-
+</div>
+ </div>
+ </div>
 
 
     

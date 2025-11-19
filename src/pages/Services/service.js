@@ -338,10 +338,12 @@ return (
      <div className="same-row">
 <h1>Dental Services</h1>
 <button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
-  </div>
-
+  
+<div className="report-section">
   {/* Right side: Export buttons */}
-  <ServicesReportExport services={services} />
+  <ServicesReportExport services={services}/>
+  </div>
+  </div>
 </div>
 </div>
   {isEditing && (

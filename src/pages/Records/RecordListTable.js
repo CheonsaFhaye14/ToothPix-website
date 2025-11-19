@@ -61,21 +61,29 @@ export default function RecordListTable({
       </div>
 <div className="table-responsive">
       <table className="table table-bordered users-table">
-        <thead>
-          <tr>
-<th>
-  <div className="d-flex align-items-center w-100" style={{ justifyContent: 'flex-end' }}>
-    <span style={{ marginRight: 'auto', marginBottom: '10px', paddingLeft: '430px' }}>
-      {groupBy === 'patient' ? 'Patient Name' : 'Dentist Name'}
-    </span>
-    <RecordReportExport records={records} />
-  </div>
-</th>
+   <thead>
+  <tr>
+    <th style={{ verticalAlign: 'middle' }}>
+      <div
+        className="d-flex align-items-center justify-content-between w-100"
+        style={{ whiteSpace: 'nowrap' }}
+      >
+        {/* Patient Name slightly lower */}
+        <span className="fw-semibold" style={{ paddingTop: '8px', display: 'inline-block' }}>
+          {groupBy === 'patient' ? 'Patient Name' : 'Dentist Name'}
+        </span>
+
+        {/* Report button aligned right, same row */}
+        <div className="report-section" style={{ marginLeft: 'auto' }}>
+          <RecordReportExport records={records} />
+        </div>
+      </div>
+    </th>
+  </tr>
+</thead>
 
 
 
-          </tr>
-        </thead>
         <tbody>
           
           {sortedList.length === 0 ? (

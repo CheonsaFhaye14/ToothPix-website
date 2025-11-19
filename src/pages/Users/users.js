@@ -606,7 +606,9 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
 <h1>User Management</h1>
 <button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
    {/* Right side: Export buttons */}
+    <div className="report-section">
   <UsersReportExport users={users} />
+  </div>
   </div>
   </div>
 
