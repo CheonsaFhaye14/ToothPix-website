@@ -546,7 +546,6 @@ const toggleExpanded = (nameKey) => {
     setModalAppointment(null);
   };
 
-
 // Build dynamic record fields using existing patients, dentists, and services
 const fieldsWithRecords = {
   ...fieldTemplates,
@@ -554,34 +553,61 @@ const fieldsWithRecords = {
 
     // 1️⃣ Patient dropdown
     if (field.name === "patient") {
-      const patientOptions = [
-        ...(patients || []).filter(p => p.firstname && p.lastname)
-          .map(p => ({
-            label: `${p.firstname} ${p.lastname}`,
-            value: p.idusers
-          })),
-        ...(records || []).filter(r => !r.idpatient && r.patient_name)
-          .map(r => ({
-            label: r.patient_name,
-            value: r.patient_name
-          }))
-      ];
 
-      // Deduplicate by label
-      const uniquePatientOptions = Array.from(
-        new Map(patientOptions.map(opt => [opt.label, opt])).values()
+      console.log("🔵 Patients from DB:", patients);
+      console.log("🟣 All records:", records);
+
+      // Step 1: extract ALL patient names from records
+      const recordNames = (records || [])
+        .filter(r => r.patient_name)
+        .map(r => r.patient_name.trim());
+
+      console.log("🟡 Extracted names from records:", recordNames);
+
+      // Step 2: remove duplicates (case-insensitive)
+      const uniqueRecordNames = Array.from(
+        new Map(recordNames.map(name => [name.toLowerCase(), name])).values()
       );
 
-      return { ...field, options: uniquePatientOptions };
+      console.log("🟢 Unique names from records:", uniqueRecordNames);
+
+      // Step 3: map record names to DB patients if possible
+      const finalPatientOptions = uniqueRecordNames.map(name => {
+        const match = (patients || []).find(
+          p => `${p.firstname} ${p.lastname}`.toLowerCase() === name.toLowerCase()
+        );
+
+        // found in DB → return ID
+        if (match) {
+          return {
+            label: name,
+            value: match.idusers
+          };
+        }
+
+        // not found → use name
+        return {
+          label: name,
+          value: name
+        };
+      });
+
+      console.log("🔵 Final patient options:", finalPatientOptions);
+
+      return { ...field, options: finalPatientOptions };
     }
 
     // 2️⃣ Dentist dropdown
     if (field.name === "dentist") {
-      const dentistOptions = (dentists || []).filter(d => d.firstname && d.lastname)
-        .map(d => ({ label: `${d.firstname} ${d.lastname}`, value: d.idusers }));
+      const dentistOptions = (dentists || [])
+        .filter(d => d.firstname && d.lastname)
+        .map(d => ({
+          label: `${d.firstname} ${d.lastname}`,
+          value: d.idusers,
+        }));
 
       const uniqueDentistOptions = Array.from(
-        new Map(dentistOptions.map(opt => [opt.label, opt])).values()
+        new Map(dentistOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
       );
 
       return { ...field, options: uniqueDentistOptions };
@@ -589,8 +615,12 @@ const fieldsWithRecords = {
 
     // 3️⃣ Services multi-select
     if (field.name === "services") {
-      const serviceOptions = (services || []).filter(s => s.name && s.idservice)
-        .map(s => ({ label: s.name, value: s.idservice }));
+      const serviceOptions = (services || [])
+        .filter(s => s.name && s.idservice)
+        .map(s => ({
+          label: s.name,
+          value: s.idservice,
+        }));
 
       const uniqueServiceOptions = Array.from(
         new Map(serviceOptions.map(opt => [opt.value, opt])).values()
@@ -603,6 +633,8 @@ const fieldsWithRecords = {
     return field;
   })
 };
+
+
 
 
 const handleAdd = async (formValues) => {
@@ -648,8 +680,7 @@ const handleAdd = async (formValues) => {
       const serviceIds = formValues.services
         .map(s => Number(s))
         .filter(id => !isNaN(id));
-      if (serviceIds.length > 0) payload.idservice = serviceIds;
-    }
+if (serviceIds.length > 0) payload.services = serviceIds;    }
 
     // ⭐ Append other fields except patient/dentist/date/time/services
     Object.entries(formValues).forEach(([key, value]) => {

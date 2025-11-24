@@ -71,13 +71,17 @@ const handleSelect = (option) => {
     const trimmed = customInput.trim();
     if (!trimmed) return setCustomError("Cannot add empty value");
 
-    // Already exists in local options
-  const exists = localOptions.some((o) => {
+const exists = localOptions.some((o) => {
   if (!o) return false;
-  const val = typeof o === "object" ? o.value : o;
-  if (!val) return false;
-  return String(val).toLowerCase() === trimmed.toLowerCase();
+
+  const lbl =
+    typeof o === "object"
+      ? String(o.label || o.value || "")
+      : String(o);
+
+  return lbl.toLowerCase() === trimmed.toLowerCase();
 });
+
 
     if (exists) {
       setCustomError("Option already exists");
