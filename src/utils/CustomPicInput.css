@@ -1,0 +1,82 @@
+.pic-circle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.pic-circle-file {
+  display: none;
+}
+
+.pic-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #e6f3ff; /* light blue idle background */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid #8ecaff; /* soft blue border */
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: 0.2s ease;
+}
+
+.pic-circle:hover {
+  transform: scale(1.03);
+  background-color: #d7ecff; /* slightly darker blue hover */
+  border-color: #66b8ff;      /* stronger blue on hover */
+  opacity: 0.95;
+}
+
+.camera-icon {
+  font-size: 38px;
+  color: #4f9fe6; /* blue camera icon */
+  pointer-events: none;
+}
+
+.remove-pic-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #7bb9ff; /* light blue remove button */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: 0.2s;
+}
+
+.remove-pic-btn:hover {
+  background: #5aa4ff; /* darker blue hover */
+  transform: scale(1.1);
+}
+
+.pic-icon {
+  font-size: 48px;
+  color: #4f9fe6; /* blue tone for light blue theme */
+  pointer-events: none;
+}
+
+.pic-label {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #4f9fe6; /* match your light blue theme */
+  text-align: center;
+  font-weight: 500;
+}

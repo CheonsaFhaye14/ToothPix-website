@@ -3,13 +3,19 @@ import axios from 'axios';
 import AppointmentReportExport from './AppointmentReportExport';
 import { BASE_URL } from '../../config';
 
+import AddModal from '../../Components/AddModal/AddModal';
+import { fieldTemplates } from '../../data/FieldTemplates/appointments.js';
+import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 
 const Appointment = () => {
+const [modalOpen, setModalOpen] = useState(false); // modal open/close
+const { token, adminId } = useAdminAuth(); // get token from context
+
+
   const [appointments, setAppointments] = useState([]);
   const [filters, setFilters] = useState({ dentist: '', patient: '', startDate: '', endDate: '', status: '' });
   const [dentists, setDentists] = useState([]);
   const [patients, setPatients] = useState([]);
-  const adminId = localStorage.getItem("adminId");
   
          const filteredAppointments = appointments.filter(appointment => {
   // Filter by date range (if any)
@@ -83,14 +89,6 @@ const existingPatient = [
       .map(app => app.patient_name)
   ])
 ];
-
-  const existingTimes = [
-    "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
-    "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
-    "05:00 PM", "06:00 PM"
-  ];
-
-  
   // Get unique full names of dentists
   const existingDentist = [
     ...new Set(
@@ -99,6 +97,15 @@ const existingPatient = [
         .map(d => `${d.firstname} ${d.lastname}`)
     ),
   ];
+
+
+  const existingTimes = [
+    "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+    "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
+    "05:00 PM", "06:00 PM"
+  ];
+
+  
 
   
   // Convert existingTimes to 24-hour format once for easier comparison
@@ -694,9 +701,159 @@ const handleEdit = async (appointment) => {
   }
 };
 
+// Build dynamic appointment fields using existing patients, dentists, and services
+const fieldsWithAppointments = {
+  ...fieldTemplates,
+  Appointments: (fieldTemplates.Appointments || []).map(field => {
 
-  
-          
+    // 1️⃣ Patient dropdown
+    if (field.name === "patient") {
+      const patientOptions = [
+        ...(patients || []).filter(p => p.firstname && p.lastname)
+          .map(p => ({
+            label: `${p.firstname} ${p.lastname}`,
+            value: p.idusers
+          })),
+        ...(appointments || []).filter(a => !a.idpatient && a.patient_name)
+          .map(a => ({
+            label: a.patient_name,
+            value: a.patient_name
+          }))
+      ];
+
+      // Deduplicate by label (case-insensitive)
+      const uniquePatientOptions = Array.from(
+        new Map(patientOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
+      );
+
+      return { ...field, options: uniquePatientOptions };
+    }
+
+    // 2️⃣ Dentist dropdown
+    if (field.name === "dentist") {
+      const dentistOptions = (dentists || []).filter(d => d.firstname && d.lastname)
+        .map(d => ({ label: `${d.firstname} ${d.lastname}`, value: d.idusers }));
+
+      const uniqueDentistOptions = Array.from(
+        new Map(dentistOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
+      );
+
+      return { ...field, options: uniqueDentistOptions };
+    }
+
+    // 3️⃣ Services multi-select
+    if (field.name === "services") {
+      const serviceOptions = (services || []).filter(s => s.name && s.idservice)
+        .map(s => ({ label: s.name, value: s.idservice }));
+
+      const uniqueServiceOptions = Array.from(
+        new Map(serviceOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
+      );
+
+      return { ...field, options: uniqueServiceOptions };
+    }
+
+    // Other fields unchanged
+    return field;
+  })
+};
+
+const handleAdd = async (formValues) => {
+  if (!token || !adminId) {
+    setMessageType("error");
+    setMessage("You must be logged in as admin.");
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values:", formValues);
+
+    // Build payload as JSON instead of FormData for proper array handling
+    const payload = {
+      adminId,
+      status: "pending",
+    };
+
+    // ⭐ Convert date + time to UTC ISO
+    if (formValues.date && formValues.time) {
+      const [hours, minutes] = formValues.time.split(":").map(Number);
+      const manilaStr = `${formValues.date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00+08:00`;
+      const dateObj = new Date(manilaStr);
+      if (!isNaN(dateObj)) payload.date = dateObj.toISOString();
+    }
+
+    // ⭐ Handle patient
+    if (formValues.patient !== undefined && formValues.patient !== null) {
+      if (!isNaN(formValues.patient)) {
+        payload.idpatient = Number(formValues.patient);
+      } else {
+        payload.patient_name = formValues.patient;
+      }
+    }
+
+    // ⭐ Handle dentist
+    if (formValues.dentist !== undefined && formValues.dentist !== null) {
+      payload.iddentist = Number(formValues.dentist);
+    }
+
+    // ⭐ Handle services (array of numeric IDs)
+    if (Array.isArray(formValues.services)) {
+      const serviceIds = formValues.services
+        .map(s => Number(s))
+        .filter(id => !isNaN(id));
+      if (serviceIds.length > 0) payload.idservice = serviceIds;
+    }
+
+    // ⭐ Append other fields except patient/dentist/date/time/services
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== "" &&
+        value !== undefined &&
+        !["patient", "dentist", "date", "time", "services", "Appointments"].includes(key)
+      ) {
+        payload[key] = value;
+      }
+    });
+
+    console.log("🧹 Payload ready:", payload);
+
+    // Send request as JSON
+    const response = await axios.post(`${BASE_URL}/api/website/appointments`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 201) {
+      await fetchServices();
+      await fetchDentists();
+      await fetchPatients();
+
+      setMessageType("success");
+      setMessage(`✅ ${formValues.appointments || "Appointment"} added successfully!`);
+      setModalOpen(false);
+    } else {
+      setMessageType("error");
+      setMessage(response.data?.message || "Something went wrong.");
+    }
+  } catch (error) {
+    console.error("handleAdd error:", error);
+
+    let message = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 400) message = "Missing or invalid input fields.";
+      else if (status === 500) message = "Internal server error occurred.";
+      else message = data?.message || message;
+    }
+
+    setMessageType("error");
+    setMessage(message);
+  }
+};
+
           
 
   return (
@@ -708,7 +865,7 @@ const handleEdit = async (appointment) => {
   <div className="d-flex align-items-center gap-3">
     <div className="same-row">
 <h1>Appointment Management</h1>
-<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+<button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
  
  
 <div className='report-section'>
@@ -1390,6 +1547,17 @@ const handleEdit = async (appointment) => {
       </form>
     </div>
   </div>
+)}
+
+{modalOpen && (
+  <AddModal
+    datatype="Appointments"             // for submission data
+    choices={["Appointments"]}       // minimal default choice
+    selected="Appointments"           // default active type
+    fields={fieldsWithAppointments}      // object: { Default: [...] }
+    onClose={() => setModalOpen(false)}
+    onSubmit={handleAdd}
+  />
 )}
 
 {showModal && (

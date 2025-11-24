@@ -19,10 +19,10 @@ import ActivityLog from './pages/ActivityLog/activitylog';
 import PublicLayout from './pages/Start/PublicLayout';
 import AdminLayout from './pages/Start/AdminLayout';
 
-import { AdminAuthProvider } from './pages/Start/AdminAuthProvider';
-import { useAdminAuth } from './pages/Start/useAdminAuth';
+import { AdminAuthProvider } from './Hooks/Auth/AdminAuthProvider';
+import { useAdminAuth } from './Hooks/Auth/useAdminAuth';
 
-// Protect admin routes
+// ✅ Protected admin route must be inside provider
 function ProtectedAdminRoute({ children }) {
   const { token } = useAdminAuth();
   if (!token) return <Navigate to="/login" replace />;
@@ -40,16 +40,72 @@ function App() {
         <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
         <Route path="/download" element={<PublicLayout><Download /></PublicLayout>} />
 
-        {/* Admin Routes (protected) */}
-        <Route path="/dashboard" element={<ProtectedAdminRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/appointments" element={<ProtectedAdminRoute><AdminLayout><Appointment /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/users" element={<ProtectedAdminRoute><AdminLayout><Users /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/record" element={<ProtectedAdminRoute><AdminLayout><Record /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/payment" element={<ProtectedAdminRoute><AdminLayout><Payment /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/service" element={<ProtectedAdminRoute><AdminLayout><Service /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/3dmodel" element={<ProtectedAdminRoute><AdminLayout><ThreeDModelManager /></AdminLayout></ProtectedAdminRoute>} />
-        <Route path="/activitylog" element={<ProtectedAdminRoute><AdminLayout><ActivityLog /></AdminLayout></ProtectedAdminRoute>} />
-        
+        {/* Admin Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Dashboard /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Appointment /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Users /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/record"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Record /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Payment /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/service"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><Service /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/3dmodel"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><ThreeDModelManager /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/activitylog"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout><ActivityLog /></AdminLayout>
+            </ProtectedAdminRoute>
+          }
+        />
+
         {/* Fallback for unmatched routes */}
         <Route path="*" element={<PublicLayout><HomePage /></PublicLayout>} />
       </Routes>

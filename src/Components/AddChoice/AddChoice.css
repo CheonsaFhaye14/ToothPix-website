@@ -1,0 +1,47 @@
+.add-choice-dropdown { 
+  position: absolute;
+  top: -5px; /* adjust based on button size */
+  left: 73px;
+  background-color: #ffffff;
+  border: 1px solid #cce5ff;
+  border-radius: 16px; /* more rounded */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  min-width: 160px; /* slightly wider for spacing */
+  z-index: 1000;
+  overflow: visible; 
+  padding: 8px 0; /* add spacing around items */
+}
+
+/* Arrow pointing to button */
+.add-choice-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 18px; /* vertical position of arrow */
+  left: -8px; /* position arrow to left edge */
+  width: 16px;
+  height: 16px;
+  background-color: #ffffff;
+  transform: rotate(45deg); /* diamond-shaped arrow */
+  z-index: 1001;
+}
+
+.add-choice-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500; /* slightly bolder text */
+  color: #075fa6; /* soft blue */
+  transition: all 0.25s ease;
+  border-radius: 12px; /* rounded items */
+  margin: 4px 8px; /* spacing between items */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* space for icons if needed */
+}
+
+.add-choice-item:hover {
+  background: linear-gradient(90deg, #6bb8fa, #3a9efc); /* soft gradient hover */
+  color: #ffffff;
+  transform: translateX(4px); /* slight slide effect */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}

@@ -1,0 +1,137 @@
+/* Modal backdrop with blur */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  pointer-events: all;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Modal content */
+.modal-content {
+  background: #ffffff;
+  border-radius: 30px;
+  width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(117, 197, 241, 0.35);
+  animation: fadeIn 0.4s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Modal title */
+.modal-title {
+  color: #0d3b66;
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 2rem 0 1.5rem 0;
+  text-shadow: 0 0 5px #75c5f1;
+  flex-shrink: 0;
+}
+
+/* Scrollable input area */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 3.5rem 2rem 3.5rem;
+}
+
+/* Buttons container */
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 1.5rem 3.5rem;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+/* Submit button */
+.btn-submit {
+  padding: 10px 22px;
+  border-radius: 25px;
+  border: none;
+  background: linear-gradient(135deg, #75c5f1, #4aa3e0);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(117, 197, 241, 0.4);
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, #4aa3e0, #75c5f1);
+  transform: scale(1.07) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(74, 163, 224, 0.5);
+}
+
+/* Cancel button */
+.btn-cancel {
+  padding: 10px 22px;
+  border-radius: 25px;
+  border: none;
+  background: #f0f0f0;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+  transform: scale(1.05) translateY(-1px);
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Choices navigation bar */
+.modal-choice-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 1rem 1rem 1rem;
+  flex-wrap: wrap;
+}
+
+.choice-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #75c5f1;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.choice-btn:hover {
+  background: #f0f8ff;
+}
+
+.choice-btn.active {
+  background: #75c5f1;
+  color: #fff;
+  border-color: #4aa3e0;
+}
+
+.text-error {
+  color: #d84343;
+  text-align: center;      /* center the text */
+  margin-top: -20px;        /* move upward (adjust value as needed) */
+  font-size: 14px;         /* optional: make it visually balanced */
+}

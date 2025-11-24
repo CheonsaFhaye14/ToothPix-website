@@ -6,7 +6,19 @@ import { BASE_URL } from '../../config';
 import CommonTable from '../../Components/Table/Table';
 import ServicesReportExport from './ServicesReportExport';
 
+import AddModal from '../../Components/AddModal/AddModal.jsx';
+import { fieldTemplates } from '../../data/FieldTemplates/services.js';
+import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+
 const Services = () => {
+
+const [modalOpen, setModalOpen] = useState(false); // modal open/close
+const { token, adminId } = useAdminAuth(); // get token from context
+
+
+
+
+
 const [services, setServices] = useState([]);
 const [isLoading, setIsLoading] = useState(true);
 const [searchTerm, setSearchTerm] = useState('');
@@ -32,6 +44,18 @@ const [addFormData, setAddFormData] = React.useState({
 
 
 const existingCategories = [...new Set(services.map(service => service.category).filter(Boolean))];
+
+const fieldsWithCategories = {
+  ...fieldTemplates,
+  Services: fieldTemplates.Services.map(field =>
+    field.name === "category"
+      ? {
+          ...field,
+          options: existingCategories.map(cat => ({ label: cat, value: cat }))
+        }
+      : field
+  )
+};
 
 const [showSuggestions, setShowSuggestions] = useState(false);
 useEffect(() => {
@@ -328,6 +352,71 @@ return false;
   
 const sortedFilteredServices = getSortedData(filteredServices);
 
+const handleAdd = async (formValues) => { 
+  if (!token || !adminId) {
+    setMessageType("error");
+    setMessage("You must be logged in as admin.");
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values:", formValues);
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append("adminId", adminId);
+
+
+  Object.entries(formValues).forEach(([key, value]) => {
+    if (
+      value !== null &&
+      value !== "" &&
+      value !== undefined &&
+      !(key === "Services" && value === "services") // skip this specific field/value
+    ) {
+      formData.append(key, value);
+    }
+  });
+
+
+    console.log("🧹 FormData ready:", [...formData.entries()]); // log FormData entries
+
+    // Send request to API
+    const response = await axios.post(`${BASE_URL}/api/website/services`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status === 201) {
+      // Refresh users
+      await fetchServices();
+      setMessageType("success");
+      setMessage(`✅ ${formValues.services} added successfully!`);
+      setModalOpen(false);
+    } else {
+      setMessageType("error");
+      setMessage(response.data?.message || "Something went wrong.");
+    }
+
+  } catch (error) {
+    console.error("handleAdd error:", error);
+
+    let message = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 409) message = "Service Name already exists.";
+      else if (status === 400) message = "Missing or invalid input fields.";
+      else if (status === 500) message = "Internal server error occurred.";
+      else message = data?.message || message;
+    }
+
+    setMessageType("error");
+    setMessage(message);
+  }
+};
+
 return (
     
     <div className="container py-4">
@@ -337,7 +426,7 @@ return (
   <div className="d-flex align-items-center gap-3">
      <div className="same-row">
 <h1>Dental Services</h1>
-<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+<button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
   
 <div className="report-section">
   {/* Right side: Export buttons */}
@@ -530,6 +619,17 @@ setShowSuggestions(false);
 </div>
   </div>
 )}
+{modalOpen && (
+  <AddModal
+    datatype="Services"             // for submission data
+    choices={["Services"]}       // minimal default choice
+    selected="Services"           // default active type
+    fields={fieldsWithCategories}      // object: { Default: [...] }
+    onClose={() => setModalOpen(false)}
+    onSubmit={handleAdd}
+  />
+)}
+
 
   {showModal && (
   <div className="modal-overlay">

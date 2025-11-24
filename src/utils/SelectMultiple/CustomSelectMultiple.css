@@ -1,0 +1,38 @@
+/* Custom add new container */
+.dropdown-item.add-new {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Override padding for the input inside the add-new container only */
+.dropdown-item.add-new input[type="text"] {
+  padding-top: 0.25rem;   /* smaller top padding */
+  padding-bottom: 0.25rem; /* smaller bottom padding */
+}
+
+/* Override margin only for the add-new container */
+.dropdown-item.add-new .input-container {
+  margin-bottom: 0; /* removes extra space below the input */
+}
+
+/* Add new button */
+.dropdown-item.add-new button {
+  padding: 0.35rem 0.75rem;
+  border: none;
+  background-color: #cce5ff;
+  color: #007bff;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.dropdown-item.add-new button:hover {
+  background-color: #99d1ff;
+  transform: translateY(-1px);
+}
+
+.dropdown-item.add-new button:active {
+  transform: translateY(0);
+}

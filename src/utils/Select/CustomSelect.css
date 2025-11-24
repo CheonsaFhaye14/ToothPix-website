@@ -31,19 +31,5 @@
   background: #f0f8ff;
 }
 
-/* Floating label adjustments */
-.has-value + .floating-label,
-.floating-input:focus + .floating-label {
-  top: 0.2rem;
-  left: 1rem;
-  font-size: 0.85rem;
-  color: #75c5f1;
-  /* background: #fff; */
-  padding: 0 0.25rem;
-}
 
 
-/* Optional: normal value color */
-.floating-input {
-  color: #000; 
-}

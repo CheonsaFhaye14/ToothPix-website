@@ -1,60 +1,83 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BASE_URL } from './config';
+import { BASE_URL } from '../config';
+import { useAdminAuth } from '../Hooks/Auth/useAdminAuth';
 
 export function useAuth() {
   const [message, setMessage] = useState('');
   const [message2, setMessage2] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState({
-    totalServices: 0,
-    totalAppointments: 0,
-    totalDentists: 0,
-    totalPatients: 0,
-  });
-  const [allPatientData, setAllPatientData] = useState([]);
-  const [showReport, setShowReport] = useState(false);
 
   const history = useNavigate();
+  const { login } = useAdminAuth();
 
-  /** LOGIN */
-  const handleLogin = async (username, password) => {
-    setMessage('');
-    setIsLoggingIn(true);
+/** LOGIN */
+const handleLogin = async (username, password) => {
+  setMessage('');
 
+  const trimmedUsername = username.trim();
+  const trimmedPassword = password;
+
+  // Early validation: check each field separately
+  if (!trimmedUsername && !trimmedPassword) {
+    setMessage('Please enter both username and password.');
+    return;
+  } else if (!trimmedUsername) {
+    setMessage('Please enter your username.');
+    return;
+  } else if (!trimmedPassword) {
+    setMessage('Please enter your password.');
+    return;
+  }
+
+  setIsLoggingIn(true);
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/website/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
+    });
+
+    let data;
     try {
-      const res = await fetch(`${BASE_URL}/api/website/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('adminToken', data.token);
-        localStorage.setItem('adminId', data.user.idusers);
-        localStorage.setItem('adminUsername', data.user.username);
-
-        history('/dashboard');
-      } else {
-        setMessage(data.message || 'Login failed.');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setMessage('An error occurred. Please try again.');
-    } finally {
-      setIsLoggingIn(false);
+      data = await res.json(); // parse JSON
+    } catch (parseError) {
+      console.error('Failed to parse response JSON:', parseError);
+      setMessage('Unexpected response from server.');
+      return;
     }
-  };
+
+    if (res.ok && data?.token && data?.user?.idusers && data?.user?.username) {
+      // Successful login
+      login(data.token, data.user.idusers, data.user.username);
+      history('/dashboard');
+
+    } else if (data?.errors && Array.isArray(data.errors)) {
+      setMessage(data.errors.map(err => err.msg).join(' | '));
+
+    } else if (data?.message) {
+      setMessage(data.message);
+
+    } else {
+      setMessage('Login failed. Please check your credentials.');
+    }
+
+  } catch (err) {
+    console.error('Network or server error during login:', err);
+    setMessage('Unable to connect to the server. Please try again later.');
+  } finally {
+    setIsLoggingIn(false);
+  }
+};
+
 
   /** FORGOT PASSWORD */
   const handleForgotPassword = async (email, closeModalCallback) => {
     setMessage2('');
 
     try {
-      // Step 1: Check if email exists
       const res = await fetch(`${BASE_URL}/api/admin`);
       const data = await res.json();
 
@@ -64,13 +87,11 @@ export function useAuth() {
       }
 
       const adminEmails = data.admin.map(a => a.email.toLowerCase());
-
       if (!adminEmails.includes(email.toLowerCase())) {
         setMessage2('Email does not match any admin account.');
         return;
       }
 
-      // Step 2: Request reset
       const resetRes = await fetch(`${BASE_URL}/api/Reset Password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,11 +104,7 @@ export function useAuth() {
         setMessage2('Password reset link sent to your email!');
         closeModalCallback(false);
       } else {
-        console.error('Reset error:', resetData);
-        setMessage2(
-          resetData.message || resetData.error || 
-          'Something went wrong while requesting password reset.'
-        );
+        setMessage2(resetData.message || resetData.error || 'Something went wrong.');
       }
     } catch (err) {
       console.error('Forgot password error:', err);
@@ -138,55 +155,13 @@ export function useAuth() {
     }
   };
 
-  /** DASHBOARD SUMMARY */
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const endpoints = [
-          { key: 'totalServices', url: `${BASE_URL}/api/app/services`, field: 'services' },
-          { key: 'totalAppointments', url: `${BASE_URL}/api/app/appointments`, field: 'appointments' },
-          { key: 'totalDentists', url: `${BASE_URL}/api/app/dentists`, field: 'dentists' },
-          { key: 'totalPatients', url: `${BASE_URL}/api/app/patients`, field: 'patients' },
-        ];
-
-        for (const ep of endpoints) {
-          const res = await fetch(ep.url);
-          const data = await res.json();
-          if (res.ok) {
-            setSummary(prev => ({ ...prev, [ep.key]: data[ep.field]?.length || 0 }));
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard summary:', err);
-      }
-    };
-
-    fetchSummary();
-  }, []);
-
-  /** FETCH PATIENT REPORT */
-  const handlePatientsClick = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/api/website/report/patients`);
-      const data = await res.json();
-      setAllPatientData(data);
-      setShowReport(true);
-    } catch (err) {
-      console.error('Failed to fetch patients report:', err);
-    }
-  };
-
   return {
     message,
     message2,
     isLoggingIn,
     loading,
-    summary,
-    allPatientData,
-    showReport,
     handleLogin,
     handleForgotPassword,
     handleResetPassword,
-    handlePatientsClick,
   };
 }

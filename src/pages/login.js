@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { BASE_URL } from "../config";
+import { useState } from "react";
 import FloatingInput from "../utils/InputForm";
-import PasswordInput from "../utils/PasswordInput"; // ✅ use combined component
+import PasswordInput from "../utils/PasswordInput";
 import ForgotPasswordModal from "../Components/ForgotPasswordModal";
-import { useAdminAuth } from "../pages/Start/useAdminAuth";
+import { useAuth } from "../API/Auth"; // ✅ THIS one handles API
 import "./Login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -12,40 +10,15 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const navigate = useNavigate();
 
-  const { login } = useAdminAuth();
+  // ✅ useAuth hook provides handleLogin, messages, and isLoggingIn state
+const { handleLogin, message, isLoggingIn } = useAuth(); // NOT useAdminAuth
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setIsLoggingIn(true);
-
-    try {
-      const res = await fetch(`${BASE_URL}/api/website/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        login(data.token);
-        setMessage("");
-        setTimeout(() => navigate("/dashboard"), 1500);
-      } else {
-        setMessage(data.message || "Login failed.");
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage("An error occurred. Please try again.");
-    } finally {
-      setIsLoggingIn(false);
-    }
+    // call the hook's handleLogin
+    await handleLogin(username, password);
   };
 
   return (
@@ -61,7 +34,6 @@ const Login = () => {
             name="username"
           />
 
-          {/* Password field using combined component */}
           <PasswordInput
             placeholder="Password"
             value={password}

@@ -1,34 +1,43 @@
-export function validateForm(formValues, fieldTemplates, currentType) {  
+export function validateForm(formValues, fieldTemplates, currentType) {
   const fields = fieldTemplates[currentType] || [];
   const errors = {};
 
   fields.forEach((field) => {
     let value = formValues[field.name];
 
-    // Normalize value (trim spaces)
+    // Trim string values
     if (typeof value === "string") {
       value = value.trim();
-      formValues[field.name] = value; // ★ auto-clean input
+      formValues[field.name] = value; // auto-clean input
     }
 
     // Determine if field is required
-    const isRequired = field.required || (typeof field.requiredIf === "function" && field.requiredIf(formValues));
+    const isRequired =
+      field.required ||
+      (typeof field.requiredIf === "function" && field.requiredIf(formValues));
 
     // Required field check
-    if (isRequired && (value === undefined || value === "")) {
-      errors[field.name] = `${field.placeholder} is required`;
-      return;
+    if (isRequired) {
+      if (
+        value === undefined ||
+        value === "" ||
+        (field.type === "select-multiple" && Array.isArray(value) && value.length === 0) ||
+        (field.type === "picture" && !value)
+      ) {
+        errors[field.name] = `${field.placeholder} is required`;
+        return;
+      }
     }
 
-    // Letters only + auto-clean multiple spaces for all fields containing "name"
-    if (field.name.toLowerCase().includes("name") && value) {
-      formValues[field.name] = value.replace(/\s+/g, " "); // remove double spaces
+    // Names (letters only, capitalize) except username
+    if (field.name.toLowerCase().includes("name") && field.name !== "username" && value) {
+      value = value.replace(/\s+/g, " ");
+      formValues[field.name] = value;
 
       if (!/^[A-Za-z\s]+$/.test(value)) {
         errors[field.name] = `${field.placeholder} must contain letters only`;
       } else {
-        // Capitalize first letter of each word
-        formValues[field.name] = formValues[field.name]
+        formValues[field.name] = value
           .split(" ")
           .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
           .join(" ");
@@ -43,10 +52,13 @@ export function validateForm(formValues, fieldTemplates, currentType) {
         errors[field.name] = "Username must not contain spaces";
       } else if (!/^[A-Za-z]/.test(value)) {
         errors[field.name] = "Username must start with a letter";
+      } else if (!/^[A-Za-z][A-Za-z0-9._-]{3,39}$/.test(value)) {
+        errors[field.name] =
+          "Username can contain letters, numbers, ., -, _ only (4-40 chars)";
       }
     }
 
-    // Email format check
+    // Email validation
     if (field.type === "email" && value) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) {
@@ -54,25 +66,49 @@ export function validateForm(formValues, fieldTemplates, currentType) {
       }
     }
 
-    // Password length check
-    if (field.name === "password" && value) {
-      if (value.length < 6) {
-        errors[field.name] = "Password must be at least 6 characters long";
-      }
+// Password validation
+if (field.name === "password" && value) {
+  // Format check: uppercase, lowercase, number
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+  if (!regex.test(value)) {
+    errors[field.name] =
+      "Password must contain uppercase, lowercase letters, and a number";
+  } else if (value.length < 6) {
+    // Length check
+    errors[field.name] = "Password must be at least 6 characters long";
+  }
+}
+
+
+
+// Birthday check (at least 5 years old)
+if (field.name === "birthdate" && value) {
+  // Ensure value is a valid date string "YYYY-MM-DD"
+  const [year, month, day] = value.split("-").map(Number);
+
+  // Check for invalid date numbers
+  if (!year || !month || !day) {
+    errors[field.name] = "Invalid birthday format";
+  } else {
+    const birthDate = new Date(year, month - 1, day); // month is 0-indexed
+    const today = new Date();
+
+    // Calculate age
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
 
-    // Birthday must be at least 5 years old
-    if (field.name === "birthday" && value) {
-      const birthDate = new Date(value);
-      const today = new Date();
-      const minDate = new Date();
-      minDate.setFullYear(today.getFullYear() - 5);
-      if (birthDate > minDate) {
-        errors[field.name] = "User must be at least 5 years old";
-      }
+    // Check age
+    if (age < 5) {
+      errors[field.name] = "User must be at least 5 years old";
     }
+  }
+}
 
-    // Contact: must start 09 + length 11 + numeric
+
+    // Contact validation
     if (field.name === "contact" && value) {
       if (!/^[0-9]+$/.test(value)) {
         errors[field.name] = "Contact must contain numbers only";
@@ -83,12 +119,26 @@ export function validateForm(formValues, fieldTemplates, currentType) {
       }
     }
 
-    // Number type validation
-    if (field.type === "number" && value !== undefined && value !== "") {
-      if (isNaN(Number(value))) {
-        errors[field.name] = `${field.placeholder} must be a number`;
-      }
-    }
+   // Number type validation
+if (field.type === "number" && value !== undefined && value !== "") {
+  const num = Number(value);
+
+  if (isNaN(num)) {
+    errors[field.name] = `${field.placeholder} must be a number`;
+  }
+
+// Specific validation for installment_times
+if (field.name === "installment_times" || "custom_interval_days") {
+  if (!Number.isInteger(num)) {
+    errors[field.name] = `${field.placeholder} must be a whole number`;
+  } else if (num < 1) {
+    errors[field.name] = `${field.placeholder} must be greater than 0`;
+  }
+}
+}
+
+
+    // Optional: multi-select value validation (already handled in required)
   });
 
   return errors;

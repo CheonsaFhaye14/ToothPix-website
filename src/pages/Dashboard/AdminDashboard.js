@@ -65,7 +65,7 @@ export default function AdminDashboard() {
       />
       <TopDentists 
         dentists={dashboardData.topDentists} 
-        // onOpenReport={() => setShowTopDentistsReport(true)}  
+        onOpenReport={() => setShowTopDentistsReport(true)}  
       />
     </div>
 

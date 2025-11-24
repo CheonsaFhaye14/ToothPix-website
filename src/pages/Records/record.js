@@ -9,6 +9,10 @@ import AddAppointmentModal from './AddAppointmentModal';
 import InfoModal from './InfoModal';
 import RecordListTable from './RecordListTable';
 
+import AddModal from '../../Components/AddModal/AddModal';
+import { fieldTemplates } from '../../data/FieldTemplates/records.js';
+import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -26,13 +30,15 @@ function formatAppointmentDate(dateString) {
 
 
 const Record = () => {
+const [modalOpen, setModalOpen] = useState(false); // modal open/close
+const { token, adminId } = useAdminAuth(); // get token from context
+
   const [isLoading, setIsLoading] = useState(true);
   const [records, setRecords] = useState([]);
   const [expandedPatient, setExpandedPatient] = useState(null);
   const [dentists, setDentists] = useState([]);
   const [services, setServices] = useState([]);
-    const [patients, setPatients] = useState([]);
-  const [report, setReport] = useState([]);
+  const [patients, setPatients] = useState([]);
 
    const existingTimes = [
     "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -58,7 +64,6 @@ const showTemporaryModal = (msg, type) => {
   };
 
   //edit
- const adminId = localStorage.getItem("adminId");
  const [isEditing, setIsEditing] = useState(false);
 const [editFormData, setEditFormData] = useState({
   idappointment: "", // ✅ Add this
@@ -153,7 +158,6 @@ const handleEditSubmit = async (e) => {
         treatment_notes: ""
       });
       await fetchRecords();
-      await fetchReport();
     } else {
       showTemporaryModal('Unexpected response while updating.', 'error');
     }
@@ -167,7 +171,6 @@ const handleEditSubmit = async (e) => {
     fetchDentists();
     fetchServices();
     fetchRecords();
-    fetchReport();
   }
 };
 
@@ -202,28 +205,6 @@ useEffect(() => {
 
 
 
-  
-   const existingService = [...new Set(services.map(service => service.name).filter(Boolean))];
-  const existingDentist = [
-    ...new Set(
-      dentists
-        .filter(d => d.firstname && d.lastname)
-        .map(d => `${d.firstname} ${d.lastname}`)
-    ),
-  ];
- const existingPatient = [
-  ...new Set([
-    // Registered patients
-    ...patients
-      .filter(p => p.firstname && p.lastname)
-      .map(p => `${p.firstname} ${p.lastname}`),
-
-    // Walk-in patients from records (patient_name is a full name string)
-    ...records
-      .filter(app => app && app.patient_name)
-      .map(app => app.patient_name)
-  ])
-];
   const fetchPatients = async () => {
         try {
           const res = await fetch(`${BASE_URL}/api/app/patients`);
@@ -268,17 +249,7 @@ useEffect(() => {
       setIsLoading(false);
     }
   };
-const fetchReport = async () => {
-  try {
-    setIsLoading(true);
-    const response = await axios.get(`${BASE_URL}/api/reports/records`);
-    setReport(response.data.records || []);
-  } catch (error) {
-    console.error('Error fetching record report:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+
 
 
   useEffect(() => {
@@ -286,9 +257,32 @@ const fetchReport = async () => {
     fetchDentists();
     fetchPatients();
       fetchServices();
-fetchReport();
   }, []);
 
+  
+  
+   const existingService = [...new Set(services.map(service => service.name).filter(Boolean))];
+  const existingDentist = [
+    ...new Set(
+      dentists
+        .filter(d => d.firstname && d.lastname)
+        .map(d => `${d.firstname} ${d.lastname}`)
+    ),
+  ];
+ const existingPatient = [
+  ...new Set([
+    // Registered patients
+    ...patients
+      .filter(p => p.firstname && p.lastname)
+      .map(p => `${p.firstname} ${p.lastname}`),
+
+    // Walk-in patients from records (patient_name is a full name string)
+    ...records
+      .filter(app => app && app.patient_name)
+      .map(app => app.patient_name)
+  ])
+];
+  
   //delete
    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // holds id to delete
    const [showModal, setShowModal] = useState(false);
@@ -314,16 +308,15 @@ fetchReport();
 
     if (!response.ok) {
       const error = await response.json();
-      showTemporaryModal(error.message || 'Failed to delete appointment.', 'error');
+      showTemporaryModal(error.message || 'Failed to delete record.', 'error');
       return;
     }
 
-    showTemporaryModal('Appointment deleted successfully.', 'success');
+    showTemporaryModal('Record deleted successfully.', 'success');
     fetchRecords(); // <-- Reload data here after successful deletion
-  fetchReport();
   } catch (error) {
-    console.error("Error deleting appointment:", error);
-    showTemporaryModal('An error occurred while deleting the appointment.', 'error');
+    console.error("Error deleting record:", error);
+    showTemporaryModal('An error occurred while deleting the record.', 'error');
   } finally {
     setConfirmDeleteId(null);
     setShowModal(false);
@@ -478,7 +471,6 @@ const handleAddSubmit = async (e) => {
         treatment_notes: '',
       });
       fetchRecords(); // refresh records to be consistent
- fetchReport();
     }
   } catch (error) {
     if (error.response) {
@@ -554,17 +546,162 @@ const toggleExpanded = (nameKey) => {
     setModalAppointment(null);
   };
 
-      
 
-        const [selectedPatientName, setSelectedPatientName] = useState(''); // start empty means all patients
-                    
-  // Extract unique patient names for the dropdown
-  const patientNames = Array.from(new Set(report.map(r => r.patient_name))).filter(Boolean);
+// Build dynamic record fields using existing patients, dentists, and services
+const fieldsWithRecords = {
+  ...fieldTemplates,
+  Records: (fieldTemplates.Records || []).map(field => {
 
-  // Filter records by selected patient, or show all if none selected
-  const filteredRecords = selectedPatientName
-    ? report.filter(r => r.patient_name === selectedPatientName)
-    : report;
+    // 1️⃣ Patient dropdown
+    if (field.name === "patient") {
+      const patientOptions = [
+        ...(patients || []).filter(p => p.firstname && p.lastname)
+          .map(p => ({
+            label: `${p.firstname} ${p.lastname}`,
+            value: p.idusers
+          })),
+        ...(records || []).filter(r => !r.idpatient && r.patient_name)
+          .map(r => ({
+            label: r.patient_name,
+            value: r.patient_name
+          }))
+      ];
+
+      // Deduplicate by label
+      const uniquePatientOptions = Array.from(
+        new Map(patientOptions.map(opt => [opt.label, opt])).values()
+      );
+
+      return { ...field, options: uniquePatientOptions };
+    }
+
+    // 2️⃣ Dentist dropdown
+    if (field.name === "dentist") {
+      const dentistOptions = (dentists || []).filter(d => d.firstname && d.lastname)
+        .map(d => ({ label: `${d.firstname} ${d.lastname}`, value: d.idusers }));
+
+      const uniqueDentistOptions = Array.from(
+        new Map(dentistOptions.map(opt => [opt.label, opt])).values()
+      );
+
+      return { ...field, options: uniqueDentistOptions };
+    }
+
+    // 3️⃣ Services multi-select
+    if (field.name === "services") {
+      const serviceOptions = (services || []).filter(s => s.name && s.idservice)
+        .map(s => ({ label: s.name, value: s.idservice }));
+
+      const uniqueServiceOptions = Array.from(
+        new Map(serviceOptions.map(opt => [opt.value, opt])).values()
+      );
+
+      return { ...field, options: uniqueServiceOptions };
+    }
+
+    // Other fields unchanged
+    return field;
+  })
+};
+
+
+const handleAdd = async (formValues) => {
+  if (!token || !adminId) {
+    setMessageType("error");
+    setMessage("You must be logged in as admin.");
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values:", formValues);
+
+    // Build payload as JSON instead of FormData for proper array handling
+    const payload = {
+      adminId,
+      status: "completed", // default status for Records
+    };
+
+    // ⭐ Convert date + time to UTC ISO
+    if (formValues.date && formValues.time) {
+      const [hours, minutes] = formValues.time.split(":").map(Number);
+      const manilaStr = `${formValues.date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00+08:00`;
+      const dateObj = new Date(manilaStr);
+      if (!isNaN(dateObj)) payload.date = dateObj.toISOString();
+    }
+
+    // ⭐ Handle patient
+    if (formValues.patient !== undefined && formValues.patient !== null) {
+      if (!isNaN(formValues.patient)) {
+        payload.idpatient = Number(formValues.patient);
+      } else {
+        payload.patient_name = formValues.patient;
+      }
+    }
+
+    // ⭐ Handle dentist
+    if (formValues.dentist !== undefined && formValues.dentist !== null) {
+      payload.iddentist = Number(formValues.dentist);
+    }
+
+    // ⭐ Handle services (array of numeric IDs)
+    if (Array.isArray(formValues.services)) {
+      const serviceIds = formValues.services
+        .map(s => Number(s))
+        .filter(id => !isNaN(id));
+      if (serviceIds.length > 0) payload.idservice = serviceIds;
+    }
+
+    // ⭐ Append other fields except patient/dentist/date/time/services
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== "" &&
+        value !== undefined &&
+        !["patient", "dentist", "date", "time", "services", "Records"].includes(key)
+      ) {
+        payload[key] = value;
+      }
+    });
+
+    console.log("🧹 Payload ready:", payload);
+
+    // Send request as JSON
+    const response = await axios.post(`${BASE_URL}/api/website/record`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 201) {
+      await fetchServices();
+      await fetchDentists();
+      await fetchPatients();
+
+      setMessageType("success");
+      setMessage(`✅ ${formValues.records || "Record"} added successfully!`);
+      setModalOpen(false);
+    } else {
+      setMessageType("error");
+      setMessage(response.data?.message || "Something went wrong.");
+    }
+  } catch (error) {
+    console.error("handleAdd error:", error);
+
+    let message = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 400) message = "Missing or invalid input fields.";
+      else if (status === 500) message = "Internal server error occurred.";
+      else message = data?.message || message;
+    }
+
+    setMessageType("error");
+    setMessage(message);
+  }
+};
+
+          
 
   return (
     <div className="container py-4">
@@ -572,7 +709,7 @@ const toggleExpanded = (nameKey) => {
         <div className="d-flex align-items-center gap-3">
           <div className="same-row">
 <h1>Record Management</h1>
-<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+<button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
   </div>
         </div>
       </div>
@@ -644,6 +781,17 @@ const toggleExpanded = (nameKey) => {
     serviceRef={serviceRef}
     showTemporaryModal={showTemporaryModal}
     setIsEditing={setIsEditing}
+  />
+)}
+
+{modalOpen && (
+  <AddModal
+    datatype="Records"             // for submission data
+    choices={["Records"]}       // minimal default choice
+    selected="Records"           // default active type
+    fields={fieldsWithRecords}      // object: { Default: [...] }
+    onClose={() => setModalOpen(false)}
+    onSubmit={handleAdd}
   />
 )}
 

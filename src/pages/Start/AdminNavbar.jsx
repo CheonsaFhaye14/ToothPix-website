@@ -1,5 +1,5 @@
 import React from "react";
-import { useAdminAuth } from "./useAdminAuth";
+import { useAdminAuth } from "../../Hooks/Auth/useAdminAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import "./AdminNavbar.css";

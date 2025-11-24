@@ -7,7 +7,18 @@ import UsersReportExport from './UsersReportExport'; // adjust path as needed
 import { BASE_URL } from '../../config';
 import './users.css';
 
+import AddChoice from '../../Components/AddChoice/AddChoice';
+import AddModal from '../../Components/AddModal/AddModal';
+import {fieldTemplates} from '../../data/FieldTemplates/users';
+import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+
 const Users = () => {
+  const choices = ["Admin", "Dentist" ,"Patient"];
+  const [selected, setSelected] = useState(""); // stores selected choice
+  const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const { token, adminId } = useAdminAuth(); // get token from context
+
   const columns = ['idusers', 'fullname', 'usertype'];
   const [users, setUsers] = useState([]);
   const [visibleColumn, setVisibleColumn] = useState('all');
@@ -17,7 +28,8 @@ const Users = () => {
   const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
   const existingGender = ["female","male"];
   const [editFormData, setEditFormData] = useState({  username: '',email: '', password: '',usertype: '',firstname: '',lastname: '', birthdate: '', contact: '',address: '',   gender: '', allergies: '', medicalhistory: '', });  // Holds the form data
-  
+ 
+
   useEffect(() => {
                  fetchUsers();
              }, []);
@@ -79,9 +91,9 @@ const [isAdding, setIsAdding] = React.useState(false);
         medicalhistory: '',
          });
          
-    const fetchUsers = async () => {
+   const fetchUsers = async () => {
   try {
-    const token = localStorage.getItem('adminToken'); // make sure key matches
+    const token = localStorage.getItem('adminToken');
     const response = await axios.get(`${BASE_URL}/api/website/users`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -91,13 +103,18 @@ const [isAdding, setIsAdding] = React.useState(false);
     console.log('API Response:', response);
     console.log('Data:', response.data);
 
-    setUsers(response.data.records); // set users state
+    const usersData = response.data.records || [];
+    setUsers(usersData);
+
+    return { success: true, data: usersData }; // ✅ return object
   } catch (error) {
     console.error('Error fetching users:', error.response || error.message);
+    return { success: false, data: [] }; // ✅ return default object
   } finally {
     setIsLoading(false);
   }
 };
+
               
 
            
@@ -582,7 +599,76 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
           
       };
       
-    
+       const handleSelect = (choice) => {
+    setSelected(choice);
+    setOpen(false);
+    setModalOpen(true);
+  };
+
+  
+const handleAdd = async (formValues) => { 
+  if (!token || !adminId) {
+    setMessageType("error");
+    setMessage("You must be logged in as admin.");
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values:", formValues);
+
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append("adminId", adminId);
+
+    // Append all fields, handle profile_image file
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (value !== null && value !== "" && value !== undefined) {
+        if (key === "profile_image" && value instanceof File) {
+          formData.append(key, value, value.name); // append file with original filename
+        } else {
+          formData.append(key, value);
+        }
+      }
+    });
+
+    console.log("🧹 FormData ready:", [...formData.entries()]); // log FormData entries
+
+    // Send request to API
+    const response = await axios.post(`${BASE_URL}/api/website/users`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status === 201) {
+      // Refresh users
+      await fetchUsers();
+      setMessageType("success");
+      setMessage(`✅ ${formValues.usertype} added successfully!`);
+      setModalOpen(false);
+    } else {
+      setMessageType("error");
+      setMessage(response.data?.message || "Something went wrong.");
+    }
+
+  } catch (error) {
+    console.error("handleAdd error:", error);
+
+    let message = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 409) message = "Username or email already exists.";
+      else if (status === 400) message = "Missing or invalid input fields.";
+      else if (status === 500) message = "Internal server error occurred.";
+      else message = data?.message || message;
+    }
+
+    setMessageType("error");
+    setMessage(message);
+  }
+};
+
 
   const showTemporaryModal = (msg, type) => {
     setMessage(msg);
@@ -604,7 +690,12 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
   <div className="d-flex align-items-center gap-3">
    <div className="same-row">
 <h1>User Management</h1>
-<button className="btn-add" onClick={() => setIsAdding(true)}>+</button>
+ <div style={{ position: "relative" }}>
+          <button className="btn-add" onClick={() => setOpen((prev) => !prev)}>
+            +
+          </button>
+          {open && <AddChoice choices={choices} onSelect={handleSelect} />}
+        </div>
    {/* Right side: Export buttons */}
     <div className="report-section">
   <UsersReportExport users={users} />
@@ -755,6 +846,18 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
         </div>
     </div>
     )}
+
+     {modalOpen && (
+        <AddModal
+         datatype="usertype"
+          selected={selected}
+          choices={choices}
+          fields={fieldTemplates}       // <-- pass all user fields
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleAdd}      // <-- receives validated formValues
+        />
+      )}
+
     </div>
   );
 
