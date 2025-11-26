@@ -79,8 +79,6 @@ const handleViewModel = (type, url, idrecord) => {
         <div>Loading...</div>
       ) : (
         
-        
-        
         <table className="table table-bordered">
 
           <thead>
