@@ -6,14 +6,42 @@ import { BASE_URL } from '../../config';
 import AddModal from '../../Components/AddModal/AddModal';
 import { fieldTemplates } from '../../data/FieldTemplates/appointments.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+import Table from '../../Components/Table/Table.jsx';
+import { showInfoFields } from '../../data/ShowInfoField/appointments.js';
+import { formatDateTime } from '../../utils/formatDateTime.jsx';
 
 const Appointment = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
+const column = [
+  { header: "Patient Name", accessor: "patientname" },
+  { header: "Dentist Name", accessor: "dentistname" },
+  { header: "Scheduled Date", accessor: "date" },
+  { header: "Status", accessor: "status" } // new column
+];
+const [appointments, setAppointments] = useState([]);
+// Assuming `appointments` is your raw data array
+const tabledata = appointments.map((appointment) => ({
+  // Map columns to the Table component
+  patientname: appointment.idpatient
+    ? appointment.patientFullname
+    : appointment.patient_name || "Unknown",
+
+  dentistname: appointment.dentistFullname,
+
+  date: formatDateTime(appointment.date), // format date as in your table
+
+  status: appointment.status,
+  dateCreated: formatDateTime(appointment.created_at ),
+
+  // Action buttons
+  onEdit: () => handleEdit(appointment),
+  onDelete: () => handleDelete(appointment.idappointment),
+}));
 
 
-  const [appointments, setAppointments] = useState([]);
-  const [filters, setFilters] = useState({ dentist: '', patient: '', startDate: '', endDate: '', status: '' });
+
+const [filters, setFilters] = useState({ dentist: '', patient: '', startDate: '', endDate: '', status: '' });
   const [dentists, setDentists] = useState([]);
   const [patients, setPatients] = useState([]);
   
@@ -885,6 +913,15 @@ const handleAdd = async (formValues) => {
         <div className="loading-text">Loading...</div>
       ) : (
 <>
+
+<Table
+  columns={column}   // your columns for service table
+  data={tabledata}           // mapped service data with edit/delete
+  showInfoFields={showInfoFields}
+  fieldColumn="Appointments"     // selects which fields to show in modal
+/>
+
+
 {/*Filter Controls */}
         <div className="filter-controls">
          

@@ -1,165 +1,210 @@
-/* 🌸 CommonTable.css — Smart Dental Theme */
-
-.table-responsive {
+.table-wrapper {  
+  background: #ffffff; /* white background */
+  padding: 20px;
   border-radius: 14px;
-  background-color: #f8fbff; /* soft baby blue background */
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(190, 210, 255, 0.3);
+  border: 1px solid #dfe3e8;
+  box-shadow: 0px 4px 12px rgba(150, 160, 180, 0.1);
 }
 
-/* ✨ Table container */
-.table {
+/* Search + Buttons */
+.table-wrapper button {
+  padding: 6px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  border: none;
+  transition: 0.25s;
+  font-weight: 500;
+  height: 45px;
+  display: flex;
+  align-items: center;
+}
+
+.Showall-btn{
+ background: #4aa3e0;
+  color: #fff;
+}
+
+.Showall-btn:hover {
+  background: #3b8cc0;
+  transform: translateY(-1px);
+}
+.Showall-btn:active {
+  transform: scale(0.97);
+}
+
+/* Reset Button */
+.reset-btn {
+  background: #d4edf9;
+  color: #2c7a9a;
+}
+.reset-btn:hover {
+  background: #b9e0f2;
+  transform: translateY(-1px);
+}
+.reset-btn:active {
+  transform: scale(0.97);
+}
+
+/* Table */
+.custom-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 10px; /* space between rows */
-  background: transparent;
-}
-
-.group-row {
-  background-color: #d8ecff;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.group-row.active-group {
-  background-color: #b0d8ff;
-}
-.expanded-inner-table tbody tr {
-  background-color: #ffffff;
+  border-collapse: collapse;
+  background: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(180, 190, 210, 0.15);
 }
 
-.expanded-inner-table tbody tr:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(170,200,255,0.4);
-}
-
-/* 💎 Header styling */
-.table thead tr {
-  background-color: #d8ecff;
-  color: #0369a1;
+/* Table Header */
+.custom-table th {
+  background: #4aa3e0; /* header in main blue */
+  color: #ffffff;
+  padding: 12px;
+  cursor: pointer;
   font-weight: 600;
-  border-radius: 12px;
+  text-align: left;
+  border-bottom: 2px solid #3b8cc0;
+  letter-spacing: 0.3px;
+  font-size: 18px;
+}
+.sortable:hover {
+  background: #3b8cc0;
 }
 
-.table thead th {
-  border: none;
-  padding: 12px 16px;
-  text-align: center;
-  font-size: 0.95rem;
+/* Table rows */
+.custom-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2fb;
+  color: #151b2a;
+  font-size: 15px;
+}
+.custom-table tbody tr:hover {
+  background: #f0f8ff;
 }
 
-/* 🪩 Row styling */
-.table tbody tr {
-  background-color: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.table tbody tr:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 10px rgba(170, 200, 255, 0.4);
-}
-
-.table tbody td {
-  border: none; /* no hard lines */
-  padding: 12px 16px;
-  font-size: 0.9rem;
-  color: #334155;
-  vertical-align: middle;
-}
-/* 
-.btn-edit {
-  background-color: #e0f2fe;
-  color: #0284c7;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-edit:hover {
-  background-color: #bae6fd;
-}
-
-.btn-delete {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-delete:hover {
-  background-color: #fecaca;
-} */
-
-.table tbody td:last-child {
-  text-align: center;
-}
-
-/* 😇 Empty message style */
-.table td.text-center {
-  color: #94a3b8;
+.custom-table td.no-data {
+text-align: center;
+  padding: 14px;
+  color: #000000;
   font-style: italic;
-  background-color: transparent;
+  font-size: 1rem; /* bigger font */
 }
 
-.btn-edit {
-  background-color: #e0f2fe;
-  color: #0284c7;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
+
+
+/* Pagination */
+.pagination {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.pagination button {
+  background: #4aa3e0;
+  color: #fff;
+}
+.pagination button:hover {
+  background: #3b8cc0;
+  transform: translateY(-1px);
+}
+.pagination button:disabled {
+  background: #d4edf9;
+  color: #7a8ba8;
+  cursor: not-allowed;
+}
+.pagination span {
+  align-self: center;
   font-weight: 500;
+  color: #2e3b5f;
+}
+/* Expanded table wrapper for nested tables */
+.expanded-table-wrapper {
+  margin: 10px 0;
+  border: 1px solid #dfe3e8;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0px 4px 12px rgba(150, 160, 180, 0.08);
+}
+
+/* Force all columns to be equal width */
+.custom-table,
+.nested-table {
+  table-layout: fixed; /* makes all columns fixed width */
+}
+
+.custom-table th,
+.custom-table td,
+.nested-table th,
+.nested-table td {
+  width: calc(100% / var(--column-count)); /* dynamically divide width */
+  text-align: center; /* keeps your text alignment */
+  overflow: hidden; /* prevents overflow text */
+  text-overflow: ellipsis; /* shows ... for long text */
+  white-space: nowrap; /* keeps content in single line */
+}
+
+/* Nested table */
+.nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(180, 190, 210, 0.1);
+}
+
+/* Nested table header */
+.nested-table thead tr {
+  background: #4aa3e0;
+  color: #ffffff;
+}
+
+.nested-table th {
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 13.5px;
+  border-bottom: 2px solid #3b8cc0;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: 0.25s;
 }
 
-.btn-edit:hover {
-  background-color: #bae6fd;
+.nested-table th:hover {
+  background: #3b8cc0;
 }
 
-.btn-delete {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+/* Nested table rows */
+.nested-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #eef2fb;
+  font-size: 13px;
+  color: #2e3b5f;
 }
 
-.btn-delete:hover {
-  background-color: #fecaca;
+.nested-table tbody tr:hover {
+  background: #f0f8ff;
 }
 
-.btn-export {
-  background-color: #cde9ff;
-  color: #0369a1;
-  border: none;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+/* Action buttons inside nested table */
+.nested-table td > .action-buttons {
+  display: flex;
+  gap: 6px;
 }
 
-.btn-export:hover {
-  background-color: #a0dbff;
+/* Optional: make nested table slightly indented */
+.expanded-table-wrapper {
+  margin-left: 20px;
+}
+
+/* Optional: rounded corners for first and last row of nested table */
+.nested-table tbody tr:first-child td {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.nested-table tbody tr:last-child td {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
 }

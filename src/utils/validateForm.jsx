@@ -119,7 +119,7 @@ if (field.name === "birthdate" && value) {
       }
     }
 
-   // Number type validation
+ // Number type validation 
 if (field.type === "number" && value !== undefined && value !== "") {
   const num = Number(value);
 
@@ -127,14 +127,14 @@ if (field.type === "number" && value !== undefined && value !== "") {
     errors[field.name] = `${field.placeholder} must be a number`;
   }
 
-// Specific validation for installment_times
-if (field.name === "installment_times" || "custom_interval_days") {
-  if (!Number.isInteger(num)) {
-    errors[field.name] = `${field.placeholder} must be a whole number`;
-  } else if (num < 1) {
-    errors[field.name] = `${field.placeholder} must be greater than 0`;
+  // Whole number validation ONLY for specific fields
+  if (field.name === "installment_times" || field.name === "custom_interval_days") {
+    if (!Number.isInteger(num)) {
+      errors[field.name] = `${field.placeholder} must be a whole number`;
+    } else if (num < 1) {
+      errors[field.name] = `${field.placeholder} must be greater than 0`;
+    }
   }
-}
 }
 
 

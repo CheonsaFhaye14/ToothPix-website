@@ -9,17 +9,27 @@ import ServicesReportExport from './ServicesReportExport';
 import AddModal from '../../Components/AddModal/AddModal.jsx';
 import { fieldTemplates } from '../../data/FieldTemplates/services.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+import Table from '../../Components/Table/Table.jsx';
+import { showInfoFields } from '../../data/ShowInfoField/services.js';
 
 const Services = () => {
 
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
-
-
-
-
-
+const column = [
+  { header: "Service Name", accessor: "name" },
+  { header: "Price", accessor: "price" },
+  { header: "Category", accessor: "category" } // new column
+];
 const [services, setServices] = useState([]);
+const tabledata = services.map((service) => ({
+  ...service, // spread the individual service object, not the whole array
+
+  // ACTION BUTTON HANDLERS
+  onEdit: () => handleEdit(service),
+  onDelete: () => handleDelete(service.id), // adjust if your service ID field is different
+}));
+
 const [isLoading, setIsLoading] = useState(true);
 const [searchTerm, setSearchTerm] = useState('');
 const [sortKey, setSortKey] = useState(''); // default sort by name
@@ -679,85 +689,14 @@ setConfirmDeleteId(null);
   <div className="loading-text">Loading...</div>
 ) : (
   <>
-{/* Search, Sort, and Filter Controls */}
-<div className="filter-controls">
-  <input
-    type="text"
-    className="form-control search-input search-margin-top"
-    placeholder="Search service..."
-    value={searchTerm}
-    onChange={handleSearch}
-  />
 
-<select
-  className="form-select sort-select"
-  value={sortKey}
-  onChange={handleSortKeyChange}
->
-  <option value="">Sort By</option>
-  {/* Only name and price as options */}
-  <option value="name">Name</option>
-  <option value="price">Price</option>
-</select>
+<Table
+  columns={column}   // your columns for service table
+  data={tabledata}           // mapped service data with edit/delete
+  showInfoFields={showInfoFields}
+  fieldColumn="Services"     // selects which fields to show in modal
+/>
 
-
-  <select
-    className="form-select sort-direction"
-    value={sortDirection}
-    onChange={handleSortDirectionChange}
-  >
-    <option value="asc">Asc</option>
-    <option value="desc">Desc</option>
-  </select>
-
-  <div className="filter-container" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '3px' }}>
-  <label htmlFor="categoryFilter" style={{ margin: 0, fontWeight: '500', whiteSpace: 'nowrap' }}>
-Filter by Category:
-  </label>
-  <select
-id="categoryFilter"
-value={filterCategory}
-onChange={(e) => setFilterCategory(e.target.value)}
-className="form-select"
-style={{ minWidth: '150px' }}
-  >
-<option value="all">All</option>
-{existingCategories.map((cat, index) => (
-  <option key={index} value={cat}>{cat}</option>
-))}
-  </select>
-</div>
-
-
-<button
-  className="btn btn-secondary show-all-btn"
-  onClick={handleShowAll}
->
-  Show All
-</button>
-
-</div>
-
-  <CommonTable
-    columns={[
-      { key: 'name', label: 'Service Name' },
-      { key: 'description', label: 'Description' },
-      { 
-        key: 'price', 
-        label: 'Price', 
-        render: (value) => `₱${parseFloat(value).toFixed(2)}` 
-      },
-      { key: 'category', label: 'Category' },
-    ]}
-    data={sortedFilteredServices}
-    onEdit={handleEdit}
-    onDelete={(id) => handleDelete(id)}
-    emptyMessage={
-      <div className="text-muted py-3 text-center">
-        <i className="bi bi-search"></i> No services found.
-      </div>
-    }
-  />
 
   </>
 )}

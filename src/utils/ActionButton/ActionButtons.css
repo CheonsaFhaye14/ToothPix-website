@@ -1,0 +1,52 @@
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center; /* Centers horizontally */
+}
+
+/* Base button style */
+.action-buttons button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 12px; /* softer, cuter edges */
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: #3a2626;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* subtle floating effect */
+}
+
+.btn-edit {
+  background-color: #7bbfff; /* previously hover color */
+  color: #003566;
+  transform: translateY(-2px); /* was hover effect */
+}
+
+.btn-edit:hover {
+  background-color: #a3d2ff; /* previously default color */
+  transform: translateY(0); /* reverse the pop effect */
+}
+
+.btn-delete {
+  background-color: #ff8a8a; /* previously hover color */
+  color: #660000;
+  transform: translateY(-2px);
+}
+
+.btn-delete:hover {
+  background-color: #ffb3b3; /* previously default */
+  transform: translateY(0);
+}
+
+.btn-undo {
+  background-color: #8ce5a1; /* previously hover */
+  color: #006633;
+  transform: translateY(-2px);
+}
+
+.btn-undo:hover {
+  background-color: #b3f0c1; /* previously default */
+  transform: translateY(0);
+}
+

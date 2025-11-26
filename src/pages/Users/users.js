@@ -11,6 +11,9 @@ import AddChoice from '../../Components/AddChoice/AddChoice';
 import AddModal from '../../Components/AddModal/AddModal';
 import {fieldTemplates} from '../../data/FieldTemplates/users';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+import Table from '../../Components/Table/Table.jsx';
+import { formatDateTime } from '../../utils/formatDateTime.jsx';
+import { showInfoFields } from '../../data/ShowInfoField/users.js';
 
 const Users = () => {
   const choices = ["Admin", "Dentist" ,"Patient"];
@@ -18,9 +21,35 @@ const Users = () => {
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const { token, adminId } = useAdminAuth(); // get token from context
+  const [users, setUsers] = useState([]);
+  const column = [
+    { header: "Name", accessor: "fullname" },
+    { header: "Type of User", accessor: "usertype" },
+    { header: "Date Created", accessor: "dateCreated" } // new column
+  ];
+  const tabledata = users.map(user => {
+    const firstname = user.firstname?.trim();
+    const lastname  = user.lastname?.trim();
+
+    const fullname = firstname && lastname ? `${firstname} ${lastname}` : "Unknown";
+
+    const dateCreated = user.created_at ? formatDateTime(user.created_at) : "Unknown";
+
+    return {
+      ...user,
+      fullname,
+      usertype: user.usertype,
+      dateCreated, // formatted as MM/DD/YYYY hh:mm AM/PM using utility
+
+      // ACTION BUTTON HANDLERS
+      onEdit: () => handleEdit(user),
+      onDelete: () => handleDelete(user.idusers),
+    };
+  });
+
+
 
   const columns = ['idusers', 'fullname', 'usertype'];
-  const [users, setUsers] = useState([]);
   const [visibleColumn, setVisibleColumn] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
@@ -729,82 +758,12 @@ const handleAdd = async (formValues) => {
   <div className="loading-text">Loading...</div>
 ) : (
   <>
-    {/* Search, Sort, and Filter Controls */}
-    <div className="filter-controls">
-      <input
-        type="text"
-        className="form-control search-input search-margin-top"
-        placeholder="Search users..."
-        value={searchTerm}
-        onChange={handleSearch}
-      />
-
-      <select
-  className="form-select sort-select"
-  value={sortKey}
-  onChange={handleSortKeyChange}
->
-  <option value="">Sort By</option>
-  {columns
-    .filter(col => col !== 'idusers')  // exclude 'idusers'
-    .map((col) => (
-      <option key={col} value={col}>
-        {col.charAt(0).toUpperCase() + col.slice(1)}
-      </option>
-    ))
-  }
-</select>
-
-      <select
-        className="form-select sort-direction"
-        value={sortDirection}
-        onChange={handleSortDirectionChange}
-      >
-        <option value="asc">Asc</option>
-        <option value="desc">Desc</option>
-      </select>
-
-      <div className="filter-container" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '3px' }}>
-  <label htmlFor="usertypeFilter" style={{ margin: 0, fontWeight: '500', whiteSpace: 'nowrap' }}>
-    Filter by Usertype:
-  </label>
-  <select
-    id="usertypeFilter"
-    value={filterUsertype}
-    onChange={(e) => setFilterUsertype(e.target.value)}
-    className="form-select"
-    style={{ minWidth: '150px' }}
-  >
-    <option value="all">All</option>
-    {existingUsertype.map((cat, index) => (
-      <option key={index} value={cat}>{cat}</option>
-    ))}
-  </select>
-</div>
-
-
-    <button
-  className="btn btn-secondary show-all-btn"
-  onClick={() => {
-    setSearchTerm('');
-    setFilterUsertype('all');
-    setSortKey('');
-    setSortDirection('asc');
-    setVisibleColumn('all');
-  }}
->
-  Show All
-</button>
-
-    </div>
-
-<UsersTable
-  sortedFilteredUsers={sortedFilteredUsers}
-  visibleColumn={visibleColumn}
-  handleEdit={handleEdit}
-  handleDelete={handleDelete}
+<Table  
+  columns={column} 
+  data={tabledata} 
+  showInfoFields={showInfoFields}
+  fieldColumn="usertype" // ← use the usertype property
 />
-
 
   </>
 )}

@@ -78,6 +78,9 @@ const handleViewModel = (type, url, idrecord) => {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
+        
+        
+        
         <table className="table table-bordered">
 
           <thead>
@@ -146,6 +149,7 @@ const handleViewModel = (type, url, idrecord) => {
             )}
           </tbody>
         </table>
+
       )}
 
   {modelType === 'Before' && (
