@@ -84,6 +84,7 @@
   color: #001f3f;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-left: 4px solid #0074d9;
+  font-weight: bold;
 }
 
 /* Active state */

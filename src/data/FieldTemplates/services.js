@@ -28,22 +28,5 @@ export const fieldTemplates = {
       showIf: (form) => form.allow_installment === true,
       requiredIf: (form) => form.allow_installment === true,
     },
-    { 
-      name: "installment_interval", 
-      placeholder: "Installment Interval",
-      type: "select",
-      options: ["weekly", "monthly", "custom"],
-      showIf: (form) => form.allow_installment === true,
-      requiredIf: (form) => form.allow_installment === true
-    },
-    {
-      name: "custom_interval_days",
-      placeholder: "Custom Interval (days)",
-      type: "number",
-      showIf: (form) => 
-        form.allow_installment === true && form.installment_interval === "custom",
-      requiredIf: (form) => 
-        form.allow_installment === true && form.installment_interval === "custom"
-    },
   ]
 };

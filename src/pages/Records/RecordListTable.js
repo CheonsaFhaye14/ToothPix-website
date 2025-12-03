@@ -181,6 +181,11 @@ const paginatedKeys = showAll
         <React.Fragment key={nameKey}>
           <tr
             onClick={() => toggleExpanded(nameKey)}
+            style={{
+  cursor: 'pointer',
+  backgroundColor: isExpanded ? '#eef8fcff' : '',
+  fontWeight: isExpanded ? 'bold' : 'normal'
+}}
             className={`group-row ${isExpanded ? "active-group" : ""}`}
           >
             <td>{displayName}</td>

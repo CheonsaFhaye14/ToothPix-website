@@ -40,7 +40,7 @@ export default function PasswordInput({ value, onChange, placeholder, name }) {
         onClick={togglePassword}
         style={{ cursor: "pointer" }}
       >
-        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+        <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
       </span>
     </div>
   );

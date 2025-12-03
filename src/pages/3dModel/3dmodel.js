@@ -2,6 +2,8 @@ import { BASE_URL } from '../../config';
 import React, { useState, useEffect } from 'react';
 import BeforeModelModal from './BeforeModelModal';
 import AfterModelModal from './AfterModelModal';
+import FloatingInput from '../../utils/InputForm';
+import { formatDateTime } from '../../utils/formatDateTime';
 
 const ThreeDModelManager = () => {
   const [data, setData] = useState([]);
@@ -11,6 +13,12 @@ const ThreeDModelManager = () => {
   const [modelType, setModelType] = useState('');
  // const [selectedModelUrl, setSelectedModelUrl] = useState('');
 const [selectedIdRecord, setSelectedIdRecord] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showAll, setShowAll] = useState(false);
+  const [sortKey, setSortKey] = useState(null);            // 'date' or other field
+  const [sortDirection, setSortDirection] = useState('asc');
+
 
   useEffect(() => {
     async function fetchData() {
@@ -51,12 +59,13 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
   const toggleExpanded = (patientKey) => {
     setExpandedPatient(expandedPatient === patientKey ? null : patientKey);
   };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString(undefined, {
-      year: 'numeric', month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
+  // Example reset function
+ const handleReset = () => {
+    setSearchTerm('');
+    setCurrentPage(1);
+    setShowAll(false);
+    setSortKey(null);
+    setSortDirection('asc');
   };
 
 const handleViewModel = (type, url, idrecord) => { 
@@ -67,6 +76,41 @@ const handleViewModel = (type, url, idrecord) => {
   setSelectedIdRecord(recordIdStr);
   setShowModelModal(true);
 };
+const handleSort = (key) => {
+  if (sortKey === key) {
+    setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+  } else {
+    setSortKey(key);
+    setSortDirection("asc");
+  }
+};
+let sortedData = [...data];
+if (sortKey === "patient_name") {
+  sortedData.sort((a, b) => {
+    const nameA = a.patientName.toLowerCase();
+    const nameB = b.patientName.toLowerCase();
+    if (nameA < nameB) return sortDirection === "asc" ? -1 : 1;
+    if (nameA > nameB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+}
+// Apply search filter
+let filteredData = sortedData.filter(patient =>
+  patient.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+);
+const pageSize = 5; // number of patients per page
+
+let paginatedData = filteredData;
+if (!showAll) {
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  paginatedData = filteredData.slice(startIndex, endIndex);
+}
+
+const totalPages = Math.ceil(filteredData.length / pageSize);
+
+
+const isResetDisabled = searchTerm === "" && !showAll && currentPage === 1;
 
 
 
@@ -78,76 +122,149 @@ const handleViewModel = (type, url, idrecord) => {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        
-        <table className="table table-bordered">
+         <> <div className="table-wrapper">
+        <div className="filter-controls">
+          <div className="one-row">
+            <FloatingInput
+              className="one-row-input"
+              placeholder="Search by patient name..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1); // reset to first page when searching
+              }}
+            />
+            <div className="buttons">
+              <button
+                className="Showall-btn"
+                onClick={() => setShowAll((prev) => !prev)}
+              >
+                {showAll ? "Paginate" : "Show All"}
+              </button>
+    
+              <button
+                onClick={handleReset}
+                disabled={isResetDisabled}
+                className="reset-btn"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+    
+<table className="custom-table">
+  <thead>
+    <tr>
+      <th onClick={() => handleSort("patient_name")}>
+        Patient Name {sortKey === "patient_name" && (sortDirection === "asc" ? "▲" : "▼")}
+      </th>
+    </tr>
+  </thead>
+<tbody>
+  {paginatedData.length === 0 ? (
+    <tr><td>No patients found</td></tr>
+  ) : (
+    paginatedData.map(({ patientKey, patientName, appointments }) => {
+      const isExpanded = expandedPatient === patientKey;
 
-          <thead>
-            <tr><th>Patient Name</th></tr>
-          </thead>
-          <tbody>
-            {data.length === 0 ? (
-              <tr><td>No patients found</td></tr>
-            ) : (
-              data.map(({ patientKey, patientName, appointments }) => (
-                <React.Fragment key={patientKey}>
-                  <tr
-                    onClick={() => toggleExpanded(patientKey)}
-                    style={{ cursor: 'pointer', backgroundColor: expandedPatient === patientKey ? '#f1f1f1' : '' }}
-                  >
-                    <td>{patientName}</td>
-                  </tr>
+      // Sort appointments here
+      let sortedAppointments = [...appointments];
+      if (sortKey === "appointment_date") {
+        sortedAppointments.sort((a, b) => {
+          const dateA = new Date(a.appointmentDate);
+          const dateB = new Date(b.appointmentDate);
+          if (dateA < dateB) return sortDirection === "asc" ? -1 : 1;
+          if (dateA > dateB) return sortDirection === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
 
-                  {expandedPatient === patientKey && (
+      return (
+        <React.Fragment key={patientKey}>
+          <tr
+            onClick={() => toggleExpanded(patientKey)}
+style={{
+  cursor: 'pointer',
+  backgroundColor: isExpanded ? '#eef8fcff' : '',
+  fontWeight: isExpanded ? 'bold' : 'normal'
+}}
+
+          >
+            <td>{patientName}</td>
+          </tr>
+
+          {isExpanded && (
+            <tr>
+              <td>
+                <table className="expanded-inner-table">
+                  <thead>
                     <tr>
-                      <td>
-                        <table className="table table-sm">
-                          <thead>
-                            <tr><th>Appointment Date</th><th>Actions</th></tr>
-                          </thead>
-                          <tbody>
-                            {appointments.map((appt, idx) => (
-                              <tr key={idx}>
-                                <td>{formatDate(appt.appointmentDate)}</td>
-                                <td>
-                                  <button
-  className="btn btn-primary btn-sm me-2"
-  onClick={(e) => {
-    e.stopPropagation();
-      const idrecord = String(appt.idrecord); // ✅ convert to string
-
-      console.log("Record ID:", idrecord, "Type:", typeof idrecord); // ✅ print ID and type
-
-    handleViewModel('Before', appt.beforeModelUrl, idrecord);
-  }}
->
-  Before
-</button>
-
-                                 <button
-  className="btn btn-secondary btn-sm"
-  onClick={(e) => {
-    e.stopPropagation();
-      console.log("Record ID:", appt.idrecord, "Type:", typeof appt.idrecord); // ✅ print ID and type
-    handleViewModel('After', appt.afterModelUrl, appt.idrecord);
-  }}
->
-  After
-</button>
-
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </td>
+                      <th onClick={() => handleSort("appointment_date")}>
+                        Appointment Date {sortKey === "appointment_date" && (sortDirection === "asc" ? "▲" : "▼")}
+                      </th>
+                      <th>Actions</th>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </thead>
+                  <tbody>
+                    {sortedAppointments.map((appt, idx) => (
+                      <tr key={idx}>
+                        <td>{formatDateTime(appt.appointmentDate)}</td>
+                        <td className="action-buttons">
+                          <button
+                            className="btn-edit"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewModel('Before', appt.beforeModelUrl, appt.idrecord);
+                            }}
+                          >
+                            Before
+                          </button>
+                          <button
+                            className="btn-edit"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewModel('After', appt.afterModelUrl, appt.idrecord);
+                            }}
+                          >
+                            After
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          )}
+        </React.Fragment>
+      );
+    })
+  )}
+</tbody>
 
+</table>
+{!showAll && (
+  <div className="pagination">
+    <button
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage(p => p - 1)}
+    >
+      Prev
+    </button>
+    <span>Page {currentPage} of {totalPages || 1}</span>
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage(p => p + 1)}
+    >
+      Next
+    </button>
+  </div>
+)}
+
+        </div>
+        
+</>
       )}
 
   {modelType === 'Before' && (

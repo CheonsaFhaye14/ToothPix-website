@@ -1,8 +1,8 @@
-import React from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import Papa from 'papaparse';
+import '../../design/fullreport.css';
 
 export default function UsersReportExport({ users }) {
   // Sort by idusers first
@@ -77,10 +77,10 @@ export default function UsersReportExport({ users }) {
 
 return (
   <div className="mb-3" style={{ display: 'flex', gap: '12px' }}>
-    <button onClick={handleDownloadCSV} className="btn btn-primary">
+    <button onClick={handleDownloadCSV} className="btn-csv">
       Export CSV
     </button>
-    <button onClick={handleDownloadPDF} className="btn btn-danger">
+    <button onClick={handleDownloadPDF} className="btn-pdf">
       Export PDF
     </button>
   </div>

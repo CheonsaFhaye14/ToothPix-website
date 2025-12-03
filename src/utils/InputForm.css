@@ -3,6 +3,12 @@
   width: auto;
   margin-bottom: 1.5rem;
 }
+/* Reuse floating-input styles */
+.textarea-input {
+  resize: vertical; /* allow resizing vertically */
+  min-height: 20px; /* ensure enough space */
+  line-height: 1.3;
+}
 
 .floating-input {
   width: 100%;

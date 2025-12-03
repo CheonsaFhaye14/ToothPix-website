@@ -41,10 +41,10 @@ export default function ServicesReportExport({ services }) {
 
  return (
   <div className="mb-3" style={{ display: 'flex', gap: '12px' }}>
-    <button onClick={handleDownloadCSV} className="btn btn-primary">
+    <button onClick={handleDownloadCSV} className="btn-csv">
       Export CSV
     </button>
-    <button onClick={handleDownloadPDF} className="btn btn-danger">
+    <button onClick={handleDownloadPDF} className="btn-pdf">
       Export PDF
     </button>
   </div>

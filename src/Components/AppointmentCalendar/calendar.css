@@ -1,34 +1,54 @@
 .calendar-card {
-  background: #ffffff; /* same as table-wrapper */
+  background: #ffffff;
   padding: 20px;
-  border-radius: 14px;
+  border-radius: 18px; /* softer, rounder corners */
   border: 1px solid #dfe3e8;
-  box-shadow: 0px 4px 12px rgba(150, 160, 180, 0.1);
+  box-shadow: 0px 6px 14px rgba(150, 160, 180, 0.12);
   margin: 20px 0;
+  transition: transform 0.2s ease;
 }
 
-/* Optional: soften FullCalendar header */
+.calendar-card:hover {
+  transform: scale(1.01); /* gentle hover lift */
+}
+
+/* FullCalendar header */
 .fc .fc-toolbar {
-  background: #4aa3e0;
+  background: linear-gradient(135deg, #7ecaf6, #4aa3e0); /* soft gradient */
   color: white;
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 8px rgba(74, 163, 224, 0.25);
 }
 
-/* Optional: day cells hover */
+/* Day cells hover */
 .fc-daygrid-day:hover {
-  background: #dff0ff;
+  background: #eaf7ff; /* lighter pastel hover */
   cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.2s ease;
 }
 
-/* Optional: event styling */
+/* Event styling */
 .fc-event {
-  border-radius: 10px !important;
-  padding: 2px 5px !important;
-  font-size: 15px;
+  border-radius: 12px !important; /* pill shape */
+  padding: 4px 8px !important;
+  font-size: 14px;
+  color: #2c3e50 !important;
+  box-shadow: 0 2px 6px rgba(135, 206, 250, 0.3);
+  transition: transform 0.2s ease;
 }
+
+.fc-event:hover {
+  transform: scale(1.05);
+}
+
+/* Legend */
 .calendar-legend {
   font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .calendar-legend ul {
@@ -46,40 +66,89 @@
 
 .legend-color {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%; /* rounder for cuteness */
   border: 1px solid #333;
 }
+
+/* Toggle button */
 .btn-toggle {
   margin-left: 50px;
   margin-bottom: 20px;
-  align-items: center;
-  justify-content: center;
-  background: #7ecaf6;          /* soft light blue */
-  color: #2c3e50;               /* dark text for contrast */
+  background: #aee7ff;          /* softer pastel blue */
+  color: #2c3e50;
   border: none;
-  border-radius: 20px;          /* smaller pill shape */
-  font-size: 15px;              /* slightly smaller text */
+  border-radius: 25px;          /* pill shape */
+  font-size: 15px;
   font-weight: 600;
-  padding: 6px 14px;
+  padding: 8px 16px;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 2px 5px rgba(135, 206, 250, 0.3); /* lighter shadow */
+  box-shadow: 0 3px 8px rgba(135, 206, 250, 0.3);
 }
 
 .btn-toggle:hover {
-  background: #7ec8f0;          /* deeper blue on hover */
-  transform: translateY(-1px) scale(1.03); /* gentle hover bounce */
-  box-shadow: 0 3px 8px rgba(135, 206, 250, 0.4);
+  background: #7ec8f0;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 10px rgba(135, 206, 250, 0.4);
 }
 
 .btn-toggle:active {
-  transform: scale(0.95);       /* squish effect when clicked */
+  transform: scale(0.95);
   background: #6bbbe0;
 }
 
 .btn-toggle:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(135, 206, 250, 0.5); /* cute focus ring */
+  box-shadow: 0 0 0 3px rgba(135, 206, 250, 0.5);
+}
+
+/* Highlight today's cell */
+.fc-day-today {
+  background: linear-gradient(135deg, #dff6ff, #cceeff) !important; /* pastel gradient */
+  border: 2px solid #4aa3e0 !important;
+  color: #2c3e50 !important;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(74, 163, 224, 0.4);
+  position: relative;
+}
+
+/* Add a cute star accent */
+.fc-day-today::after {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 1rem;
+}
+
+/* Date number styling */
+.fc-day-today .fc-daygrid-day-number {
+  font-weight: 700;
+  font-size: 1.2em;
+  color: #0077cc;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7);
+}
+
+/* Weekdays row styling */
+.fc-col-header-cell {
+  background: #96dbfc;              /* soft pastel light blue */
+  color: #2c3e50;                   /* dark text for contrast */
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Gentle hover effect */
+.fc-col-header-cell:hover {
+  background: #d0ecff;
+  transition: background 0.2s ease;
+}
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid,
+.fc-theme-standard .fc-scrollgrid-sync-table,
+.fc-theme-standard .fc-scrollgrid-section > td,
+.fc-theme-standard .fc-daygrid-day-frame,
+.fc-col-header-cell {
+  border: 1px solid #d0e9f9 !important; /* all lines same pastel blue */
 }

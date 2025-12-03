@@ -1,41 +1,37 @@
-.full-report h2 {
-  color: #0c5ea3;
-}
-
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.filter-bar input,
-.filter-bar select,
-.filter-bar button {
-  padding: 8px;
-  border: 1px solid #b3d9f7;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.report-table {
-  background-color: #f0f8ff;
+.btn-csv {
+  background-color: #a8e6cf; /* soft mint green */
+  color: #2e7d32; /* deep green text */
+  border: 2px solid #81c784;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 8px rgba(107, 184, 250, 0.3);
+  padding: 10px 18px;
+  font-weight: bold;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.report-table th {
-  background-color: #d0eaff;
-  color: #0c5ea3;
-  padding: 12px;
+.btn-csv:hover {
+  background-color: #81c784;
+  color: white;
+  transform: scale(1.05);
 }
 
-.report-table td {
-  background-color: #ffffff;
-  padding: 10px;
+.btn-pdf {
+  background-color: #ff8b94; /* soft pink/red */
+  color: #b71c1c; /* deep red text */
+  border: 2px solid #f06292;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: bold;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.report-table tbody tr:nth-child(even) td {
-  background-color: #f4faff;
+.btn-pdf:hover {
+  background-color: #f06292;
+  color: white;
+  transform: scale(1.05);
 }

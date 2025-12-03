@@ -128,7 +128,7 @@ if (field.type === "number" && value !== undefined && value !== "") {
   }
 
   // Whole number validation ONLY for specific fields
-  if (field.name === "installment_times" || field.name === "custom_interval_days") {
+  if (field.name === "installment_times") {
     if (!Number.isInteger(num)) {
       errors[field.name] = `${field.placeholder} must be a whole number`;
     } else if (num < 1) {

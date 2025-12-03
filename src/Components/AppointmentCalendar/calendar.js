@@ -103,15 +103,22 @@ const eventsWithStyles = appointments.map((a) => {
 </div>
 
 
-       <FullCalendar
+   <FullCalendar
   plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
   initialView="dayGridMonth"
   events={eventsWithStyles}
   eventClick={handleEventClick}
   height="auto"
   eventDisplay="block"
-  displayEventTime={false}   // 👈 disables the built-in "9a"
+  displayEventTime={false}
+  dayCellClassNames={(arg) => {
+    if (arg.isToday) {
+      return ["custom-today"];
+    }
+    return [];
+  }}
 />
+
       </div>
 
       {/* Show info modal */}

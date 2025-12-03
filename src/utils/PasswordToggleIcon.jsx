@@ -8,7 +8,7 @@ const PasswordToggleIcon = ({ show, onToggle }) => {
       onClick={onToggle}
       style={{ cursor: "pointer" }}
     >
-      <FontAwesomeIcon icon={show ? faEyeSlash : faEye} />
+      <FontAwesomeIcon icon={show ? faEye : faEyeSlash} />
     </span>
   );
 };
