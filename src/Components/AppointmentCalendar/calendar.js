@@ -22,19 +22,23 @@ export default function AppointmentCalendar({ appointments = [], table = "Table"
     });
   };
 
-  const statusColors = {
-    pending: "#ffb7b7ff",
-    rescheduled: "#ffd27f",
-    approved: "#7fffd4",
-    cancelled: "#b0b0b0",
-  };
+// 1️⃣ Add completed to your status colors
+const statusColors = {
+  pending: "#ffb7b7ff",
+  rescheduled: "#ffd27f",
+  approved: "#7fffd4",
+  cancelled: "#b0b0b0",
+  completed: "#a0e7a0", // green for completed
+};
 
-  const borderColors = {
-    pending: "#ff2600",
-    rescheduled: "#ff9d00",
-    approved: "#00ff1e",
-    cancelled: "#000000",
-  };
+const borderColors = {
+  pending: "#ff2600",
+  rescheduled: "#ff9d00",
+  approved: "#00ff1e",
+  cancelled: "#000000",
+  completed: "#008000", // dark green border
+};
+
 
 const eventsWithStyles = appointments.map((a) => {
   const formattedTime = new Date(a.start).toLocaleTimeString([], {
@@ -90,6 +94,11 @@ const eventsWithStyles = appointments.map((a) => {
       <span className="legend-color" style={{ backgroundColor: statusColors.cancelled }}></span>
       Cancelled
     </li>
+    <li>
+  <span className="legend-color" style={{ backgroundColor: statusColors.completed }}></span>
+  Completed
+</li>
+
   </ul>
 </div>
 
@@ -164,7 +173,7 @@ const eventsWithStyles = appointments.map((a) => {
             appointment: [
               { name: "patient", type: "text", placeholder: "Patient Name", required: true },
               { name: "services", type: "text", placeholder: "Services" },
-              { name: "status", type: "select", placeholder: "Status", options: ["pending", "rescheduled", "approved", "cancelled"] },
+{ name: "status", type: "select", placeholder: "Status", options: ["pending", "rescheduled", "approved", "cancelled", "completed"] },
               { name: "notes", type: "text", placeholder: "Notes" },
               { name: "date", type: "date", placeholder: "Date" },
               { name: "time", type: "text", placeholder: "Time" },

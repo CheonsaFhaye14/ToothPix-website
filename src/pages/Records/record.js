@@ -12,6 +12,7 @@ import AddModal from '../../Components/AddModal/AddModal';
 import { fieldTemplates } from '../../data/FieldTemplates/records.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
+import AppointmentCalendar from '../../Components/AppointmentCalendar/calendar.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,6 +34,9 @@ const Record = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
 const [records, setRecords] = useState([]);
+const [showCalendar, setShowCalendar] = useState(true); // toggle state
+const [appointmentData, setAppointmentData] = useState([]);
+
 
   const [isLoading, setIsLoading] = useState(true);
   const [expandedPatient, setExpandedPatient] = useState(null);
@@ -62,6 +66,51 @@ const showTemporaryModal = (msg, type) => {
       setMessageType('');
     }, 2000);
   };
+
+  const fetchAppointmentsForCalendar = async () => { 
+  try {
+    const token = localStorage.getItem("jwt_token");
+    const response = await axios.get(`${BASE_URL}/api/website/appointmentsforcalendar`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+
+    const now = new Date();
+
+    const events = response.data.appointments
+      // Filter for past appointments
+      .filter(a => new Date(a.date) < now)
+      .map((a) => {
+        const formattedTime = new Date(a.date).toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        return {
+          id: a.idappointment,
+          title: `${formattedTime} ${a.patientfullname || a.patient_name || "No Patient"}`,
+          start: a.date,
+          end: a.date,
+          extendedProps: {
+            patient: a.patientfullname || a.patient_name,
+            services: a.services?.map((s) => s.name).join(", "),
+            notes: a.notes,
+            status: a.status,
+          },
+        };
+      });
+
+    setAppointmentData(events);
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchAppointmentsForCalendar(); // 👈 renamed call
+}, []);
 
   //edit
  const [isEditing, setIsEditing] = useState(false);
@@ -305,7 +354,11 @@ const fetchPatients = async () => {
     }
 
     showTemporaryModal('Record deleted successfully.', 'success');
-    fetchRecords(); // <-- Reload data here after successful deletion
+          await fetchServices();
+      await fetchDentists();
+      await fetchPatients();
+    await fetchRecords(); // <-- Reload data here after successful deletion
+    await fetchAppointmentsForCalendar();
   } catch (error) {
     console.error("Error deleting record:", error);
     showTemporaryModal('An error occurred while deleting the record.', 'error');
@@ -522,6 +575,7 @@ const handleAdd = async (formValues) => {
       await fetchDentists();
       await fetchPatients();
       await fetchRecords();
+      await fetchAppointmentsForCalendar();
       setMessage({ type: "success", text: `✅ ${formValues.records || "Record"} added successfully!` });
       setModalOpen(false);
       setTimeout(() => setMessage(null), 2000);
@@ -556,6 +610,13 @@ const handleAdd = async (formValues) => {
           <div className="same-row">
 <h1>Record Management</h1>
 <button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
+              {/* 👇 Toggle button between Add and Report */}
+            <button
+              className="btn-toggle"
+              onClick={() => setShowCalendar(!showCalendar)}
+            >
+              {showCalendar ? "Show Table" : "Show Calendar"}
+            </button>
   </div>
         </div>
       </div>
@@ -563,7 +624,13 @@ const handleAdd = async (formValues) => {
         <div className="loading-text">Loading...</div>
       ) : (
        <> 
-       <RecordListTable
+       {showCalendar ? (
+              <AppointmentCalendar
+                appointments={appointmentData}
+                table="Appointment"
+                onDelete={(id) => handleDelete(id)}
+              />
+            ) : ( <RecordListTable
   searchTerm={searchTerm}
   setSearchTerm={setSearchTerm}
   groupBy={groupBy}
@@ -582,7 +649,8 @@ const handleAdd = async (formValues) => {
   handleDelete={handleDelete}
   formatAppointmentDate={formatAppointmentDate}
 />
-</>
+ )}
+</>      
       )}
 
  {showInfoModal && modalAppointment && (
