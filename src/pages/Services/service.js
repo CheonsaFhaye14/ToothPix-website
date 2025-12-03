@@ -27,7 +27,7 @@ const tabledata = services.map((service) => ({
 
   // ACTION BUTTON HANDLERS
   onEdit: () => handleEdit(service),
-  onDelete: () => handleDelete(service.id), // adjust if your service ID field is different
+  onDelete: () => handleDelete(service.idservice), // adjust if your service ID field is different
 }));
 
 const [isLoading, setIsLoading] = useState(true);
@@ -613,7 +613,7 @@ setShowSuggestions(false);
         </div>
     </div>
     )}
-    
+
  {message && (
         <MessageModal
           message={message.text}
