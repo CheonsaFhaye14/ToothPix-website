@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 
 import axios from 'axios';
 import { BASE_URL } from '../../config';
-import CommonTable from '../../Components/Table/Table';
 import ServicesReportExport from './ServicesReportExport';
 
 import AddModal from '../../Components/AddModal/AddModal.jsx';
@@ -11,6 +10,7 @@ import { fieldTemplates } from '../../data/FieldTemplates/services.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import Table from '../../Components/Table/Table.jsx';
 import { showInfoFields } from '../../data/ShowInfoField/services.js';
+import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
 
 const Services = () => {
 
@@ -31,9 +31,6 @@ const tabledata = services.map((service) => ({
 }));
 
 const [isLoading, setIsLoading] = useState(true);
-const [searchTerm, setSearchTerm] = useState('');
-const [sortKey, setSortKey] = useState(''); // default sort by name
-const [sortDirection, setSortDirection] = useState('asc');
 const [message, setMessage] = useState('');
 const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 const [showModal, setShowModal] = useState(false);
@@ -44,7 +41,6 @@ const [editingService, setEditingService] = useState(null);  // Holds the servic
 const [editFormData, setEditFormData] = useState({ name: '', description: '', price: '' });  // Holds the form data
 const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
 const [isAdding, setIsAdding] = React.useState(false);
-const [filterCategory, setFilterCategory] = useState('all');
 const [addFormData, setAddFormData] = React.useState({
   name: '',
   description: '',
@@ -161,19 +157,12 @@ Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
       showTemporaryModal('Error adding service.', 'error');
     }
   };
-  
-
-const handleSearch = (e) => {
-  const term = e.target.value.toLowerCase();
-  setSearchTerm(term);
-};
 
 const handleDelete = (id) => {
   setConfirmDeleteId(id);
   setMessageType("error");
   setConfirmMessage("Are you sure you want to delete this service?");
   setShowModal(true);
-  
 };
 
 const confirmDeletion = async () => {
@@ -207,49 +196,6 @@ const confirmDeletion = async () => {
     setMessage("An error occurred while deleting the service.");
     setMessageType("error");
   }
-};
-
-
-
-
-  const handleSortKeyChange = (e) => {
-  setSortKey(e.target.value);
-};
-
-const handleSortDirectionChange = (e) => {
-  setSortDirection(e.target.value);
-};
-
-
-  
-
-  const getSortedData = (data) => {
-  if (!sortKey) return data;
-
-  return [...data].sort((a, b) => {
-let aVal = a[sortKey];
-let bVal = b[sortKey];
-
-if (sortKey === 'price') {
-  aVal = parseFloat(aVal);
-  bVal = parseFloat(bVal);
-}
-
-if (typeof aVal === 'number') {
-  return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-} else {
-  return sortDirection === 'asc'
-    ? String(aVal).localeCompare(String(bVal))
-    : String(bVal).localeCompare(String(aVal));
-}
-  });
-};
-
-const handleShowAll = () => {
-  setSearchTerm('');
-  setFilterCategory('all');
-  setSortKey('');
-  setSortDirection('asc');
 };
 
 const handleEdit = (service) => {
@@ -347,25 +293,10 @@ prevServices.map((service) =>
       setMessageType('');
     }, 2000);
   };
-  
-        
-  const filteredServices = services.filter((service) => {
-  // Filter by category if needed
-  if (filterCategory !== 'all' && service.category !== filterCategory) {
-return false;
-  }
-
-  // Filter by search term only on service name
-  return service.name.toLowerCase().includes(searchTerm);
-});
-
-  
-const sortedFilteredServices = getSortedData(filteredServices);
 
 const handleAdd = async (formValues) => { 
   if (!token || !adminId) {
-    setMessageType("error");
-    setMessage("You must be logged in as admin.");
+    setMessage({ type: "error", text: "You must be logged in as admin." });
     return;
   }
 
@@ -376,18 +307,16 @@ const handleAdd = async (formValues) => {
     const formData = new FormData();
     formData.append("adminId", adminId);
 
-
-  Object.entries(formValues).forEach(([key, value]) => {
-    if (
-      value !== null &&
-      value !== "" &&
-      value !== undefined &&
-      !(key === "Services" && value === "services") // skip this specific field/value
-    ) {
-      formData.append(key, value);
-    }
-  });
-
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (
+        value !== null &&
+        value !== "" &&
+        value !== undefined &&
+        !(key === "Services" && value === "services") // skip this specific field/value
+      ) {
+        formData.append(key, value);
+      }
+    });
 
     console.log("🧹 FormData ready:", [...formData.entries()]); // log FormData entries
 
@@ -400,30 +329,32 @@ const handleAdd = async (formValues) => {
     });
 
     if (response.status === 201) {
-      // Refresh users
+      // Refresh services
       await fetchServices();
-      setMessageType("success");
-      setMessage(`✅ ${formValues.services} added successfully!`);
-      setModalOpen(false);
+      setMessage({ type: "success", text: `✅ Service added successfully!` });
+      // Close modal after message auto-dismiss
+      setTimeout(() => {
+        setModalOpen(false);
+        setMessage(null);
+      }, 2000);
+
     } else {
-      setMessageType("error");
-      setMessage(response.data?.message || "Something went wrong.");
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
     }
 
   } catch (error) {
     console.error("handleAdd error:", error);
 
-    let message = "Could not connect to server. Please try again later.";
+    let errorMessage = "Could not connect to server. Please try again later.";
     if (error.response) {
       const { status, data } = error.response;
-      if (status === 409) message = "Service Name already exists.";
-      else if (status === 400) message = "Missing or invalid input fields.";
-      else if (status === 500) message = "Internal server error occurred.";
-      else message = data?.message || message;
+      if (status === 409) errorMessage = "Service Name already exists.";
+      else if (status === 400) errorMessage = "Missing or invalid input fields.";
+      else if (status === 500) errorMessage = "Internal server error occurred.";
+      else errorMessage = data?.message || errorMessage;
     }
 
-    setMessageType("error");
-    setMessage(message);
+    setMessage({ type: "error", text: errorMessage });
   }
 };
 
@@ -641,36 +572,6 @@ setShowSuggestions(false);
 )}
 
 
-  {showModal && (
-  <div className="modal-overlay">
-    <div className={`modal-box ${messageType}`}>
-      <p className="modal-message text-center mb-3">
-        {confirmMessage || message}
-      </p>
-
-      {confirmDeleteId && (
-        <div className="modal-actions text-center">
-<button
-  className="btn btn-danger me-3 px-4"
-  onClick={confirmDeletion}
->
-  Yes
-</button>
-<button
-  className="btn btn-secondary px-4"
-  onClick={() => {
-setShowModal(false);
-setConfirmDeleteId(null);
-  }}
->
-  Cancel
-</button>
-        </div>
-      )}
-    </div>
-  </div>
-)}
-
 
   {showModal2 && (
   <div className="modal-overlay">
@@ -696,7 +597,30 @@ setConfirmDeleteId(null);
   showInfoFields={showInfoFields}
   fieldColumn="Services"     // selects which fields to show in modal
 />
-
+{showModal && (
+    <div className="modal-overlay">
+        <div className={`modal-box ${messageType}`}>
+        <p>{confirmDeleteId ? confirmMessage : message}</p>
+        {confirmDeleteId ? (
+            <div style={{ marginTop: '1rem' }}>
+            <button className="btn btn-danger me-2" onClick={confirmDeletion}>Yes</button>
+            <button className="btn btn-secondary" onClick={() => {
+                setShowModal(false);
+                setConfirmDeleteId(null);
+            }}>Cancel</button>
+            </div>
+        ) : null}
+        </div>
+    </div>
+    )}
+    
+ {message && (
+        <MessageModal
+          message={message.text}
+          type={message.type}
+          onClose={() => setMessage(null)}
+        />
+      )}
 
   </>
 )}

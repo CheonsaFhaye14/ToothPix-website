@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import UsersTable from './UsersTable'; // adjust path if needed
-import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import UsersReportExport from './UsersReportExport'; // adjust path as needed
 import { BASE_URL } from '../../config';
-import './users.css';
 
 import AddChoice from '../../Components/AddChoice/AddChoice';
 import AddModal from '../../Components/AddModal/AddModal';
@@ -14,6 +11,7 @@ import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import Table from '../../Components/Table/Table.jsx';
 import { formatDateTime } from '../../utils/formatDateTime.jsx';
 import { showInfoFields } from '../../data/ShowInfoField/users.js';
+import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
 
 const Users = () => {
   const choices = ["Admin", "Dentist" ,"Patient"];
@@ -49,9 +47,6 @@ const Users = () => {
 
 
 
-  const columns = ['idusers', 'fullname', 'usertype'];
-  const [visibleColumn, setVisibleColumn] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
   const [editingUser, setEditingUser] = useState(null);  // Holds the user being edited
   const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
@@ -93,33 +88,13 @@ const Users = () => {
             ,[]);
                 
 const [isLoading, setIsLoading] = useState(true);
-const [sortKey, setSortKey] = useState(' '); // default sort by idusers
 const existingUsertype = ["patient", "dentist","admin"];
-const [isAdding, setIsAdding] = React.useState(false);
       const [message, setMessage] = useState('');
         const [messageType, setMessageType] = useState(''); // 'success' or 'error'
-          const [filterUsertype, setFilterUsertype] = useState('all');
-          const [sortDirection, setSortDirection] = useState('asc');
               const [confirmDeleteId, setConfirmDeleteId] = useState(null); // holds id to delete
               const [confirmMessage, setConfirmMessage] = useState('');
               const [showModal, setShowModal] = useState(false);
-             
-            const [showModal2, setShowModal2] = useState(false);
-    const [addFormData, setAddFormData] = React.useState({
-        username: '',
-        email:'',
-        password: '',
-        usertype: '',
-        firstname: '',
-        lastname: '',
-        birthdate: '',
-        contact: '',
-        address: '', 
-        gender: '',
-        allergies: '',   
-        medicalhistory: '',
-         });
-         
+                     
    const fetchUsers = async () => {
   try {
     const token = localStorage.getItem('adminToken');
@@ -144,117 +119,49 @@ const [isAdding, setIsAdding] = React.useState(false);
   }
 };
 
-              
+        
 
-           
-   const handleSortKeyChange = (e) => {
-  const selectedKey = e.target.value;
-  setSortKey(selectedKey);
-  setVisibleColumn('all'); // Always show both columns when sorting
-};
+const handleDelete = (id) => {
+  setConfirmDeleteId(id);
+  setMessageType('error');
+  setConfirmMessage("Are you sure you want to delete this user?");
+  setShowModal(true);
+};    
 
+const confirmDeletion = async () => {
+  const adminId = localStorage.getItem('adminId'); // make sure you have this stored
 
-    const handleSortDirectionChange = (e) => {
-        setSortDirection(e.target.value);
-    };
-    const handleSearch = (e) => {
-  const term = e.target.value.toLowerCase();
-  setSearchTerm(term);
+  try {
+    const response = await fetch(`${BASE_URL}/api/website/users/${confirmDeleteId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ adminId }) // send adminId here
+    });
 
-  if (!term) {
-    setVisibleColumn('all');
-  } else {
-    setVisibleColumn('all'); // Since we only search full name
+    if (!response.ok) {
+      const error = await response.json();
+      setMessage({ type: 'error', text: error.message || 'Failed to delete user.' });
+      return;
+    }
+
+    setUsers(prevUsers =>
+      prevUsers.filter(user => user.idusers !== confirmDeleteId)
+    );
+    setMessage({ type: 'success', text: 'User deleted successfully.' });
+
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    setMessage({ type: 'error', text: 'An error occurred while deleting the user.' });
+  } finally {
+    setConfirmDeleteId(null);
+    setShowModal(false);
   }
 };
-
-
-
-    const getSortedData = (data) => {
-        if (!sortKey) return data;
-      
-        return [...data].sort((a, b) => {
-      const getFullName = (user) => `${user.firstname || ''} ${user.lastname || ''}`.trim();
-let aVal = sortKey === 'fullname' ? getFullName(a) : a[sortKey];
-let bVal = sortKey === 'fullname' ? getFullName(b) : b[sortKey];
-
-          if (typeof aVal === 'number') {
-            return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-          } else {
-            return sortDirection === 'asc'
-              ? String(aVal).localeCompare(String(bVal))
-              : String(bVal).localeCompare(String(aVal));
-          }
-        });
-      };
-      
-            const handleAddFormChange = (e) => {
-                const { name, value } = e.target;
-                setAddFormData((prevData) => ({
-                  ...prevData,
-                  [name]: value,
-                }));
-              };
-
-              const handleDelete = (id) => {
-                setConfirmDeleteId(id);
-                setMessageType('error');
-                setConfirmMessage("Are you sure you want to delete this user?");
-                setShowModal(true);
-            };    
-
-           const confirmDeletion = async () => {
-        try {
-        const response = await fetch(`${BASE_URL}/api/website/users/${confirmDeleteId}`, {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-              'Content-Type': 'application/json'
-            }
-        });
-    
-        if (!response.ok) {
-            const error = await response.json();
-            showTemporaryModal(error.message || 'Failed to delete user.', 'error');
-            return;
-        }
-    
-        setUsers(prevUsers =>
-            prevUsers.filter(user => user.idusers !== confirmDeleteId)
-        );
-        showTemporaryModal('User deleted successfully.', 'success');
-        } catch (error) {
-        console.error("Error deleting user:", error);
-        showTemporaryModal('An error occurred while deleting the user.', 'error');
-        } finally {
-        setConfirmDeleteId(null);
-            setShowModal(false);
-        }
-    };
-const filteredUsers = users.filter((user) => {
-  // Filter by usertype if filterUsertype is not 'all'
-  if (filterUsertype !== 'all' && user.usertype !== filterUsertype) {
-    return false;
-  }
-
-  const search = searchTerm.toLowerCase();
-
-  const firstName = (user.firstname || '').toLowerCase();
-  const lastName = (user.lastname || '').toLowerCase();
-  const fullName = `${firstName} ${lastName}`.trim();
-
-  return (
-    firstName.includes(search) ||
-    lastName.includes(search) ||
-    fullName.includes(search)
-  );
-});
-
-
-
-    const sortedFilteredUsers = getSortedData(filteredUsers);
   
-    const handleEdit = (user) => {
+const handleEdit = (user) => {
         const sanitize = (value) => (typeof value === 'string' ? value : value === null || value === undefined ? '' : String(value));
       
         setEditingUser(user);
@@ -285,113 +192,107 @@ const filteredUsers = users.filter((user) => {
         const nameRegex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
         const phoneRegex = /^09\d{9}$/;
       
-        // Username
-        if (!editFormData.username.trim()) {
-          showTemporaryModal('Username is required.', 'error');
-          return;
-        }
-        if (!usernameRegex.test(editFormData.username.trim())) {
-          showTemporaryModal('Username must be 6–20 characters and start with a letter. Only letters, numbers, underscores, or dots allowed.', 'error');
-          return;
-        }
-      
-        // Email
-        if (!editFormData.email.trim()) {
-          showTemporaryModal('Email is required.', 'error');
-          return;
-        }
-        if (!emailRegex.test(editFormData.email.trim())) {
-          showTemporaryModal('Invalid email format.', 'error');
-          return;
-        }
-      
-       
-    // Password (optional – only required if user wants to change it)
-if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
-    showTemporaryModal('Password must be at least 6 characters long.', 'error');
-    return;
-  }
-  
-      
-        // Usertype
-        if (!editFormData.usertype.trim()) {
-            showTemporaryModal('Usertype is required.', 'error');
-            return;
-          }
+      // Username
+if (!editFormData.username.trim()) {
+  setMessage({ type: 'error', text: 'Username is required.' });
+  return;
+}
+if (!usernameRegex.test(editFormData.username.trim())) {
+  setMessage({ type: 'error', text: 'Username must be 6–20 characters and start with a letter. Only letters, numbers, underscores, or dots allowed.' });
+  return;
+}
 
-          const allowedUsertypes = ['patient', 'dentist','admin'];
-  if (!allowedUsertypes.includes(editFormData.usertype.trim().toLowerCase())) {
-    showTemporaryModal('Usertype must be either "patient", "dentist" or "admin".', 'error');
+// Email
+if (!editFormData.email.trim()) {
+  setMessage({ type: 'error', text: 'Email is required.' });
+  return;
+}
+if (!emailRegex.test(editFormData.email.trim())) {
+  setMessage({ type: 'error', text: 'Invalid email format.' });
+  return;
+}
+ // Password (optional – only required if user wants to change it)
+if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
+  setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' });
+  return;
+}
+
+// Usertype
+if (!editFormData.usertype.trim()) {
+  setMessage({ type: 'error', text: 'Usertype is required.' });
+  return;
+}
+
+const allowedUsertypes = ['patient', 'dentist', 'admin'];
+if (!allowedUsertypes.includes(editFormData.usertype.trim().toLowerCase())) {
+  setMessage({ type: 'error', text: 'Usertype must be either "patient", "dentist" or "admin".' });
+  return;
+}
+
+// Firstname
+if (!editFormData.firstname.trim()) {
+  setMessage({ type: 'error', text: 'Firstname is required.' });
+  return;
+}
+if (!nameRegex.test(editFormData.firstname.trim())) {
+  setMessage({ type: 'error', text: 'Firstname must contain only letters and valid characters (spaces, hyphens, apostrophes).' });
+  return;
+}
+     // Lastname
+if (!editFormData.lastname.trim()) {
+  setMessage({ type: 'error', text: 'Lastname is required.' });
+  return;
+}
+if (!nameRegex.test(editFormData.lastname.trim())) {
+  setMessage({ type: 'error', text: 'Lastname must contain only letters and valid characters (spaces, hyphens, apostrophes).' });
+  return;
+}
+
+// Birthdate (optional but validate if provided)
+if (editFormData.birthdate.trim()) {
+  const birthdate = new Date(editFormData.birthdate.trim());
+  if (isNaN(birthdate.getTime())) {
+    setMessage({ type: 'error', text: 'Birthdate must be a valid date.' });
     return;
   }
-      
-        // Firstname
-        if (!editFormData.firstname.trim()) {
-          showTemporaryModal('Firstname is required.', 'error');
-          return;
-        }
-        if (!nameRegex.test(editFormData.firstname.trim())) {
-          showTemporaryModal('Firstname must contain only letters and valid characters (spaces, hyphens, apostrophes).', 'error');
-          return;
-        }
-      
-        // Lastname
-        if (!editFormData.lastname.trim()) {
-          showTemporaryModal('Lastname is required.', 'error');
-          return;
-        }
-        if (!nameRegex.test(editFormData.lastname.trim())) {
-          showTemporaryModal('Lastname must contain only letters and valid characters (spaces, hyphens, apostrophes).', 'error');
-          return;
-        }
-      
-        // Birthdate (optional but validate if provided)
-        if (editFormData.birthdate.trim()) {
-          const birthdate = new Date(editFormData.birthdate.trim());
-          if (isNaN(birthdate.getTime())) {
-            showTemporaryModal('Birthdate must be a valid date.', 'error');
-            return;
-          }
-      
-          const today = new Date();
-          let age = today.getFullYear() - birthdate.getFullYear();
-          const m = today.getMonth() - birthdate.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-            age--;
-          }
-      
-          if (age < 1) {
-            showTemporaryModal('User must be at least 1 year old.', 'error');
-            return;
-          }
-        }
-      
-        // Contact
-        if (!editFormData.contact.trim()) {
-          showTemporaryModal('Contact is required.', 'error');
-          return;
-        }
-        if (!phoneRegex.test(editFormData.contact.trim())) {
-          showTemporaryModal('Contact must be a valid Philippine mobile number starting with 09 and 11 digits long.', 'error');
-          return;
-        }
-      
-        // Address
-        if (!editFormData.address.trim()) {
-          showTemporaryModal('Address is required.', 'error');
-          return;
-        }
-      
-        // Gender (optional but validate if provided)
-        if (editFormData.gender.trim()) {
-          const allowedGenders = ['female', 'male'];
-          if (!allowedGenders.includes(editFormData.gender.trim().toLowerCase())) {
-            showTemporaryModal('Gender must be either "female" or "male" if provided.', 'error');
-            return;
-          }
-        }
-      
-        const updatedUser = {
+
+  const today = new Date();
+  let age = today.getFullYear() - birthdate.getFullYear();
+  const m = today.getMonth() - birthdate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
+    age--;
+  }
+
+  if (age < 1) {
+    setMessage({ type: 'error', text: 'User must be at least 1 year old.' });
+    return;
+  }
+}
+
+// Contact
+if (!editFormData.contact.trim()) {
+  setMessage({ type: 'error', text: 'Contact is required.' });
+  return;
+}
+if (!phoneRegex.test(editFormData.contact.trim())) {
+  setMessage({ type: 'error', text: 'Contact must be a valid Philippine mobile number starting with 09 and 11 digits long.' });
+  return;
+}
+     // Address
+if (!editFormData.address.trim()) {
+  setMessage({ type: 'error', text: 'Address is required.' });
+  return;
+}
+
+// Gender (optional but validate if provided)
+if (editFormData.gender.trim()) {
+  const allowedGenders = ['female', 'male'];
+  if (!allowedGenders.includes(editFormData.gender.trim().toLowerCase())) {
+    setMessage({ type: 'error', text: 'Gender must be either "female" or "male" if provided.' });
+    return;
+  }
+}
+      const updatedUser = {
           username: editFormData.username.trim(),
           email: editFormData.email.trim(),
           password: editFormData.password.trim(),
@@ -425,26 +326,28 @@ if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
                   : user
               )
             );
-            showTemporaryModal('User updated successfully.', 'success');
+setMessage({ type: 'success', text: 'User updated successfully.' });
             setIsEditing(false);
         }
         } catch (error) {
           console.error('Error updating user:', error);
-          if (error.response) {
-            const status = error.response.status;
-            const serverMessage = error.response.data.message;
-            if (status === 409) {
-              showTemporaryModal(serverMessage || 'Username or email already exists.', 'error');
-            } else if (status === 400) {
-              showTemporaryModal(serverMessage || 'Missing or invalid input fields.', 'error');
-            } else if (status === 500) {
-              showTemporaryModal(serverMessage || 'Internal server error occurred.', 'error');
-            } else {
-              showTemporaryModal(serverMessage || 'Unexpected error occurred.', 'error');
-            }
-          } else {
-            showTemporaryModal('Could not connect to server. Please try again later.', 'error');
-          }
+     if (error.response) {
+  const status = error.response.status;
+  const serverMessage = error.response.data.message;
+
+  if (status === 409) {
+    setMessage({ type: 'error', text: serverMessage || 'Username or email already exists.' });
+  } else if (status === 400) {
+    setMessage({ type: 'error', text: serverMessage || 'Missing or invalid input fields.' });
+  } else if (status === 500) {
+    setMessage({ type: 'error', text: serverMessage || 'Internal server error occurred.' });
+  } else {
+    setMessage({ type: 'error', text: serverMessage || 'Unexpected error occurred.' });
+  }
+} else {
+  setMessage({ type: 'error', text: 'Could not connect to server. Please try again later.' });
+}
+
         } 
       };
       
@@ -455,178 +358,7 @@ if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
           [name]: value,
         }));
       };
-      
-
-      const handleAddSubmit = async (e) => {
-        e.preventDefault();
-      
-        // Regex for basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      
-        // Validation
-        if (!addFormData.username.trim()) {
-          showTemporaryModal('Username is required.', 'error');
-          return;
-        }
-
-        const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{5,19}$/;
-
-if (!usernameRegex.test(addFormData.username.trim())) {
-  showTemporaryModal('Username must be 6–20 characters and can only contain letters, numbers, underscores, or dots. It must start with a letter.', 'error');
-  return;
-}
-
-      
-        if (!addFormData.email.trim()) {
-          showTemporaryModal('Email is required.', 'error');
-          return;
-        }
-        if (!emailRegex.test(addFormData.email.trim())) {
-          showTemporaryModal('Invalid email format.', 'error');
-          return;
-        }
-      
-        if (!String(addFormData.password).trim()) {
-            showTemporaryModal('Password is required.', 'error');
-            return;
-          }
-
-          if (!String(addFormData.password).trim() || addFormData.password.trim().length < 6) {
-            showTemporaryModal('Password must be at least 6 characters long.', 'error');
-            return;
-          }
-          
-      
-        if (!addFormData.usertype.trim()) {
-          showTemporaryModal('Usertype is required.', 'error');
-          return;
-        }
-        const allowedUsertypes = ['patient', 'dentist','admin'];
-if (!allowedUsertypes.includes(addFormData.usertype.trim().toLowerCase())) {
-  showTemporaryModal('Usertype must be either "patient", "dentist" or "admin".', 'error');
-  return;
-}
-
-        const nameRegex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
-
-if (!addFormData.firstname.trim()) {
-  showTemporaryModal('Firstname is required.', 'error');
-  return;
-}
-if (!nameRegex.test(addFormData.firstname.trim())) {
-  showTemporaryModal('Firstname must contain only letters and valid characters (spaces, hyphens, apostrophes).', 'error');
-  return;
-}
-
-if (!addFormData.lastname.trim()) {
-  showTemporaryModal('Lastname is required.', 'error');
-  return;
-}
-if (!nameRegex.test(addFormData.lastname.trim())) {
-  showTemporaryModal('Lastname must contain only letters and valid characters (spaces, hyphens, apostrophes).', 'error');
-  return;
-}
-if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
-    const birthdate = new Date(addFormData.birthdate.trim());
-    if (isNaN(birthdate.getTime())) {
-      showTemporaryModal('Birthdate must be a valid date.', 'error');
-      return;
-    }
-  
-    // Calculate age in years
-    const today = new Date();
-    let age = today.getFullYear() - birthdate.getFullYear();
-    const m = today.getMonth() - birthdate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-      age--;
-    }
-  
-    if (age < 1) {
-      showTemporaryModal('User must be at least 1 year old.', 'error');
-      return;
-    }
-  }
-  
-  
-  if (!addFormData.contact.trim()) {
-    showTemporaryModal('Contact is required.', 'error');
-    return;
-  }
-  
-  const phoneRegex = /^09\d{9}$/;
-  if (!phoneRegex.test(addFormData.contact.trim())) {
-    showTemporaryModal('Contact must be a valid Philippine mobile number starting with 09 and 11 digits long.', 'error');
-    return;
-  }
-  
-
-        if (!addFormData.address.trim()) {
-          showTemporaryModal('Address is required.', 'error');
-          return;
-        }
-        if (addFormData.gender.trim()) {
-            const allowedGenders = ['female', 'male'];
-            if (!allowedGenders.includes(addFormData.gender.trim().toLowerCase())) {
-              showTemporaryModal('Gender must be either "female" or "male" if provided.', 'error');
-              return;
-            }
-          }
-          
-      
-        const newUser = {
-          username: addFormData.username.trim(),
-          email: addFormData.email.trim(),
-          password: addFormData.password.trim(),
-          usertype: addFormData.usertype.trim(),
-          firstname: addFormData.firstname.trim(),
-          lastname: addFormData.lastname.trim(),
-          birthdate: addFormData.birthdate.trim(),
-          contact: addFormData.contact.trim(),
-          address: addFormData.address.trim(),
-          gender: addFormData.gender.trim(),
-          allergies: addFormData.allergies.trim(),
-          medicalhistory: addFormData.medicalhistory.trim(),
-          adminId: localStorage.getItem('adminId')
-        };
-
-         try {
-          const response = await axios.post(`${BASE_URL}/api/website/users`, newUser, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-            },
-          });
-
-          if (response.status === 201) {
-            setUsers((prevUsers) => [...prevUsers, response.data.user]);
-            showTemporaryModal('User added successfully.', 'success');
-            setIsAdding(false);
-            setAddFormData({
-              username: '', email: '', password: '', usertype: '',
-              firstname: '', lastname: '', birthdate: '',
-              contact: '', address: '', gender: '', allergies: '', medicalhistory: ''
-            });
-          }
-        } catch (error) {
-            if (error.response) {
-              const status = error.response.status;
-              const serverMessage = error.response.data.message;
-          
-              if (status === 409) {
-                showTemporaryModal(serverMessage || 'Username or email already exists.', 'error');
-              } else if (status === 400) {
-                showTemporaryModal(serverMessage || 'Missing or invalid input fields.', 'error');
-              } else if (status === 500) {
-                showTemporaryModal(serverMessage || 'Internal server error occurred.', 'error');
-              } else {
-                showTemporaryModal(serverMessage || 'Unexpected error occurred.', 'error');
-              }
-            } else {
-              // Network or other error not from server
-              showTemporaryModal('Could not connect to server. Please try again later.', 'error');
-            }
-          }
-          
-      };
+    
       
        const handleSelect = (choice) => {
     setSelected(choice);
@@ -637,8 +369,7 @@ if (addFormData.birthdate && String(addFormData.birthdate).trim()) {
   
 const handleAdd = async (formValues) => { 
   if (!token || !adminId) {
-    setMessageType("error");
-    setMessage("You must be logged in as admin.");
+    setMessage({ type: "error", text: "You must be logged in as admin." });
     return;
   }
 
@@ -649,18 +380,17 @@ const handleAdd = async (formValues) => {
     const formData = new FormData();
     formData.append("adminId", adminId);
 
-    // Append all fields, handle profile_image file
     Object.entries(formValues).forEach(([key, value]) => {
       if (value !== null && value !== "" && value !== undefined) {
         if (key === "profile_image" && value instanceof File) {
-          formData.append(key, value, value.name); // append file with original filename
+          formData.append(key, value, value.name);
         } else {
           formData.append(key, value);
         }
       }
     });
 
-    console.log("🧹 FormData ready:", [...formData.entries()]); // log FormData entries
+    console.log("🧹 FormData ready:", [...formData.entries()]);
 
     // Send request to API
     const response = await axios.post(`${BASE_URL}/api/website/users`, formData, {
@@ -671,45 +401,35 @@ const handleAdd = async (formValues) => {
     });
 
     if (response.status === 201) {
-      // Refresh users
       await fetchUsers();
-      setMessageType("success");
-      setMessage(`✅ ${formValues.usertype} added successfully!`);
-      setModalOpen(false);
+      setMessage({ type: "success", text: `✅ ${formValues.usertype} added successfully!` });
+
+      // Close modal after message auto-dismiss
+      setTimeout(() => {
+        setModalOpen(false);
+        setMessage(null);
+      }, 2000);
+
     } else {
-      setMessageType("error");
-      setMessage(response.data?.message || "Something went wrong.");
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
     }
 
   } catch (error) {
     console.error("handleAdd error:", error);
 
-    let message = "Could not connect to server. Please try again later.";
+    let errorMessage = "Could not connect to server. Please try again later.";
     if (error.response) {
       const { status, data } = error.response;
-      if (status === 409) message = "Username or email already exists.";
-      else if (status === 400) message = "Missing or invalid input fields.";
-      else if (status === 500) message = "Internal server error occurred.";
-      else message = data?.message || message;
+      if (status === 409) errorMessage = "Username or email already exists.";
+      else if (status === 400) errorMessage = "Missing or invalid input fields.";
+      else if (status === 500) errorMessage = "Internal server error occurred.";
+      else errorMessage = data?.message || errorMessage;
     }
 
-    setMessageType("error");
-    setMessage(message);
+    setMessage({ type: "error", text: errorMessage });
   }
 };
 
-
-  const showTemporaryModal = (msg, type) => {
-    setMessage(msg);
-    setMessageType(type);
-    setShowModal2(true);
-    setTimeout(() => {
-      setShowModal2(false);
-      setMessage('');
-      setMessageType('');
-    }, 2000);
-  };
-  
   return (
     <div className="container py-4">
 
@@ -735,24 +455,6 @@ const handleAdd = async (formValues) => {
 
  
 </div>
-
-
-{isAdding && (
-  <AddUserModal
-    addFormData={addFormData}
-    handleAddFormChange={handleAddFormChange}
-    handleAddSubmit={handleAddSubmit}
-    setIsAdding={setIsAdding}
-    openSuggestion={openSuggestion}
-    setOpenSuggestion={setOpenSuggestion}
-    existingUsertype={existingUsertype}
-    existingGender={existingGender}
-    setAddFormData={setAddFormData}
-  />
-)}
-
-
-
   
 {isLoading ? (
   <div className="loading-text">Loading...</div>
@@ -782,14 +484,7 @@ const handleAdd = async (formValues) => {
   />
 )}
 
-{showModal2 && (
-  <div className="modal-overlay">
-    <div className={`modal-box ${messageType}`}>
-      <p>{message}</p>
-    </div>
-  </div>
-)}
-     {showModal && (
+{showModal && (
     <div className="modal-overlay">
         <div className={`modal-box ${messageType}`}>
         <p>{confirmDeleteId ? confirmMessage : message}</p>
@@ -814,6 +509,14 @@ const handleAdd = async (formValues) => {
           fields={fieldTemplates}       // <-- pass all user fields
           onClose={() => setModalOpen(false)}
           onSubmit={handleAdd}      // <-- receives validated formValues
+        />
+      )}
+
+ {message && (
+        <MessageModal
+          message={message.text}
+          type={message.type}
+          onClose={() => setMessage(null)}
         />
       )}
 

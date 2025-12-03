@@ -1,25 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FloatingInput from "../utils/InputForm";
 import PasswordInput from "../utils/PasswordInput";
 import ForgotPasswordModal from "../Components/ForgotPasswordModal";
-import { useAuth } from "../API/Auth"; // ✅ THIS one handles API
+import { useAuth } from "../API/Auth";
 import "./Login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import MessageModal from "../Components/MessageModal/MessageModal.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
 
-  // ✅ useAuth hook provides handleLogin, messages, and isLoggingIn state
-const { handleLogin, message, isLoggingIn } = useAuth(); // NOT useAdminAuth
+  const { handleLogin, message, successMessage, isLoggingIn } = useAuth();
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    if (successMessage) {
+      setShowSuccessModal(true);
+
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/dashboard");
+      }, 3000); // redirect after 3s
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // call the hook's handleLogin
     await handleLogin(username, password);
   };
+
+  const closeMessageModal = () => setShowSuccessModal(false);
 
   return (
     <div className="login-container">
@@ -61,11 +80,21 @@ const { handleLogin, message, isLoggingIn } = useAuth(); // NOT useAdminAuth
             )}
           </button>
 
-          {message && <p className="error-text">{message}</p>}
+          {/* Inline error for non-success messages */}
+          {message && !successMessage && <p className="error-text">{message}</p>}
         </form>
       </div>
 
       {showModal && <ForgotPasswordModal onClose={() => setShowModal(false)} />}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <MessageModal
+          message={successMessage}
+          type="success"
+          onClose={closeMessageModal}
+        />
+      )}
     </div>
   );
 };

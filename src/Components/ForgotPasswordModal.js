@@ -1,30 +1,36 @@
-import React, { useState } from "react"; 
+import { useState } from "react"; 
 import { BASE_URL } from "../config";
 import FloatingInput from "../utils/InputForm";
+import MessageModal from "../Components/MessageModal/MessageModal.jsx"; // import the modal
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import "./ForgotPasswordModal.css";
 
 const ForgotPasswordModal = ({ onClose }) => {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("error"); // 'error' or 'success'
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(false); // loading state
 
-  const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setMessageType("error");
+    setErrorMessage("");
+    setSuccessMessage("");
+    setShowSuccessModal(false);
+    setLoading(true);
 
     if (!email.trim()) {
-      setMessage("Please enter your email.");
+      setErrorMessage("Please enter your email.");
+      setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
-      setMessage("Please enter a valid email address.");
+      setErrorMessage("Please enter a valid email address.");
+      setLoading(false);
       return;
     }
 
@@ -32,34 +38,42 @@ const ForgotPasswordModal = ({ onClose }) => {
       const res = await fetch(`${BASE_URL}/api/admin`);
       const data = await res.json();
 
-      if (res.ok) {
-        const adminEmails = data.admin.map((admin) => admin.email.toLowerCase());
-        if (adminEmails.includes(email.toLowerCase())) {
-          const resetRes = await fetch(`${BASE_URL}/api/request-reset-password`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-          });
-          const resetData = await resetRes.json();
+      if (!res.ok) {
+        setErrorMessage("Admin details not found.");
+        setLoading(false);
+        return;
+      }
 
-          if (resetRes.ok) {
-            setMessage("✅ Password reset link sent to your email!");
-            setMessageType("success");
-            // Optionally close after a short delay
-            setTimeout(onClose, 2000);
-          } else {
-            setMessage(resetData.message || "Error sending reset link.");
-          }
+      const adminEmails = data.admin.map((admin) => admin.email.toLowerCase());
+      if (!adminEmails.includes(email.toLowerCase())) {
+        setErrorMessage("Email does not match any admin account.");
+        setLoading(false);
+        return;
+      }
 
-        } else {
-          setMessage("Email does not match any admin account.");
-        }
+      const resetRes = await fetch(`${BASE_URL}/api/request-reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const resetData = await resetRes.json();
+
+      if (resetRes.ok) {
+        setSuccessMessage("Password reset link sent to your email!");
+        setShowSuccessModal(true);
+
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          onClose();
+        }, 2000);
       } else {
-        setMessage("Admin details not found.");
+        setErrorMessage(resetData.message || "Error sending reset link.");
       }
     } catch (err) {
       console.error(err);
-      setMessage("An error occurred. Please try again.");
+      setErrorMessage("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,18 +88,35 @@ const ForgotPasswordModal = ({ onClose }) => {
             onChange={(e) => setEmail(e.target.value)}
             name="email"
           />
-          <div className="modal-buttons">
-            <button type="submit">Send Reset Link</button>
-            <button type="button" onClick={onClose}>Close</button>
+          <div className="reset-buttons">
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                  <span style={{ marginLeft: "8px" }}>Sending...</span>
+                </>
+              ) : (
+                "Send"
+              )}
+            </button>
+            <button type="button" className="btn-cancel" onClick={onClose} disabled={loading}>
+              Close
+            </button>
           </div>
         </form>
 
-        {message && (
-          <p className={messageType === "success" ? "success-text" : "error-text"}>
-            {message}
-          </p>
-        )}
+        {/* Inline error message */}
+        {errorMessage && <p className="error-text">{errorMessage}</p>}
       </div>
+
+      {/* Success modal */}
+      {showSuccessModal && (
+        <MessageModal
+          message={successMessage}
+          type="success"
+          onClose={() => setShowSuccessModal(false)}
+        />
+      )}
     </div>
   );
 };

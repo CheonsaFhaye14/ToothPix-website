@@ -5,13 +5,13 @@ import { BASE_URL } from '../../config';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import EditAppointmentModal from './EditAppointmentModal';
-import AddAppointmentModal from './AddAppointmentModal';
 import InfoModal from './InfoModal';
 import RecordListTable from './RecordListTable';
 
 import AddModal from '../../Components/AddModal/AddModal';
 import { fieldTemplates } from '../../data/FieldTemplates/records.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
+import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -32,9 +32,9 @@ function formatAppointmentDate(dateString) {
 const Record = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
+const [records, setRecords] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [records, setRecords] = useState([]);
   const [expandedPatient, setExpandedPatient] = useState(null);
   const [dentists, setDentists] = useState([]);
   const [services, setServices] = useState([]);
@@ -205,15 +205,20 @@ useEffect(() => {
 
 
 
-  const fetchPatients = async () => {
-        try {
-          const res = await fetch(`${BASE_URL}/api/app/patients`);
-          const data = await res.json();
-          if (res.ok) setPatients(data.patients);
-        } catch (error) {
-          console.error('Error fetching patients:', error);
-        }
-      };
+const fetchPatients = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/website/patients`);
+    const data = await res.json();
+    if (res.ok) {
+      setPatients(data.patients); // patients array from backend
+    } else {
+      console.error('Failed to fetch patients:', data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+  }
+};
+
    const fetchDentists = async () => {
         try {
           const res = await fetch(`${BASE_URL}/api/app/dentists`);
@@ -269,19 +274,6 @@ useEffect(() => {
         .map(d => `${d.firstname} ${d.lastname}`)
     ),
   ];
- const existingPatient = [
-  ...new Set([
-    // Registered patients
-    ...patients
-      .filter(p => p.firstname && p.lastname)
-      .map(p => `${p.firstname} ${p.lastname}`),
-
-    // Walk-in patients from records (patient_name is a full name string)
-    ...records
-      .filter(app => app && app.patient_name)
-      .map(app => app.patient_name)
-  ])
-];
   
   //delete
    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // holds id to delete
@@ -329,164 +321,6 @@ useEffect(() => {
     setConfirmMessage("Are you sure you want to delete this Record?");
     setShowModal(true);
   };
-
-//add
-    const [isAdding, setIsAdding] = React.useState(false);
-
-const [addFormData, setAddFormData] = useState({
-  patient: "",
-  dentist: "",
-  date: "",
-  time: "",
-  service: [],
-  serviceInput: "",
-  treatment_notes: "", // <--- New
-});
-const handleAddFormChange = (e) => {
-    const { name, value } = e.target;
-    setAddFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-const handleAddSubmit = async (e) => {
-  e.preventDefault();
-
-  const patientName = addFormData.patient.trim();
-  const dentistName = addFormData.dentist.trim();
-
-  if (!patientName) {
-    showTemporaryModal('Patient is required.', 'error');
-    return;
-  }
-
-  if (!dentistName) {
-    showTemporaryModal('Dentist is required.', 'error');
-    return;
-  }
-
-  const patientObj = patients.find(
-    (p) => `${p.firstname} ${p.lastname}` === patientName
-  );
-  const dentistObj = dentists.find(
-    (d) => `${d.firstname} ${d.lastname}` === dentistName
-  );
-
-  if (!dentistObj) {
-    showTemporaryModal('Dentist not found in records.', 'error');
-    return;
-  }
-
-  if (!addFormData.date) {
-    showTemporaryModal('Date is required.', 'error');
-    return;
-  }
-
-  if (!addFormData.time.trim()) {
-    showTemporaryModal('Time is required.', 'error');
-    return;
-  }
-
-  if (!addFormData.service.length) {
-    showTemporaryModal('At least one service must be selected.', 'error');
-    return;
-  }
-
-  for (const serviceName of addFormData.service) {
-    if (!existingService.includes(serviceName)) {
-      showTemporaryModal(`Service "${serviceName}" does not exist.`, 'error');
-      return;
-    }
-  }
-
-  // Convert 12-hour time to 24-hour format
-  const [timePart, modifier] = addFormData.time.split(' ');
-  let [hours, minutes] = timePart.split(':').map(Number);
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-
-  // Create local Date object in Manila timezone (UTC+8)
-  const [year, month, day] = addFormData.date.split('-').map(Number);
-  // month -1 because JS months are 0-indexed
-  const localDate = new Date(year, month - 1, day, hours, minutes, 0);
-
-  // Convert local Manila time to UTC ISO string
-  const combinedDateTime = localDate.toISOString();
-
-  const selectedDateTime = new Date(combinedDateTime);
-  const now = new Date();
-
-  // Only allow past datetime (not future)
-  if (selectedDateTime > now) {
-    showTemporaryModal('Selected date and time cannot be in the future.', 'error');
-    return;
-  }
-
-  const selectedServiceIds = [
-    ...new Set(
-      addFormData.service
-        .map((serviceName) => {
-          const serviceObj = services.find((s) => s.name === serviceName);
-          return serviceObj ? serviceObj.idservice : null;
-        })
-        .filter((id) => id !== null)
-    ),
-  ];
-
-  const newAppointment = {
-    iddentist: dentistObj.idusers,
-    date: combinedDateTime, // UTC ISO string sent here
-    services: selectedServiceIds,
-    treatment_notes: addFormData.treatment_notes?.trim() || '',
-    ...(patientObj
-      ? { idpatient: patientObj.idusers }
-      : { patient_name: patientName }),
-      adminId,
-  };
-
-  console.log(newAppointment);
-
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/api/website/record`,
-      newAppointment,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
-        },
-      }
-    );
-
-    if (response.status === 201) {
-      showTemporaryModal('Appointment added successfully.', 'success');
-      setRecords((prev) => [...prev, response.data.appointment]);
-      setIsAdding(false);
-      setAddFormData({
-        patient: '',
-        dentist: '',
-        date: '',
-        time: '',
-        service: [],
-        serviceInput: '',
-        treatment_notes: '',
-      });
-      fetchRecords(); // refresh records to be consistent
-    }
-  } catch (error) {
-    if (error.response) {
-      const msg = error.response.data.message;
-      showTemporaryModal(msg || 'Something went wrong while adding.', 'error');
-    } else {
-      showTemporaryModal('Failed to connect to the server.', 'error');
-    }
-  } finally {
-    fetchDentists();
-    fetchPatients();
-    fetchServices();
-  }
-};
-
-
 
 //filters
 const [sortKey, setSortKey] = useState(''); // default sort by idusers
@@ -553,48 +387,18 @@ const fieldsWithRecords = {
 
     // 1️⃣ Patient dropdown
     if (field.name === "patient") {
+      // Use patients array directly
+      const patientOptions = (patients || []).map(p => ({
+        label: p.fullname,
+        value: p.idusers ? p.idusers : p.fullname
+      }));
 
-      console.log("🔵 Patients from DB:", patients);
-      console.log("🟣 All records:", records);
-
-      // Step 1: extract ALL patient names from records
-      const recordNames = (records || [])
-        .filter(r => r.patient_name)
-        .map(r => r.patient_name.trim());
-
-      console.log("🟡 Extracted names from records:", recordNames);
-
-      // Step 2: remove duplicates (case-insensitive)
-      const uniqueRecordNames = Array.from(
-        new Map(recordNames.map(name => [name.toLowerCase(), name])).values()
+      // Deduplicate by label (case-insensitive)
+      const uniquePatientOptions = Array.from(
+        new Map(patientOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
       );
 
-      console.log("🟢 Unique names from records:", uniqueRecordNames);
-
-      // Step 3: map record names to DB patients if possible
-      const finalPatientOptions = uniqueRecordNames.map(name => {
-        const match = (patients || []).find(
-          p => `${p.firstname} ${p.lastname}`.toLowerCase() === name.toLowerCase()
-        );
-
-        // found in DB → return ID
-        if (match) {
-          return {
-            label: name,
-            value: match.idusers
-          };
-        }
-
-        // not found → use name
-        return {
-          label: name,
-          value: name
-        };
-      });
-
-      console.log("🔵 Final patient options:", finalPatientOptions);
-
-      return { ...field, options: finalPatientOptions };
+      return { ...field, options: uniquePatientOptions };
     }
 
     // 2️⃣ Dentist dropdown
@@ -637,31 +441,39 @@ const fieldsWithRecords = {
 
 
 
+
 const handleAdd = async (formValues) => {
   if (!token || !adminId) {
-    setMessageType("error");
-    setMessage("You must be logged in as admin.");
+    setMessage({ type: "error", text: "You must be logged in as admin." });
+    setTimeout(() => setMessage(null), 2000);
     return;
   }
 
   try {
     console.log("📝 Original Form Values:", formValues);
 
-    // Build payload as JSON instead of FormData for proper array handling
+    // Build payload as JSON
     const payload = {
       adminId,
       status: "completed", // default status for Records
     };
 
-    // ⭐ Convert date + time to UTC ISO
+    // Convert date + time to UTC ISO
     if (formValues.date && formValues.time) {
       const [hours, minutes] = formValues.time.split(":").map(Number);
       const manilaStr = `${formValues.date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00+08:00`;
       const dateObj = new Date(manilaStr);
-      if (!isNaN(dateObj)) payload.date = dateObj.toISOString();
+
+      if (isNaN(dateObj)) {
+        setMessage({ type: "error", text: "Invalid date or time." });
+        setTimeout(() => setMessage(null), 2000);
+        return;
+      }
+
+      payload.date = dateObj.toISOString();
     }
 
-    // ⭐ Handle patient
+    // Handle patient
     if (formValues.patient !== undefined && formValues.patient !== null) {
       if (!isNaN(formValues.patient)) {
         payload.idpatient = Number(formValues.patient);
@@ -670,19 +482,20 @@ const handleAdd = async (formValues) => {
       }
     }
 
-    // ⭐ Handle dentist
+    // Handle dentist
     if (formValues.dentist !== undefined && formValues.dentist !== null) {
       payload.iddentist = Number(formValues.dentist);
     }
 
-    // ⭐ Handle services (array of numeric IDs)
+    // Handle services (array of numeric IDs)
     if (Array.isArray(formValues.services)) {
       const serviceIds = formValues.services
-        .map(s => Number(s))
-        .filter(id => !isNaN(id));
-if (serviceIds.length > 0) payload.services = serviceIds;    }
+        .map((s) => Number(s))
+        .filter((id) => !isNaN(id));
+      if (serviceIds.length > 0) payload.services = serviceIds;
+    }
 
-    // ⭐ Append other fields except patient/dentist/date/time/services
+    // Append other fields except patient/dentist/date/time/services
     Object.entries(formValues).forEach(([key, value]) => {
       if (
         value !== null &&
@@ -708,29 +521,31 @@ if (serviceIds.length > 0) payload.services = serviceIds;    }
       await fetchServices();
       await fetchDentists();
       await fetchPatients();
-
-      setMessageType("success");
-      setMessage(`✅ ${formValues.records || "Record"} added successfully!`);
+      await fetchRecords();
+      setMessage({ type: "success", text: `✅ ${formValues.records || "Record"} added successfully!` });
       setModalOpen(false);
+      setTimeout(() => setMessage(null), 2000);
     } else {
-      setMessageType("error");
-      setMessage(response.data?.message || "Something went wrong.");
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
+      setTimeout(() => setMessage(null), 2000);
     }
   } catch (error) {
     console.error("handleAdd error:", error);
 
-    let message = "Could not connect to server. Please try again later.";
+    let messageText = "Could not connect to server. Please try again later.";
     if (error.response) {
       const { status, data } = error.response;
-      if (status === 400) message = "Missing or invalid input fields.";
-      else if (status === 500) message = "Internal server error occurred.";
-      else message = data?.message || message;
+      if (status === 400) messageText = "Missing or invalid input fields.";
+      else if (status === 500) messageText = "Internal server error occurred.";
+      else messageText = data?.message || messageText;
     }
 
-    setMessageType("error");
-    setMessage(message);
+    setMessage({ type: "error", text: messageText });
+    setTimeout(() => setMessage(null), 2000);
   }
 };
+
+
 
           
 
@@ -747,7 +562,8 @@ if (serviceIds.length > 0) payload.services = serviceIds;    }
       {isLoading ? (
         <div className="loading-text">Loading...</div>
       ) : (
-       <> <RecordListTable
+       <> 
+       <RecordListTable
   searchTerm={searchTerm}
   setSearchTerm={setSearchTerm}
   groupBy={groupBy}
@@ -778,24 +594,6 @@ if (serviceIds.length > 0) payload.services = serviceIds;    }
     messageType={messageType}
   />
 )}
-
- {isAdding && (
-  <AddAppointmentModal
-    addFormData={addFormData}
-    setAddFormData={setAddFormData}
-    handleAddFormChange={handleAddFormChange}
-    handleAddSubmit={handleAddSubmit}
-    existingPatient={existingPatient}
-    existingDentist={existingDentist}
-    existingTimes={existingTimes}
-    existingService={existingService}
-    openSuggestion={openSuggestion}
-    setOpenSuggestion={setOpenSuggestion}
-    showTemporaryModal={showTemporaryModal}
-    setIsAdding={setIsAdding}
-  />
-)}
-
 {isEditing && (
   <EditAppointmentModal
     editFormData={editFormData}
@@ -851,7 +649,13 @@ if (serviceIds.length > 0) payload.services = serviceIds;    }
   </div>
 )}
 
-
+ {message && (
+        <MessageModal
+          message={message.text}
+          type={message.type}
+          onClose={() => setMessage(null)}
+        />
+      )}
 
     </div>
   );

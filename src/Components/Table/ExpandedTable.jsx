@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import "../Table/Table.css";
 import FloatingInput from "../../utils/InputForm.jsx";
 import ShowInfoModal from "../ShowInfoModal/ShowInfoModal.jsx";
-import ActionButtons from "../../utils/ActionButton/ActionButtons";
+import ActionButtons from "../../utils/ActionButton/ActionButtons.jsx";
 
 const Table = ({
   columns = [],
@@ -107,7 +107,7 @@ const Table = ({
 
   return (
     <div className="table-wrapper">
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+        <div className="one-row">
         <FloatingInput
           placeholder="Search..."
           value={search}
@@ -141,11 +141,12 @@ const Table = ({
                   style={{ cursor: expandableKey ? "pointer" : "default", backgroundColor: expandedRow === row[expandableKey] ? "#f1f1f1" : "" }}
                   onClick={() => expandableKey && toggleExpanded(row[expandableKey])}
                 >
-                  {columns.map(col => (
-                    <td key={col.accessor} onClick={() => setSelectedRow(row)}>
-                      {col.render ? col.render(row) : row[col.accessor]}
-                    </td>
-                  ))}
+                 {columns.map(col => (
+  <td key={col.accessor}>
+    {col.render ? col.render(row) : row[col.accessor]}
+  </td>
+))}
+
                   {hasActions && (
                     <td onClick={e => e.stopPropagation()}>
                       <ActionButtons
@@ -160,32 +161,35 @@ const Table = ({
                   )}
                 </tr>
 
-                {expandableKey && expandedRow === row[expandableKey] && row[subRowsKey] && (
-                  <tr>
-                    <td colSpan={columns.length + (hasActions ? 1 : 0)}>
-                      {renderSubRow ? renderSubRow(row[subRowsKey]) : (
-                        <table className="table table-sm table-bordered">
-                          <thead>
-                            <tr>
-                              <th>Sub Row</th>
-                              <th>Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {row[subRowsKey].map((sub, i) => (
-                              <tr key={i}>
-                                <td>{sub.name || "No Data"}</td>
-                                <td>
-                                  {sub.onView && <button className="btn btn-primary btn-sm" onClick={sub.onView}>View</button>}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
-                    </td>
-                  </tr>
-                )}
+              {expandableKey && expandedRow && (() => {
+  const rowData = data.find(r => r[expandableKey] === expandedRow);
+  if (!rowData) return null;
+
+  let matchKey = null;
+  if (fieldColumn && rowData[fieldColumn]) {
+    const v = String(rowData[fieldColumn]).toLowerCase();
+    if (showInfoFields[v]) matchKey = v;
+  }
+  if (!matchKey && fieldColumn) {
+    const v = String(fieldColumn).toLowerCase();
+    if (showInfoFields[v]) matchKey = v;
+  }
+
+  const fields = matchKey
+    ? showInfoFields[matchKey].map(f => ({
+        key: f.key,
+        label: f.label,
+        value: rowData[f.key] ?? ""
+      }))
+    : Object.keys(rowData).map(key => ({
+        key,
+        label: key,
+        value: rowData[key]
+      }));
+
+  return <ShowInfoModal row={rowData} fields={fields} onClose={() => setExpandedRow(null)} />;
+})()}
+
               </React.Fragment>
             ))
           ) : (

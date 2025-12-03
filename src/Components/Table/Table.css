@@ -1,6 +1,7 @@
 .table-wrapper {  
   background: #ffffff; /* white background */
   padding: 20px;
+  width: 100%;
   border-radius: 14px;
   border: 1px solid #dfe3e8;
   box-shadow: 0px 4px 12px rgba(150, 160, 180, 0.1);
@@ -79,8 +80,18 @@
   color: #151b2a;
   font-size: 15px;
 }
-.custom-table tbody tr:hover {
+
+/* Only highlight group rows on hover */
+.custom-table > tbody > tr.group-row:hover {
   background: #f0f8ff;
+}
+
+/* Expanded rows should not highlight */
+.custom-table > tbody > tr.expanded-row:hover {
+  background: transparent;
+}
+.expanded-inner-table tbody tr:hover {
+  background: #fafafa; /* light gray */
 }
 
 .custom-table td.no-data {
@@ -187,24 +198,57 @@ text-align: center;
   background: #f0f8ff;
 }
 
-/* Action buttons inside nested table */
-.nested-table td > .action-buttons {
-  display: flex;
-  gap: 6px;
-}
-
 /* Optional: make nested table slightly indented */
 .expanded-table-wrapper {
   margin-left: 20px;
 }
 
-/* Optional: rounded corners for first and last row of nested table */
-.nested-table tbody tr:first-child td {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+.one-row {
+  display: flex;
+  justify-content: space-between; /* input left, buttons right */
+  width: 100%;
+  gap: 15px;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
-.nested-table tbody tr:last-child td {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+.one-row .input-container {
+  flex: 1 1 auto;   /* stretch input container to fill space */
+  min-width: 0;     /* prevents overflowing in flex */
 }
+
+.one-row .floating-input {
+  width: 100%;      /* input fills container */
+}
+
+.one-row .buttons {
+  display: flex;    /* horizontal buttons */
+  gap: 10px;
+  flex: 0 0 auto;   /* buttons keep natural size */
+}
+
+
+/* Inner expanded table */
+.expanded-inner-table {
+  margin: 0;                   /* remove default margin */
+  border-collapse: collapse;   /* cleaner borders */
+  width: 100%;                 /* full width inside cell */
+  border-radius: 10px;
+}
+
+.expanded-inner-table th {
+  font-weight: 600;
+  padding: 16px 8px;        /* increase vertical padding for more height */
+  text-align: center;       /* center horizontally */
+  vertical-align: text-top;   /* center vertically */
+  border-bottom: 2px solid #3b8cc0;
+}
+
+
+.expanded-inner-table td {
+  padding: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+
+

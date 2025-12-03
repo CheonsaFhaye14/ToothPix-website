@@ -16,7 +16,7 @@
 
 /* Hero section */
 .hero {
-  background-color: #d3eaff;
+  background-color: #ffffff;
   padding: 3rem 2rem;
   border-radius:100px; /* more rounded for cuteness */
   flex: 0 0 45%;
@@ -79,7 +79,7 @@
 
 /* Highlight cards */
 .highlight-card {
-  background-color: #e0f3ff;
+  background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 200px; /* rounder for cuteness */
   box-shadow: 0 6px 15px rgba(0,0,0,0.08);

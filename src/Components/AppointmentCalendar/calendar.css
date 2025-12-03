@@ -1,0 +1,85 @@
+.calendar-card {
+  background: #ffffff; /* same as table-wrapper */
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #dfe3e8;
+  box-shadow: 0px 4px 12px rgba(150, 160, 180, 0.1);
+  margin: 20px 0;
+}
+
+/* Optional: soften FullCalendar header */
+.fc .fc-toolbar {
+  background: #4aa3e0;
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Optional: day cells hover */
+.fc-daygrid-day:hover {
+  background: #dff0ff;
+  cursor: pointer;
+}
+
+/* Optional: event styling */
+.fc-event {
+  border-radius: 10px !important;
+  padding: 2px 5px !important;
+  font-size: 15px;
+}
+.calendar-legend {
+  font-size: 0.9rem;
+}
+
+.calendar-legend ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.calendar-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid #333;
+}
+.btn-toggle {
+  margin-left: 50px;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+  background: #7ecaf6;          /* soft light blue */
+  color: #2c3e50;               /* dark text for contrast */
+  border: none;
+  border-radius: 20px;          /* smaller pill shape */
+  font-size: 15px;              /* slightly smaller text */
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 5px rgba(135, 206, 250, 0.3); /* lighter shadow */
+}
+
+.btn-toggle:hover {
+  background: #7ec8f0;          /* deeper blue on hover */
+  transform: translateY(-1px) scale(1.03); /* gentle hover bounce */
+  box-shadow: 0 3px 8px rgba(135, 206, 250, 0.4);
+}
+
+.btn-toggle:active {
+  transform: scale(0.95);       /* squish effect when clicked */
+  background: #6bbbe0;
+}
+
+.btn-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(135, 206, 250, 0.5); /* cute focus ring */
+}

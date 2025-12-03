@@ -5,6 +5,7 @@ import { useAdminAuth } from '../Hooks/Auth/useAdminAuth';
 
 export function useAuth() {
   const [message, setMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // NEW
   const [message2, setMessage2] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -12,71 +13,68 @@ export function useAuth() {
   const history = useNavigate();
   const { login } = useAdminAuth();
 
-/** LOGIN */
-const handleLogin = async (username, password) => {
-  setMessage('');
+  /** LOGIN */
+  const handleLogin = async (username, password) => {
+    setMessage('');
+    setSuccessMessage(''); // reset success
 
-  const trimmedUsername = username.trim();
-  const trimmedPassword = password;
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password;
 
-  // Early validation: check each field separately
-  if (!trimmedUsername && !trimmedPassword) {
-    setMessage('Please enter both username and password.');
-    return;
-  } else if (!trimmedUsername) {
-    setMessage('Please enter your username.');
-    return;
-  } else if (!trimmedPassword) {
-    setMessage('Please enter your password.');
-    return;
-  }
-
-  setIsLoggingIn(true);
-
-  try {
-    const res = await fetch(`${BASE_URL}/api/website/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
-    });
-
-    let data;
-    try {
-      data = await res.json(); // parse JSON
-    } catch (parseError) {
-      console.error('Failed to parse response JSON:', parseError);
-      setMessage('Unexpected response from server.');
+    if (!trimmedUsername && !trimmedPassword) {
+      setMessage('Please enter both username and password.');
+      return;
+    } else if (!trimmedUsername) {
+      setMessage('Please enter your username.');
+      return;
+    } else if (!trimmedPassword) {
+      setMessage('Please enter your password.');
       return;
     }
 
-    if (res.ok && data?.token && data?.user?.idusers && data?.user?.username) {
-      // Successful login
-      login(data.token, data.user.idusers, data.user.username);
-      history('/dashboard');
+    setIsLoggingIn(true);
 
-    } else if (data?.errors && Array.isArray(data.errors)) {
-      setMessage(data.errors.map(err => err.msg).join(' | '));
+    try {
+      const res = await fetch(`${BASE_URL}/api/website/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
+      });
 
-    } else if (data?.message) {
-      setMessage(data.message);
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        console.error('Failed to parse response JSON:', parseError);
+        setMessage('Unexpected response from server.');
+        return;
+      }
 
-    } else {
-      setMessage('Login failed. Please check your credentials.');
+      if (res.ok && data?.token && data?.user?.idusers && data?.user?.username) {
+        // Successful login
+        login(data.token, data.user.idusers, data.user.username);
+
+        // Set success message instead of immediately navigating
+        setSuccessMessage('Login successful! Redirecting...');
+        // The component will show the success modal and navigate after a timeout
+      } else if (data?.errors && Array.isArray(data.errors)) {
+        setMessage(data.errors.map(err => err.msg).join(' | '));
+      } else if (data?.message) {
+        setMessage(data.message);
+      } else {
+        setMessage('Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      console.error('Network or server error during login:', err);
+      setMessage('Unable to connect to the server. Please try again later.');
+    } finally {
+      setIsLoggingIn(false);
     }
-
-  } catch (err) {
-    console.error('Network or server error during login:', err);
-    setMessage('Unable to connect to the server. Please try again later.');
-  } finally {
-    setIsLoggingIn(false);
-  }
-};
-
+  };
 
   /** FORGOT PASSWORD */
   const handleForgotPassword = async (email, closeModalCallback) => {
     setMessage2('');
-
     try {
       const res = await fetch(`${BASE_URL}/api/admin`);
       const data = await res.json();
@@ -157,6 +155,7 @@ const handleLogin = async (username, password) => {
 
   return {
     message,
+    successMessage, // NEW
     message2,
     isLoggingIn,
     loading,

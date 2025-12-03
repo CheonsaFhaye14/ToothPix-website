@@ -1,0 +1,130 @@
+/* 🌫️ Blurred white background overlay with gradual blur */
+.message-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  background: rgba(255, 255, 255, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1rem;
+  pointer-events: all;
+  animation: blurIn 0.5s ease forwards;
+}
+
+/* Gradual blur and fade-in of overlay */
+@keyframes blurIn {
+  0% {
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+    background: rgba(255, 255, 255, 0);
+  }
+  100% {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.55);
+  }
+}
+
+/* Fade overlay out when modal disappears */
+.message-overlay.fade-out {
+  animation: blurOut 0.5s ease forwards;
+}
+
+@keyframes blurOut {
+  0% {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.55);
+  }
+  100% {
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+    background: rgba(255, 255, 255, 0);
+  }
+}
+
+/* ✨ The cute message box */
+.message-modal {
+  background: #ffffff;
+  color: #333;
+  padding: 1.2rem 2rem;
+  border-radius: 25px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  animation: slideUp 0.5s ease-out, fadeout 3s forwards;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  max-width: 90%;
+  min-width: 250px;
+}
+
+/* 🩵 Info */
+.message-modal.info {
+  border-color: #b8dbff;
+  color: #0d3b66;
+  box-shadow: 0 4px 25px rgba(184, 219, 255, 0.5);
+}
+
+/* 💔 Error */
+.message-modal.error {
+  border-color: #ffc5c5;
+  color: #b30000;
+  box-shadow: 0 4px 25px rgba(255, 197, 197, 0.5);
+}
+
+/* 💚 Success */
+.message-modal.success {
+  border-color: #b5f7ca;
+  color: #006633;
+  box-shadow: 0 4px 25px rgba(181, 247, 202, 0.5);
+}
+
+.message-modal p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* 🌈 Cute slide-up animation */
+@keyframes slideUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ☁️ Gentle fadeout */
+@keyframes fadeout {
+  0%, 80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+}
+
+/* 💨 Overlay fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

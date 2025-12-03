@@ -43,25 +43,28 @@ useEffect(() => {
     setLocalOptions(options);
   }, [options]);
 
-  const getOptionLabel = (opt) => {
-    if (!opt) return "";
-    if (typeof opt === "string" || typeof opt === "number") return opt;
-    return opt.label || String(opt.value || "");
-  };
+const getOptionLabel = (opt) => {
+  if (!opt) return "";
+  if (typeof opt === "string") return capitalizeWords(opt);
+  if (typeof opt === "number") return String(opt); // leave numbers as-is
+  return capitalizeWords(opt.label || String(opt.value || ""));
+};
 
 const handleSelect = (option) => {
   if (!option) return;
 
-  // Determine label and value
-  const label = typeof option === "object" ? option.label : option;
-  const val = typeof option === "object" ? option.value : option;
+  const rawLabel = typeof option === "object" ? option.label : option;
+  const rawVal   = typeof option === "object" ? option.value : option;
 
-  // Show the label in the input field
+  const label = capitalizeWords(rawLabel);  // pretty for the UI
+  const val   = String(rawVal);             // stable for logic
+
+  console.log("Selected option:", option);
+  console.log("Label:", label);
+  console.log("Value:", val);
+
   setInputValue(label);
-
-  // Send the value to the parent form
   onChange && onChange({ target: { name, value: val } });
-
   setOpen(false);
 };
 
@@ -96,7 +99,11 @@ const exists = localOptions.some((o) => {
     }
 
     // Add new option
-    const newOption = { label: capitalizeWords(trimmed), value: trimmed };
+const newOption = { 
+  label: capitalizeWords(trimmed), 
+  value: capitalizeWords(trimmed) 
+};
+
     setLocalOptions((prev) => [...prev, newOption]);
 
     // Automatically select the new option
@@ -146,7 +153,7 @@ const exists = localOptions.some((o) => {
           ))}
 
           {allowCustom && (
-            <li className="dropdown-item add-new">
+              <li className="dropdown-item add-new">
               <FloatingInput
                 name="customInput"
                 value={customInput}

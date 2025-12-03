@@ -60,14 +60,9 @@ const ResetPassword = () => {
 
   return (
     <div className="reset-password-page">
-      <div className="right-panel">
+      <div className="login-container">
         <div className="login-card">
-          <h2>Reset Password</h2>
-          {message && (
-            <div className={`message ${message.startsWith('✅') ? 'success-text' : 'error-text'}`}>
-              {message}
-            </div>
-          )}
+          <h1>Reset Password</h1>
           <form onSubmit={handleSubmit}>
 
             {/* New Password */}
@@ -93,6 +88,11 @@ const ResetPassword = () => {
             <button type="submit" className="btn-primary" disabled={loading || !token}>
               {loading ? 'Loading...' : 'Reset Password'}
             </button>
+                      {message && (
+            <div className={`message ${message.startsWith('✅') ? 'success-text' : 'error-text'}`}>
+              {message}
+            </div>
+          )}
           </form>
         </div>
       </div>

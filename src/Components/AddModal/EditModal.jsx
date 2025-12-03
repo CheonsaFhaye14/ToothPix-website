@@ -10,9 +10,9 @@ import CustomPicInput from "../../utils/CustomPicInput"; // <-- new image input
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
-export default function AddModal({ datatype, choices, selected, fields, onClose, onSubmit })
+export default function EditModal({ datatype, choices, selected, fields, onClose, onSubmit })
 {
-  const [currentType, setCurrentType] = useState(selected); // default to selected choice
+  const [currentType, setCurrentType] = useState(selected?.[datatype] || choices?.[0] || "");
   const [showPasswordFields, setShowPasswordFields] = useState({}); 
   const [errors, setErrors] = useState({});
   const currentFields = fields[currentType] || [];  // fields for current type
@@ -20,7 +20,6 @@ export default function AddModal({ datatype, choices, selected, fields, onClose,
 
   // Initialize form values based on current type
 const initializeFormValues = useCallback((type) => {
-
     const currentFields = fields[type] || [];
 
     // Set initial values based on field types
@@ -43,7 +42,7 @@ const initializeFormValues = useCallback((type) => {
   return initValues;
 }, [fields]);
 
-    const [formValues, setFormValues] = useState(() => initializeFormValues(currentType));
+const [formValues, setFormValues] = useState(() => initializeFormValues(currentType));
 
 // Reset form values and errors when currentType changes
 useEffect(() => {
@@ -83,12 +82,10 @@ const handleChange = (e) => {
 
 // Handle form submission
 const handleSubmit = () => {
-
    setLoading(true);
 
   // Validate all fields
   const validationErrors = validateForm(formValues, fields, currentType);
-
   // If there are errors, mark all fields as touched and show errors
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
@@ -145,7 +142,7 @@ const handleSubmit = () => {
 
 
 
-  const dynamicTitle = `Add New ${currentType}`;
+  const dynamicTitle = `Edit ${currentType}`;
 
   return (
     <div className="modal-backdrop">

@@ -92,14 +92,18 @@ export default function RecordReportExport({ records = [] }) {
   };
 
 return (
-  <div className="mb-3" style={{ display: 'flex', gap: '12px' }}>
-    <button onClick={handleDownloadCSV} className="btn btn-primary">
-      Export CSV
-    </button>
-    <button onClick={handleDownloadPDF} className="btn btn-danger">
-      Export PDF
-    </button>
-  </div>
+<div
+  className="mb-3"
+  style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}
+>
+  <button onClick={handleDownloadCSV} className="btn btn-primary">
+    Export CSV
+  </button>
+  <button onClick={handleDownloadPDF} className="btn btn-danger">
+    Export PDF
+  </button>
+</div>
+
 );
 
 }

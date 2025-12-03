@@ -16,7 +16,7 @@
 }
 
 .about-section {
-  background-color: #d3eaff; /* soft light blue */
+  background-color: #ffffff; /* soft light blue */
   padding: 1.5rem 2rem;
   margin-bottom: 1.5rem;
   border-radius: 25px; /* cute rounded corners */
@@ -47,7 +47,7 @@
 }
 
 .about-section ul li {
-  background-color: #e0f3ff; /* slightly lighter pill */
+  background-color: #ffffff; /* slightly lighter pill */
   margin-bottom: 0.8rem;
   padding: 0.8rem 1rem;
   border-radius: 50px; /* pill shape for objectives */

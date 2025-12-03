@@ -9,6 +9,8 @@ import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import Table from '../../Components/Table/Table.jsx';
 import { showInfoFields } from '../../data/ShowInfoField/appointments.js';
 import { formatDateTime } from '../../utils/formatDateTime.jsx';
+import AppointmentCalendar from '../../Components/AppointmentCalendar/calendar.js';
+import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
 
 const Appointment = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
@@ -37,44 +39,61 @@ const tabledata = appointments.map((appointment) => ({
   // Action buttons
   onEdit: () => handleEdit(appointment),
   onDelete: () => handleDelete(appointment.idappointment),
+
 }));
+const [appointmentData, setAppointmentData] = useState([]);
+const [showCalendar, setShowCalendar] = useState(true); // toggle state
+
+const fetchAppointmentsForCalendar = async () => {
+  try {
+    const token = localStorage.getItem("jwt_token");
+    const response = await axios.get(`${BASE_URL}/api/website/appointmentsforcalendar`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+
+    const now = new Date();
+
+    const events = response.data.appointments
+      .filter(a => new Date(a.date) >= now)
+      .map((a) => {
+        const formattedTime = new Date(a.date).toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        return {
+          id: a.idappointment,
+          title: `${formattedTime} ${a.patientfullname || a.patient_name || "No Patient"}`,
+          start: a.date,
+          end: a.date,
+          extendedProps: {
+            patient: a.patientfullname || a.patient_name,
+            services: a.services?.map((s) => s.name).join(", "),
+            notes: a.notes,
+            status: a.status,
+          },
+        };
+      });
+
+    setAppointmentData(events);
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchAppointmentsForCalendar(); // 👈 renamed call
+}, []);
 
 
 
-const [filters, setFilters] = useState({ dentist: '', patient: '', startDate: '', endDate: '', status: '' });
-  const [dentists, setDentists] = useState([]);
+const [dentists, setDentists] = useState([]);
   const [patients, setPatients] = useState([]);
   
-         const filteredAppointments = appointments.filter(appointment => {
-  // Filter by date range (if any)
-  if (filters.startDate && filters.endDate) {
-    const appointmentDateOnly = appointment.date.split('T')[0];
-    if (appointmentDateOnly < filters.startDate || appointmentDateOnly > filters.endDate) return false;
-  }
 
-  // Filter by status (if any)
-  if (filters.status && appointment.status.toLowerCase() !== filters.status.toLowerCase()) {
-    return false;
-  }
-
-  // Filter by patient
-  if (filters.patient) {
-    // Check if this appointment's patient matches filter:
-    // 1) If registered patient, compare with fullname
-    // 2) If walk-in, compare with patient_name
-    const fullname = appointment.patientFullname?.trim().toLowerCase();
-    const walkinName = appointment.patient_name?.trim().toLowerCase();
-    const filterName = filters.patient.trim().toLowerCase();
-
-    if (appointment.idpatient) {
-      if (fullname !== filterName) return false;
-    } else {
-      if (walkinName !== filterName) return false;
-    }
-  }
-
-  return true;
-});
 
  
   const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
@@ -134,27 +153,6 @@ const existingPatient = [
   ];
 
   
-
-  
-  // Convert existingTimes to 24-hour format once for easier comparison
-  
-const sortedAppointments = React.useMemo(() => {
-  const sorted = [...filteredAppointments];
-
-  sorted.sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-
-    if (dateA < dateB) return -1;
-    if (dateA > dateB) return 1;
-
-    // If same datetime, sort by ID
-    return a.idappointment - b.idappointment;
-  });
-
-  return sorted;
-}, [filteredAppointments]);
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest('.usertype-input-wrapper')) {
@@ -165,20 +163,11 @@ const sortedAppointments = React.useMemo(() => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
   
-                 
- const [addFormData, setAddFormData] = React.useState({
-               patient: '',
-               dentist:'',
-               date: '',
-               time: '',
-               service: []  // an array of selected services
-                });
  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
               const [confirmMessage, setConfirmMessage] = useState('');
               const [showModal, setShowModal] = useState(false);
       const [message, setMessage] = useState('');
             const [showModal2, setShowModal2] = useState(false);
-    const [isAdding, setIsAdding] = React.useState(false);
 
 
 
@@ -208,15 +197,23 @@ const sortedAppointments = React.useMemo(() => {
         }
     };
   
-      const fetchPatients = async () => {
-        try {
-          const res = await fetch(`${BASE_URL}/api/app/patients`);
-          const data = await res.json();
-          if (res.ok) setPatients(data.patients);
-        } catch (error) {
-          console.error('Error fetching patients:', error);
-        }
-      };
+const fetchPatients = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/website/patients`);
+    const data = await res.json();
+
+    if (res.ok) {
+      // data.patients is an array of objects like:
+      // { idusers: 11, firstname: "Sugar", lastname: "Redillas", fullname: "Sugar Redillas" }
+      setPatients(data.patients);
+    } else {
+      console.error('Failed to fetch patients:', data.message);
+    }
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+  }
+};
+
   
   useEffect(() => {
     
@@ -240,31 +237,51 @@ const sortedAppointments = React.useMemo(() => {
     });
   };
 
-const formatAppointmentDate = (utcDateString) => {
-  if (!utcDateString) return '';
-
-  const date = new Date(utcDateString); // parses ISO string as UTC automatically
-
-  return new Intl.DateTimeFormat('en-PH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Asia/Manila',  // convert and format in Manila timezone
-  }).format(date);
-};
-
-
-  
   const handleDelete = (id) => {
     setConfirmDeleteId(id);
     setMessageType('error');
     setConfirmMessage("Are you sure you want to delete this appointment?");
     setShowModal(true);
   };
-   
+const confirmDeletion = async () => {
+  if (!confirmDeleteId) {
+    showTemporaryModal('No appointment selected for deletion.', 'error');
+    setShowModal(false);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/website/appointments/${confirmDeleteId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        adminId: localStorage.getItem('adminId'), // <-- send adminId here
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      showTemporaryModal(error.message || 'Failed to delete appointment.', 'error');
+      return;
+    }
+
+    // ✅ Refresh calendar data from server
+    await fetchAppointmentsForCalendar();
+
+    showTemporaryModal('Appointment deleted successfully.', 'success');
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    showTemporaryModal('An error occurred while deleting the appointment.', 'error');
+  } finally {
+    setConfirmDeleteId(null);
+    setShowModal(false);
+  }
+};
+
+
 
 const fetchAppointments = async (filters = {}) => {
   try {
@@ -308,222 +325,7 @@ const fetchAppointments = async (filters = {}) => {
     }
   }, [dentists, patients]);
 
- const handleFilterChange = async (e) => {
-  const { name, value } = e.target;
-  const newFilters = { ...filters, [name]: value };
-  setFilters(newFilters);
 
-  // If you want to fetch from backend:
-  if (['dentist', 'patient', 'status'].includes(name)) {
-    const data = await fetchAppointments(newFilters);
-    const enriched = getFullNames(data, dentists, patients);
-    setAppointments(enriched);
-  }
-};
-
-
-  const clearFilters = async () => {
-    const emptyFilters = { dentist: '', patient: '', startDate: '', endDate: '', status: '' };
-    setFilters(emptyFilters);
-    const data = await fetchAppointments(emptyFilters);
-    const enriched = getFullNames(data, dentists, patients);
-    setAppointments(enriched);
-  };
-
-const confirmDeletion = async () => {
-  if (!confirmDeleteId) {
-    showTemporaryModal('No appointment selected for deletion.', 'error');
-    setShowModal(false);
-    return;
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/website/appointments{confirmDeleteId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        adminId: localStorage.getItem('adminId') // <-- send adminId here
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      showTemporaryModal(error.message || 'Failed to delete appointment.', 'error');
-      return;
-    }
-
-    setAppointments(prevAppointments =>
-      prevAppointments.filter(appointment => appointment.idappointment !== confirmDeleteId)
-    );
-    showTemporaryModal('Appointment deleted successfully.', 'success');
-  } catch (error) {
-    console.error("Error deleting appointment:", error);
-    showTemporaryModal('An error occurred while deleting the appointment.', 'error');
-  } finally {
-    setConfirmDeleteId(null);
-    setShowModal(false);
-  }
-};
-
-
-
-
-  
-  
-const handleAddFormChange = (e) => {
-    const { name, value } = e.target;
-    setAddFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-const handleAddSubmit = async (e) => {  
-  e.preventDefault();
-  
-  const patientName = addFormData.patient.trim();
-  const dentistName = addFormData.dentist.trim();
-
-  if (!patientName) {
-    showTemporaryModal('Patient is required.', 'error');
-    return;
-  }
-
-  if (!dentistName) {
-    showTemporaryModal('Dentist is required.', 'error');
-    return;
-  }
-
-  const patientObj = patients.find(p => `${p.firstname} ${p.lastname}` === patientName);
-  const dentistObj = dentists.find(d => `${d.firstname} ${d.lastname}` === dentistName);
-
-  if (!dentistObj) {
-    showTemporaryModal('Dentist not found in records.', 'error');
-    return;
-  }
-
-  if (!addFormData.date) {
-    showTemporaryModal('Date is required.', 'error');
-    return;
-  }
-
-  if (!addFormData.time.trim()) {
-    showTemporaryModal('Time is required.', 'error');
-    return;
-  }
-
-  if (!existingTimes.includes(addFormData.time)) {
-    showTemporaryModal('Time does not exist.', 'error');
-    return;
-  }
-
-  if (!addFormData.service.length) {
-    showTemporaryModal('At least one service must be selected.', 'error');
-    return;
-  }
-
-  for (const serviceName of addFormData.service) {
-    if (!existingService.includes(serviceName)) {
-      showTemporaryModal(`Service "${serviceName}" does not exist.`, 'error');
-      return;
-    }
-  }
-
-  const selectedServiceIds = addFormData.service
-    .map(serviceName => {
-      const serviceObj = services.find(s => s.name === serviceName);
-      return serviceObj ? serviceObj.idservice : null;
-    })
-    .filter(id => id !== null);
-
-  // Convert 12h time to 24h
-  const [timePart, modifier] = addFormData.time.split(' ');
-  let [hours, minutes] = timePart.split(':').map(Number);
-
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-
-  // Create a Date object in Manila timezone by constructing the ISO string with timezone offset +08:00
-  // This avoids JS timezone confusion
-  const manilaDateTimeStr = `${addFormData.date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00+08:00`;
-  const appointmentDate = new Date(manilaDateTimeStr);
-
-  if (isNaN(appointmentDate)) {
-    showTemporaryModal('Invalid date or time.', 'error');
-    return;
-  }
-
-  const now = new Date();
-  if (appointmentDate.getTime() <= now.getTime()) {
-    showTemporaryModal('Selected date and time cannot be in the past.', 'error');
-    return;
-  }
-
-  // Convert Manila time Date to UTC ISO string
-  const utcISOString = appointmentDate.toISOString();
-
-  const newAppointment = {
-    iddentist: dentistObj.idusers,
-    date: utcISOString,
-    status: 'pending',
-    idservice: selectedServiceIds,
-    notes: '',
-    ...(patientObj
-      ? { idpatient: patientObj.idusers }
-      : { patient_name: patientName }),
-      adminId,
-  };
-
-  console.log(newAppointment);
-
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/api/website/appointments`,
-      newAppointment,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
-        },
-      }
-    );
-
-    if (response.status === 201) {
-      setAppointments((prev) => [...prev, response.data.appointment]);
-      showTemporaryModal('Appointment added successfully.', 'success');
-      setIsAdding(false);
-      setAddFormData({
-        patient: '',
-        dentist: '',
-        date: '',
-        time: '',
-        service: [],
-        serviceInput: '',
-      });
-    }
-  } catch (error) {
-    if (error.response) {
-      const status = error.response.status;
-      const serverMessage = error.response.data.message;
-
-      if (status === 400) {
-        showTemporaryModal(serverMessage || 'Missing or invalid input fields.', 'error');
-      } else if (status === 500) {
-        showTemporaryModal(serverMessage || 'Internal server error occurred.', 'error');
-      } else {
-        showTemporaryModal(serverMessage || 'Unexpected error occurred.', 'error');
-      }
-    } else {
-      showTemporaryModal('Could not connect to server. Please try again later.', 'error');
-    }
-  } finally {
-    fetchDentists();
-    fetchPatients();
-    fetchServices();
-  }
-};
 
 const showTemporaryModal = (msg, type) => {
     setMessage(msg);
@@ -734,28 +536,20 @@ const fieldsWithAppointments = {
   ...fieldTemplates,
   Appointments: (fieldTemplates.Appointments || []).map(field => {
 
-    // 1️⃣ Patient dropdown
-    if (field.name === "patient") {
-      const patientOptions = [
-        ...(patients || []).filter(p => p.firstname && p.lastname)
-          .map(p => ({
-            label: `${p.firstname} ${p.lastname}`,
-            value: p.idusers
-          })),
-        ...(appointments || []).filter(a => !a.idpatient && a.patient_name)
-          .map(a => ({
-            label: a.patient_name,
-            value: a.patient_name
-          }))
-      ];
+if (field.name === "patient") {
+  const patientOptions = (patients || []).map(p => ({
+    label: p.fullname,                          // always present
+    value: p.idusers ? p.idusers : p.fullname   // use idusers if available, else fallback to fullname
+  }));
 
-      // Deduplicate by label (case-insensitive)
-      const uniquePatientOptions = Array.from(
-        new Map(patientOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
-      );
+  // Deduplicate by label (case-insensitive)
+  const uniquePatientOptions = Array.from(
+    new Map(patientOptions.map(opt => [opt.label.toLowerCase(), opt])).values()
+  );
 
-      return { ...field, options: uniquePatientOptions };
-    }
+  return { ...field, options: uniquePatientOptions };
+}
+
 
     // 2️⃣ Dentist dropdown
     if (field.name === "dentist") {
@@ -786,53 +580,57 @@ const fieldsWithAppointments = {
   })
 };
 
+
 const handleAdd = async (formValues) => {
   if (!token || !adminId) {
-    setMessageType("error");
-    setMessage("You must be logged in as admin.");
+    setMessage({ type: "error", text: "You must be logged in as admin." });
     return;
   }
 
   try {
     console.log("📝 Original Form Values:", formValues);
 
-    // Build payload as JSON instead of FormData for proper array handling
-    const payload = {
-      adminId,
-      status: "pending",
-    };
-
-    // ⭐ Convert date + time to UTC ISO
+    // ⭐ Convert date + time to UTC ISO and check if it's in the past
+    let appointmentDate = null;
     if (formValues.date && formValues.time) {
       const [hours, minutes] = formValues.time.split(":").map(Number);
       const manilaStr = `${formValues.date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00+08:00`;
-      const dateObj = new Date(manilaStr);
-      if (!isNaN(dateObj)) payload.date = dateObj.toISOString();
-    }
+      appointmentDate = new Date(manilaStr);
 
-    // ⭐ Handle patient
-    if (formValues.patient !== undefined && formValues.patient !== null) {
-      if (!isNaN(formValues.patient)) {
-        payload.idpatient = Number(formValues.patient);
-      } else {
-        payload.patient_name = formValues.patient;
+      if (isNaN(appointmentDate)) {
+        setMessage({ type: "error", text: "Invalid date or time." });
+        return;
+      }
+
+      const now = new Date();
+      if (appointmentDate <= now) {
+        setMessage({ type: "error", text: "Cannot add an appointment in the past." });
+        return;
       }
     }
 
-    // ⭐ Handle dentist
+    // Build payload
+    const payload = { adminId, status: "pending" };
+    if (appointmentDate) payload.date = appointmentDate.toISOString();
+
+    // Handle patient
+    if (formValues.patient !== undefined && formValues.patient !== null) {
+      if (!isNaN(formValues.patient)) payload.idpatient = Number(formValues.patient);
+      else payload.patient_name = formValues.patient;
+    }
+
+    // Handle dentist
     if (formValues.dentist !== undefined && formValues.dentist !== null) {
       payload.iddentist = Number(formValues.dentist);
     }
 
-    // ⭐ Handle services (array of numeric IDs)
+    // Handle services (array of numeric IDs)
     if (Array.isArray(formValues.services)) {
-      const serviceIds = formValues.services
-        .map(s => Number(s))
-        .filter(id => !isNaN(id));
+      const serviceIds = formValues.services.map(s => Number(s)).filter(id => !isNaN(id));
       if (serviceIds.length > 0) payload.idservice = serviceIds;
     }
 
-    // ⭐ Append other fields except patient/dentist/date/time/services
+    // Append other fields
     Object.entries(formValues).forEach(([key, value]) => {
       if (
         value !== null &&
@@ -858,453 +656,79 @@ const handleAdd = async (formValues) => {
       await fetchServices();
       await fetchDentists();
       await fetchPatients();
-
-      setMessageType("success");
-      setMessage(`✅ ${formValues.appointments || "Appointment"} added successfully!`);
+      await fetchAppointments();
+      await fetchAppointmentsForCalendar();
+      setMessage({ type: "success", text: `✅ ${formValues.appointments || "Appointment"} added successfully!` });
       setModalOpen(false);
+      setTimeout(() => setMessage(null), 2000);
     } else {
-      setMessageType("error");
-      setMessage(response.data?.message || "Something went wrong.");
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
     }
   } catch (error) {
     console.error("handleAdd error:", error);
 
-    let message = "Could not connect to server. Please try again later.";
+    let errorMessage = "Could not connect to server. Please try again later.";
     if (error.response) {
       const { status, data } = error.response;
-      if (status === 400) message = "Missing or invalid input fields.";
-      else if (status === 500) message = "Internal server error occurred.";
-      else message = data?.message || message;
+      if (status === 400) errorMessage = "Missing or invalid input fields.";
+      else if (status === 500) errorMessage = "Internal server error occurred.";
+      else errorMessage = data?.message || errorMessage;
     }
 
-    setMessageType("error");
-    setMessage(message);
+    setMessage({ type: "error", text: errorMessage });
   }
 };
+
+
 
           
 
   return (
     <div className="container py-4">
+      {/* Title and add side by side */}
+      <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
+        {/* Left side: Title + Add Button + Toggle */}
+        <div className="d-flex align-items-center gap-3">
+          <div className="same-row">
+            <h1>Appointment Management</h1>
+            <button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
 
-    {/* Title and add side by side */}
-<div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
-  {/* Left side: Title + Add Button */}
-  <div className="d-flex align-items-center gap-3">
-    <div className="same-row">
-<h1>Appointment Management</h1>
-<button className="btn-add" onClick={() => setModalOpen(true)}>+</button>
- 
- 
-<div className='report-section'>
+            {/* 👇 Toggle button between Add and Report */}
+            <button
+              className="btn-toggle"
+              onClick={() => setShowCalendar(!showCalendar)}
+            >
+              {showCalendar ? "Show Table" : "Show Calendar"}
+            </button>
 
-  {/* Right side: Export buttons (PASS enriched data) */}
-  <AppointmentReportExport appointments={appointments} />
-</div>
-</div>
- </div>
- </div>
-
-
-    
-
+            <div className="report-section">
+              {/* Right side: Export buttons */}
+              <AppointmentReportExport appointments={appointments} />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="loading-text">Loading...</div>
       ) : (
 <>
-
-<Table
-  columns={column}   // your columns for service table
-  data={tabledata}           // mapped service data with edit/delete
-  showInfoFields={showInfoFields}
-  fieldColumn="Appointments"     // selects which fields to show in modal
-/>
-
-
-{/*Filter Controls */}
-        <div className="filter-controls">
-         
-        <select
-  name="patient"
-  value={filters.patient}
-  onChange={handleFilterChange}
-  className="form-select sort-select"
->
-  <option value="">Patient</option>
-  
-  {/* Registered patients */}
-  {patients.map(p => (
-    <option key={`patient-${p.idusers}`} value={`${p.firstname} ${p.lastname}`}>
-      {p.firstname} {p.lastname}
-    </option>
-  ))}
-
-  {/* Walk-in patients from appointments */}
-  {appointments
-    .filter(app => !app.idpatient && app.patient_name)
-    .map((app, index) => (
-      <option key={`walkin-${index}`} value={app.patient_name}>
-        {app.patient_name}
-      </option>
-    ))}
-</select>
-
-
-          <select
-            name="dentist"
-            value={filters.dentist}
-            onChange={handleFilterChange}
-            className="form-select sort-select"
-          >
-            <option value="">Dentist</option>
-            {dentists.map(d => (
-              <option key={d.idusers} value={d.idusers}>
-                {d.firstname} {d.lastname}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            name="status"
-            value={filters.status}
-            onChange={handleFilterChange}
-            className="form-select sort-select"
-          >
-            <option value="">Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Rescheduled">Rescheduled</option>
-          </select>
-  
-          <div className="d-flex flex-column">
-            <label className="small ms-4">Start Date</label>
-            <input
-              type="date"
-              name="startDate"
-              className="form-control"
-              value={filters.startDate}
-              onChange={handleFilterChange}
-            />
-          </div>
-  
-          <div className="d-flex flex-column">
-            <label className="small ms-4">End Date</label>
-            <input
-              type="date"
-              name="endDate"
-              className="form-control form-control"
-              value={filters.endDate}
-              onChange={handleFilterChange}
-            />
-          </div>
-  
-  
-         
-          <button className="btn btn-secondary show-all-btn" onClick={clearFilters}>
-            Show All
-          </button>
-      </div>
-
-      
-        <div className="table-responsive">
-  <table className="table">
-    <thead>
-      <tr>
-        <th>Patient Name</th>
-        <th>Dentist Name</th>
-        <th>Scheduled Date</th>
-        <th>Status</th>
-        <th className="actions-column"></th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {sortedAppointments.length === 0 ? (
-        <tr>
-          <td colSpan="5" className="text-center">No appointments found</td>
-        </tr>
+ {showCalendar ? (
+        <AppointmentCalendar
+          appointments={appointmentData}
+          table="Appointment"
+          onDelete={(id) => handleDelete(id)}
+        />
       ) : (
-        sortedAppointments.map((appointment) => (
-          <tr key={appointment.idappointment}>
-            {/* Use patient_name for walk-ins, patientFullname for registered */}
-            <td>
-              {appointment.idpatient
-                ? appointment.patientFullname
-                : appointment.patient_name || 'Unknown'}
-            </td>
-
-            <td>{appointment.dentistFullname}</td>
-
-            <td>{formatAppointmentDate(appointment.date)}</td>
-
-            <td>
-              <span className={`status ${appointment.status.toLowerCase()}`}>
-                {appointment.status}
-              </span>
-            </td>
-
-            <td className="actions-column">
-              <button
-                className="btn-edit me-2"
-                onClick={() => handleEdit(appointment)}
-              >
-                ✏️ Edit
-              </button>
-
-              <button
-                className="btn-delete"
-                onClick={() => handleDelete(appointment.idappointment)}
-              >
-                🗑️ Delete
-              </button>
-            </td>
-          </tr>
-        ))
+        <Table
+          columns={column}
+          data={tabledata}
+          showInfoFields={showInfoFields}
+          fieldColumn="Appointments"
+        />
       )}
-    </tbody>
-  </table>
-</div>
-
-
-    
         </>
       )}
-
-
-
-
-    {isAdding && (
-    <div className="modal-overlay">
-        <div className="modal-box">
-        <h2>Add New Appointment</h2>
-        <form onSubmit={handleAddSubmit}>
-            <div className="form-row">
-            <div className="form-group usertype-input-wrapper">
-            <input
-                type="text"
-                name="patient"
-                 placeholder="Select Patient"
-                value={addFormData.patient}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    setAddFormData(prev => ({ ...prev, patient: value }));
-                    setOpenSuggestion('patient');
-                }}
-                onFocus={() => setOpenSuggestion('patient')}
-                className="form-control"
-                autoComplete="off"
-            />
-            {openSuggestion === 'patient' && (
-    <ul className="suggestions-list">
-        {existingPatient
-        .filter(cat =>
-            cat.toLowerCase().includes(addFormData.patient.toLowerCase())
-        )
-        .map((cat, index) => (
-            <li
-            key={index}
-            className="suggestion-item"
-            onClick={() => {
-                setAddFormData(prev => ({ ...prev, patient: cat }));
-                setOpenSuggestion(null);
-            }}
-            >
-            {cat}
-            </li>
-        ))}
-    </ul>
-    )}
-            </div>
-            <div className="form-group usertype-input-wrapper">
-            
-            <input
-    type="text"
-    name="dentist"
-     placeholder="Select Dentist"
-    value={addFormData.dentist}
-    onChange={(e) => {
-        const value = e.target.value;
-        setAddFormData(prev => ({ ...prev, dentist: value }));
-        setOpenSuggestion('dentist');
-    }}
-    onFocus={() => setOpenSuggestion('dentist')}
-    className="form-control"
-    autoComplete="off"
-    />
-
-    {openSuggestion === 'dentist' && (
-    <ul className="suggestions-list">
-        {existingDentist
-        .filter(cat =>
-            cat.toLowerCase().includes(addFormData.dentist.toLowerCase())
-        )
-        .map((cat, index) => (
-            <li
-            key={index}
-            className="suggestion-item"
-            onClick={() => {
-                setAddFormData(prev => ({ ...prev, dentist: cat }));
-                setOpenSuggestion(null);
-            }}
-            >
-            {cat}
-            </li>
-        ))}
-    </ul>
-    )}
-
-            </div>
-            <div className="form-group">
-   
-    <div className="form-group">
-  <input
-    type="date"
-    name="date"
-    value={addFormData.date}
-    onChange={handleAddFormChange}
-    className="form-control"
-    min={new Date().toISOString().split("T")[0]} // min today
-  />
-</div>
-
-    </div>
-
-            </div>
-            <div className="form-row">
-            <div className="form-group usertype-input-wrapper">
-    
-    <input
-        type="text"
-        name="time"
-        value={addFormData.time}
-        onChange={(e) => {
-        const value = e.target.value;
-        setAddFormData(prev => ({ ...prev, time: value }));
-        setOpenSuggestion("time");
-        }}
-        onFocus={() => setOpenSuggestion("time")}
-        className="form-control"
-        autoComplete="off"
-         placeholder="Select Time"
-    />
-
-    {openSuggestion === "time" && (
-        <ul className="suggestions-list">
-        {existingTimes
-            .filter(t =>
-            t.toLowerCase().includes(addFormData.time.toLowerCase())
-            )
-            .map((t, index) => (
-            <li
-                key={index}
-                className="suggestion-item"
-                onClick={() => {
-                setAddFormData(prev => ({ ...prev, time: t }));
-                setOpenSuggestion(null);
-                }}
-            >
-                {t}
-            </li>
-            ))}
-        </ul>
-    )}
-    </div>
-
-    <div className="form-group usertype-input-wrapper">
-    
-
-    <div className="input-and-tags-wrapper">
-        <input
-        type="text"
-        name="service"
-        value={addFormData.serviceInput || ''}
-        onChange={(e) => {
-            setAddFormData(prev => ({
-            ...prev,
-            serviceInput: e.target.value,
-            }));
-            setOpenSuggestion('service');
-        }}
-        onFocus={() => setOpenSuggestion('service')}
-        className="form-control"
-        autoComplete="off"
-         placeholder="Select Service"
-        />
-
-    </div>
-
-    {openSuggestion === 'service' && (
-        <ul className="suggestions-list">
-        {existingService
-            .filter(serviceName =>
-            serviceName.toLowerCase().includes((addFormData.serviceInput || '').toLowerCase()) &&
-            !addFormData.service.includes(serviceName)
-            )
-            .map((serviceName, index) => (
-                <li
-                key={index}
-                className="suggestion-item"
-                onClick={() => {
-                  if (addFormData.service.length < 3) {
-                    setAddFormData(prev => ({
-                      ...prev,
-                      service: [...prev.service, serviceName],
-                      serviceInput: '',
-                    }));
-                    setOpenSuggestion(null);
-                  } else {
-                    showTemporaryModal('You can only select up to 3 services.', 'error' );
-                  }
-                }}
-              >
-                {serviceName}
-              </li>
-              
-            ))}
-        </ul>
-    )}
-    </div>
-
-            </div>
-            <div className='form-row'>
-                  {/* Show selected services as tags */}
-        <div className="selected-services">
-        {(addFormData.service || []).map((serviceName, idx) => (
-            <span key={idx} className="service-tag">
-            {serviceName}
-            <button
-                type="button"
-                onClick={() => {
-                setAddFormData(prev => ({
-                    ...prev,
-                    service: prev.service.filter(s => s !== serviceName),
-                }));
-                }}
-            >
-                &times;
-            </button>
-            </span>
-        ))}
-        </div>
-         </div>
-            <div className="form-actions">
-            <button type="submit" className="btn btn-primary">
-                Add User
-            </button>
-            <button
-                type="button"
-                onClick={() => setIsAdding(false)}
-                className="btn btn-secondary"
-            >
-                Cancel
-            </button>
-            </div>
-        </form>
-        </div>
-    </div>
-    )}
  {isEditing && (
   <div className="modal-overlay">
     <div className="modal-box">
@@ -1620,6 +1044,15 @@ const handleAdd = async (formValues) => {
     </div>
   </div>
 )}
+
+ {message && (
+        <MessageModal
+          message={message.text}
+          type={message.type}
+          onClose={() => setMessage(null)}
+        />
+      )}
+
     </div>
   );
   

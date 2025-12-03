@@ -2,13 +2,14 @@
 .dropdown-item.add-new {
   display: flex;
   gap: 1rem;
-  align-items: center;
+  width: 100%;
 }
 
 /* Override padding for the input inside the add-new container only */
 .dropdown-item.add-new input[type="text"] {
   padding-top: 0.25rem;   /* smaller top padding */
   padding-bottom: 0.25rem; /* smaller bottom padding */
+  width: 470px;
 }
 
 /* Override margin only for the add-new container */

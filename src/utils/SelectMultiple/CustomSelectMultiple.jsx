@@ -102,7 +102,9 @@ const handleCustomAdd = () => {
 
   // Add new option safely
   setCustomError("");
-  const newOption = { label: capitalizeWords(customInput), value: customInput };
+  const capitalized = capitalizeWords(trimmedValue);
+  const newOption = { label: capitalized, value: capitalized };
+
   setLocalOptions((prev) => [...prev, newOption]);
   handleSelect(newOption);
   setCustomInput("");
@@ -123,7 +125,7 @@ const handleCustomAdd = () => {
   }, []);
 
   return (
-    <div className="input-container custom-select-container" ref={containerRef} style={{ position: "relative" }}>
+    <div className="input-container" ref={containerRef} style={{ position: "relative" }}>
       <input
         type="text"
         readOnly

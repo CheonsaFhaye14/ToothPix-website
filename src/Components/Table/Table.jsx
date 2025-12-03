@@ -3,8 +3,10 @@ import "./Table.css";
 import FloatingInput from "../../utils/InputForm.jsx";
 import ShowInfoModal from "../ShowInfoModal/ShowInfoModal.jsx"; 
 import ActionButtons from "../../utils/ActionButton/ActionButtons";
+import CustomSelect from "../../utils/Select/CustomSelect";
+import CustomDate from "../../utils/CustomDate.jsx";
 
-const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFields = {}, fieldColumn}) => {
+const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFields = {}, fieldColumn, filterFields = []}) => {
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,24 +97,65 @@ const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFiel
 
   return (
     <div className="table-wrapper">
-      <div style={{ display: "flex", gap: "10px" }}>
-        <FloatingInput
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
+ {/* Top Row: Search + Buttons */}
+<div className="one-row">
+  <FloatingInput
+    className="one-row-input"
+    placeholder="Search..."
+    value={search}
+    onChange={(e) => {
+      setSearch(e.target.value);
+      setCurrentPage(1);
+    }}
+  />
+
+<div className="buttons">
+  <button className="Showall-btn" onClick={() => setShowAll(prev => !prev)}>
+    {showAll ? "Paginate" : "Show All"}
+  </button>
+
+  <button onClick={handleReset} disabled={isResetDisabled} className="reset-btn">
+    Reset
+  </button>
+  </div>
+</div>
+
+{/* Filters Row */}
+{filterFields && filterFields.length > 0 && (
+  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center", marginBottom: "10px" }}>
+    {filterFields.map((field) => {
+      if (field === "startDate" || field === "endDate") {
+        return (
+          <CustomDate
+            key={field}
+            value={filters[field] || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, [field]: e.value || e.target.value }))
+            }
+            placeholder={field === "startDate" ? "Start Date" : "End Date"}
+            style={{ flexGrow: 1, minWidth: "150px" }} // fill remaining space
+          />
+        );
+      }
+
+      return (
+        <CustomSelect
+          key={field}
+          value={filters[field] || ""}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, [field]: e.value || e.target.value }))
+          }
+          options={filters[field + "Options"] || []}
+          placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+          style={{ flexGrow: 1, minWidth: "150px" }} // fill remaining space
         />
+      );
+    })}
+  </div>
+)}
 
-        <button className="Showall-btn" onClick={() => setShowAll(prev => !prev)}>
-          {showAll ? "Paginate" : "Show All"}
-        </button>
 
-        <button onClick={handleReset} disabled={isResetDisabled} className="reset-btn">
-          Reset
-        </button>
-      </div>
+
 
       <table className="custom-table">
         <thead>
