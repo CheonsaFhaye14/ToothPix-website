@@ -36,6 +36,7 @@ export const fieldTemplates = {
 },
 
     { name: "services", placeholder: "Service", type: "select-multiple",required: true },
+       { name: "treatment_notes", placeholder: "Notes", type: "textarea" },
 
   ]
 };

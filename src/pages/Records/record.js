@@ -13,7 +13,7 @@ import { fieldTemplates } from '../../data/FieldTemplates/records.js';
 import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
 import AppointmentCalendar from '../../Components/AppointmentCalendar/calendar.js';
-
+import EditModal from '../../Components/AddModal/EditModal.jsx';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -36,6 +36,7 @@ const { token, adminId } = useAdminAuth(); // get token from context
 const [records, setRecords] = useState([]);
 const [showCalendar, setShowCalendar] = useState(true); // toggle state
 const [appointmentData, setAppointmentData] = useState([]);
+const [editingRecords, seteditingRecords] = useState(null);
 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -76,29 +77,34 @@ const showTemporaryModal = (msg, type) => {
 
     const now = new Date();
 
-    const events = response.data.appointments
-      // Filter for past appointments
-      .filter(a => new Date(a.date) < now)
-      .map((a) => {
-        const formattedTime = new Date(a.date).toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        });
+   const events = response.data.appointments
+  .filter(a => new Date(a.date) < now)
+  .map((a) => {
+    const formattedTime = new Date(a.date).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
 
-        return {
-          id: a.idappointment,
-          title: `${formattedTime} ${a.patientfullname || a.patient_name || "No Patient"}`,
-          start: a.date,
-          end: a.date,
-          extendedProps: {
-            patient: a.patientfullname || a.patient_name,
-            services: a.services?.map((s) => s.name).join(", "),
-            notes: a.notes,
-            status: a.status,
-          },
-        };
-      });
+    return {
+      id: a.idappointment,
+      title: `${formattedTime} ${a.patientfullname || a.patient_name || "No Patient"}`,
+      start: a.date,
+      end: a.date,
+      extendedProps: {
+        idappointment: a.idappointment,
+        idpatient: a.idpatient,
+        patient: a.patientfullname || a.patient_name,
+        iddentist: a.iddentist,
+        dentist: a.dentistfullname,
+        services: a.services?.map((s) => s.name).join(", "),
+        serviceIds: a.services?.map((s) => s.idservice) || [],
+        treatment_notes: a.treatment_notes,
+        status: a.status,
+        created_at: a.created_at,
+      },
+    };
+  });
 
     setAppointmentData(events);
   } catch (error) {
@@ -131,6 +137,83 @@ const handleEditFormChange = (e) => {
     ...prev,
     [name]: value,
   }));
+};
+const handleEdit = async (appointmentId, formValues) => {
+  if (!token || !adminId) {
+    setMessage({ type: "error", text: "You must be logged in as admin." });
+    return;
+  }
+
+  try {
+    // ⭐ Convert date + time to UTC ISO and check if it's in the past
+    let appointmentDate = null;
+    if (formValues.date && formValues.time) {
+      const [hours, minutes] = formValues.time.split(":").map(Number);
+      const manilaStr = `${formValues.date}T${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}:00+08:00`;
+      appointmentDate = new Date(manilaStr);
+
+      if (isNaN(appointmentDate)) {
+        setMessage({ type: "error", text: "Invalid date or time." });
+        return;
+      }
+
+      const now = new Date();
+      // ✅ For records, block *future* dates
+      if (appointmentDate > now) {
+        setMessage({ type: "error", text: "Record date must be in the past." });
+        return;
+      }
+    }
+
+    // Build payload matching backend expectations
+    const payload = {
+      adminId, // backend expects adminId
+      iddentist: formValues.dentist ? Number(formValues.dentist) : null,
+      date: appointmentDate ? appointmentDate.toISOString() : null,
+      services: Array.isArray(formValues.services)
+        ? formValues.services.map(s => Number(s)).filter(id => !isNaN(id))
+        : [],
+      treatment_notes: formValues.treatment_notes || ""
+    };
+
+    // Send request to /record/:idappointment
+    const response = await axios.put(
+      `${BASE_URL}/api/website/record/${appointmentId}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      await fetchServices();
+      await fetchDentists();
+      await fetchPatients();
+      await fetchRecords();
+      await fetchAppointmentsForCalendar();
+      setMessage({ type: "success", text: "✏️ Record updated successfully!" });
+      seteditingRecords(null); // make sure you use the right state setter
+      setTimeout(() => setMessage(null), 2000);
+    } else {
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
+    }
+  } catch (error) {
+    console.error("handleEdit error:", error);
+
+    let errorMessage = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 400) errorMessage = "Missing or invalid input fields.";
+      else if (status === 404) errorMessage = "Record not found.";
+      else if (status === 500) errorMessage = "Internal server error occurred.";
+      else errorMessage = data?.message || errorMessage;
+    }
+
+    setMessage({ type: "error", text: errorMessage });
+  }
 };
 
 const handleEditSubmit = async (e) => {
@@ -618,13 +701,38 @@ const handleAdd = async (formValues) => {
         <div className="loading-text">Loading...</div>
       ) : (
        <> 
-       {showCalendar ? (
-              <AppointmentCalendar
-                appointments={appointmentData}
-                table="Appointment"
-                onDelete={(id) => handleDelete(id)}
-              />
-            ) : ( <RecordListTable
+    {showCalendar ? (
+  <AppointmentCalendar
+  appointments={appointmentData}
+  table="Appointment"
+onEdit={(event) => {
+  const rawDate = new Date(event.start);
+  const manilaDate = rawDate.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+  const manilaHours = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Manila"
+  }).format(rawDate);
+
+  const normalizedRow = {
+    idappointment: event.id,
+    patient: event.extendedProps.idpatient || event.extendedProps.patient,
+    dentist: event.extendedProps.iddentist,
+    date: manilaDate,
+    time: manilaHours.slice(0, 5),
+    services: event.extendedProps.serviceIds || [],
+    status: event.extendedProps.status,
+    treatment_notes: event.extendedProps.treatment_notes || "",
+  };
+
+  seteditingRecords(normalizedRow);
+}}
+
+  onDelete={(id) => handleDelete(id)}
+/>
+) : (
+ <RecordListTable
   searchTerm={searchTerm}
   setSearchTerm={setSearchTerm}
   groupBy={groupBy}
@@ -638,12 +746,11 @@ const handleAdd = async (formValues) => {
   expandedPatient={expandedPatient}
   toggleExpanded={toggleExpanded}
   openAppointmentModal={openAppointmentModal}
-  setEditFormData={setEditFormData}
-  setIsEditing={setIsEditing}
   handleDelete={handleDelete}
   formatAppointmentDate={formatAppointmentDate}
+  onEdit={(row) => seteditingRecords(row)}   // 👈 same as calendar
 />
- )}
+)}
 </>      
       )}
 
@@ -676,6 +783,7 @@ const handleAdd = async (formValues) => {
   />
 )}
 
+
 {modalOpen && (
   <AddModal
     datatype="Records"             // for submission data
@@ -686,7 +794,19 @@ const handleAdd = async (formValues) => {
     onSubmit={handleAdd}
   />
 )}
-
+{editingRecords && (
+  <EditModal
+    datatype="Records"
+    selected="Records"
+    choices={["Records"]}
+    fields={fieldsWithRecords}
+    row={editingRecords}
+    onClose={() => seteditingRecords(null)}
+    onSubmit={(formValues) =>
+      handleEdit(editingRecords.idappointment, formValues)
+    }
+  />
+)}
 {showModal && (
     <div className="modal-overlay">
         <div className={`modal-box ${messageType}`}>

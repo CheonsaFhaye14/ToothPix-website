@@ -138,6 +138,7 @@ const eventsWithStyles = appointments.map((a) => {
       { key: "services", label: "Services" },
       { key: "status", label: "Status" },
       { key: "notes", label: "Notes" },
+            { key: "treatment_notes", label: "Notes" },
          { key: "created_at", label: "Date Created" },
 
     ]}

@@ -41,13 +41,7 @@ const [confirmMessage, setConfirmMessage] = useState('');
 const [editingService, setEditingService] = useState(null);  // Holds the service being edited
 const [editFormData, setEditFormData] = useState({ name: '', description: '', price: '' });  // Holds the form data
 const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
-const [isAdding, setIsAdding] = React.useState(false);
-const [addFormData, setAddFormData] = React.useState({
-  name: '',
-  description: '',
-  price: '',
-  category: '',
-});
+
 
 
 const existingCategories = [...new Set(services.map(service => service.category).filter(Boolean))];
@@ -95,69 +89,6 @@ const fetchServices = async () => {
     setIsLoading(false);
     }
 };
-
-const handleAddFormChange = (e) => {
-  const { name, value } = e.target;
-  setAddFormData((prevData) => ({
-    ...prevData,
-    [name]: value,
-  }));
-};
-
-const handleAddSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Validation
-    if (!addFormData.name.trim()) {
-      showTemporaryModal('Service Name is required.', 'error');
-      return;
-    }
-  
-    // Check for duplicate service name (case insensitive)
-    const isDuplicate = services.some(
-      (service) => service.name.toLowerCase() === addFormData.name.trim().toLowerCase()
-    );
-    if (isDuplicate) {
-      showTemporaryModal('Service name already exists. Please choose a different name.', 'error');
-      return;
-    }
-  
-    if (!addFormData.price || isNaN(addFormData.price)) {
-      showTemporaryModal('Valid Service Price is required.', 'error');
-      return;
-    }
-    if (!addFormData.category.trim()) {
-      showTemporaryModal('Category is required.', 'error');
-      return;
-    }
-  
-    const newService = {
-      name: addFormData.name.trim(),
-      description: addFormData.description.trim(),
-      price: parseFloat(addFormData.price),
-      category: addFormData.category.trim(),
-    };
-  
-    try {
-      const response = await axios.post(`${BASE_URL}/api/website/services`, newService, {
-        headers: {
-Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
-        },
-      });
-
-      if (response.status === 201) {
-        // Add the newly created service to your list
-        setServices((prevServices) => [...prevServices, response.data.service]);
-
-        showTemporaryModal('Service added successfully.', 'success');
-        setIsAdding(false);
-        setAddFormData({ name: '', description: '', price: '', category: '' });
-      }
-    } catch (error) {
-      console.error('Error adding service:', error);
-      showTemporaryModal('Error adding service.', 'error');
-    }
-  };
 
 const handleDelete = (id) => {
   setConfirmDeleteId(id);
@@ -498,11 +429,11 @@ autoComplete="off"
       </div>
     </div>
     <div className="form-actions">
-      <button type="submit" className="btn btn-primary">Save Changes</button>
+      <button type="submit" className=" btn-submit">Save Changes</button>
       <button
         type="button"
         onClick={() => setIsEditing(false)}
-        className="btn btn-secondary"
+        className="btn-cancel"
       >
         Cancel
       </button>
@@ -512,99 +443,6 @@ autoComplete="off"
   </div>
 )}
 
-{isAdding && (
-  <div className="modal-overlay">
-<div className="modal-box">
-  <h2>Add New Service</h2>
-  <form onSubmit={handleAddSubmit}>
-    <div className="form-row">
-    <div className="form-group">
-      <input
-        type="text"
-        placeholder='Input Service Name'
-        name="name"
-        value={addFormData.name}
-        onChange={handleAddFormChange}
-        className="form-control"
-      />
-    </div>
-    <div className="form-group">
-      <input
-        type="text"
-        name="description"
-        placeholder='Input Service Description (Optional)'
-        value={addFormData.description}
-        onChange={handleAddFormChange}
-        className="form-control"
-      />
-    </div>
-    <div className="form-group">
-      <input
-        type="number"
-        name="price"
-        placeholder='Input Service Price'
-        value={addFormData.price}
-        onChange={handleAddFormChange}
-        className="form-control"
-        step="0.01"
-      />
-    </div>
-    <div className="form-group category-input-wrapper">
-  <input
-type="text"
-name="category"
-value={addFormData.category}
-placeholder='Input Service Category'
-onChange={(e) => {
-  const value = e.target.value;
-  setAddFormData(prev => ({ ...prev, category: value }));
-  setShowSuggestions(true);
-}}
-onFocus={() => setShowSuggestions(true)}
-className="form-control"
-autoComplete="off"
-  />
-  {showSuggestions && (
-<ul className="suggestions-list">
-  {existingCategories
-    .filter(cat =>
-      cat.toLowerCase().includes(addFormData.category.toLowerCase())
-    )
-    .map((cat, index) => (
-      <li
-        key={index}
-        className="suggestion-item"
-        onClick={() => {
-setAddFormData(prev => ({ ...prev, category: cat }));
-setShowSuggestions(false);
-        }}
-      >
-        {cat}
-      </li>
-    ))}
-</ul>
-  )}
-</div>
-
-
-
-    </div>
-    <div className="form-actions">
-      <button type="submit" className="btn btn-primary">
-        Add Service
-      </button>
-      <button
-        type="button"
-        onClick={() => setIsAdding(false)}
-        className="btn btn-secondary"
-      >
-        Cancel
-      </button>
-    </div>
-  </form>
-</div>
-  </div>
-)}
 {modalOpen && (
   <AddModal
     datatype="Services"             // for submission data

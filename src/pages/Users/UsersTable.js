@@ -74,7 +74,7 @@ export default function UsersTable({
                     </td>
                   )}
                 <td className="actions-column">
-                  <button className="btn-edit me-2" onClick={() => handleEdit(user)}>
+                  <button className="btn-edit" onClick={() => handleEdit(user)}>
                     ✏️ Edit
                   </button>
                   <button className="btn-delete" onClick={() => handleDelete(user.idusers)}>

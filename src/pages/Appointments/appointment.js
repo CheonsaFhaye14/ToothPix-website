@@ -16,6 +16,7 @@ import { fieldTemplatesEdit } from '../../data/FieldTemplates/appointmentsfieldT
 const Appointment = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
+
 const column = [
   { header: "Patient Name", accessor: "patientname" },
   { header: "Dentist Name", accessor: "dentistname" },

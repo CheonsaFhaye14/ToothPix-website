@@ -216,7 +216,7 @@ export default function AddAppointmentModal({
 
           {/* ACTION BUTTONS */}
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">Add Appointment</button>
+            <button type="submit" className="btn btn-submit">Add Appointment</button>
             <button type="button" onClick={() => setIsAdding(false)} className="btn btn-secondary">Cancel</button>
           </div>
         </form>
