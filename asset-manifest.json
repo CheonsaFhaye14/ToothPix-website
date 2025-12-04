@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/ToothPix-website/static/css/main.fc811c70.css",
-    "main.js": "/ToothPix-website/static/js/main.970c0567.js",
+    "main.css": "/ToothPix-website/static/css/main.b20ec263.css",
+    "main.js": "/ToothPix-website/static/js/main.6d4fab4d.js",
     "static/js/239.d1fa9155.chunk.js": "/ToothPix-website/static/js/239.d1fa9155.chunk.js",
     "static/js/977.2de1ab10.chunk.js": "/ToothPix-website/static/js/977.2de1ab10.chunk.js",
     "static/js/732.755bc2ee.chunk.js": "/ToothPix-website/static/js/732.755bc2ee.chunk.js",
@@ -9,16 +9,17 @@
     "static/media/background.jpg": "/ToothPix-website/static/media/background.ad9163bdc4f97c0cd323.jpg",
     "static/media/Waiver.png": "/ToothPix-website/static/media/Waiver.31561dc389d15f1d2ac3.png",
     "static/media/logo.png": "/ToothPix-website/static/media/logo.0ce2420950b2fab9e5a3.png",
+    "static/media/ServicesReport.png": "/ToothPix-website/static/media/ServicesReport.9c447d4f03cefb62451f.png",
     "index.html": "/ToothPix-website/index.html",
-    "main.fc811c70.css.map": "/ToothPix-website/static/css/main.fc811c70.css.map",
-    "main.970c0567.js.map": "/ToothPix-website/static/js/main.970c0567.js.map",
+    "main.b20ec263.css.map": "/ToothPix-website/static/css/main.b20ec263.css.map",
+    "main.6d4fab4d.js.map": "/ToothPix-website/static/js/main.6d4fab4d.js.map",
     "239.d1fa9155.chunk.js.map": "/ToothPix-website/static/js/239.d1fa9155.chunk.js.map",
     "977.2de1ab10.chunk.js.map": "/ToothPix-website/static/js/977.2de1ab10.chunk.js.map",
     "732.755bc2ee.chunk.js.map": "/ToothPix-website/static/js/732.755bc2ee.chunk.js.map",
     "453.571de1f8.chunk.js.map": "/ToothPix-website/static/js/453.571de1f8.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.fc811c70.css",
-    "static/js/main.970c0567.js"
+    "static/css/main.b20ec263.css",
+    "static/js/main.6d4fab4d.js"
   ]
 }
