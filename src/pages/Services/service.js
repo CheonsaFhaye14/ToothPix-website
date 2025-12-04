@@ -11,6 +11,7 @@ import {useAdminAuth} from '../../Hooks/Auth/useAdminAuth';
 import Table from '../../Components/Table/Table.jsx';
 import { showInfoFields } from '../../data/ShowInfoField/services.js';
 import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
+import EditModal from '../../Components/AddModal/EditModal.jsx';
 
 const Services = () => {
 
@@ -26,7 +27,7 @@ const tabledata = services.map((service) => ({
   ...service, // spread the individual service object, not the whole array
 
   // ACTION BUTTON HANDLERS
-  onEdit: () => handleEdit(service),
+  onEdit: () => setEditingService(service),
   onDelete: () => handleDelete(service.idservice), // adjust if your service ID field is different
 }));
 
@@ -198,16 +199,64 @@ const confirmDeletion = async () => {
   }
 };
 
-const handleEdit = (service) => {
-    setEditingService(service); // Set the service to be edited
-    setEditFormData({
-      name: service.name,
-      description: service.description,
-      price: service.price,
-      category: service.category
+const handleEdit = async (serviceId, formValues) => {
+  if (!token || !adminId) {
+    setMessage({ type: "error", text: "You must be logged in as admin." });
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values (Edit):", formValues);
+
+    const formData = new FormData();
+    formData.append("admin_id", adminId); // ✅ backend expects admin_id
+
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (value !== null && value !== "" && value !== undefined) {
+        if (key === "price") {
+          formData.append("price", parseFloat(value)); // ✅ ensure number
+        } else if (key === "allow_installment") {
+          formData.append("allow_installment", value ? "true" : "false"); // ✅ boolean string
+        } else if (key === "installment_times") {
+          if (formValues.allow_installment) {
+            formData.append("installment_times", Number(value)); // ✅ only if installments allowed
+          }
+        } else {
+          formData.append(key, value);
+        }
+      }
     });
-    setIsEditing(true); // Open the editing modal
-  };
+
+    console.log("🧹 FormData ready for edit:", [...formData.entries()]);
+
+    const response = await axios.put(
+      `${BASE_URL}/api/website/services/${serviceId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      await fetchServices();
+      setMessage({ type: "success", text: "✏️ Service updated successfully!" });
+      setTimeout(() => {
+        setEditingService(null);
+        setMessage(null);
+      }, 2000);
+    } else {
+      setMessage({ type: "error", text: response.data?.message || "Something went wrong." });
+    }
+  } catch (error) {
+    console.error("handleEdit error:", error);
+    setMessage({ type: "error", text: "Failed to update service." });
+  }
+};
+
+
   
   const handleEditFormChange = (e) => {
     const { name, value } = e.target;
@@ -568,6 +617,17 @@ setShowSuggestions(false);
     fields={fieldsWithCategories}      // object: { Default: [...] }
     onClose={() => setModalOpen(false)}
     onSubmit={handleAdd}
+  />
+)}
+{editingService && (
+  <EditModal
+    datatype="Services"
+    selected="Services"
+    choices={["Services"]}
+    fields={fieldTemplates}
+    row={editingService}
+    onClose={() => setEditingService(null)}
+    onSubmit={(formValues) => handleEdit(editingService.idservice, formValues)}
   />
 )}
 

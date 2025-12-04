@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import EditUserModal from './EditUserModal';
 import UsersReportExport from './UsersReportExport'; // adjust path as needed
 import { BASE_URL } from '../../config';
 
@@ -51,25 +50,10 @@ const tabledata = users.map(user => {
     setEditingUser(user); // open modal with this user's data
   };
 
-  const handleClose = () => {
-    setEditingUser(null); // close modal
-  };
-  const handleEditSave = (updatedValues) => {
-    console.log("Updated user:", updatedValues);
-    // 🔗 Call your backend PUT/PATCH API here
-    // fetch(`/api/website/users/${editingUser.idusers}`, {
-    //   method: "PUT",
-    //   body: JSON.stringify(updatedValues),
-    //   headers: { "Content-Type": "application/json" }
-    // })
-    handleClose();
-  };
 
-  const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
+
+
   const [editingUser, setEditingUser] = useState(null);  // Holds the user being edited
-  const [openSuggestion, setOpenSuggestion] = useState(null); // can be 'patient', 'dentist', or null
-  const existingGender = ["female","male"];
-  const [editFormData, setEditFormData] = useState({  username: '',email: '', password: '',usertype: '',firstname: '',lastname: '', birthdate: '', contact: '',address: '',   gender: '', allergies: '', medicalhistory: '', });  // Holds the form data
  
 
   useEffect(() => {
@@ -82,7 +66,6 @@ const tabledata = users.map(user => {
         { 
           if (!e.target.closest('.usertype-input-wrapper')) 
             { 
-              setOpenSuggestion(null); 
             } 
           };
           document.addEventListener('click', handleClickOutside);
@@ -96,7 +79,6 @@ const tabledata = users.map(user => {
               {
                 if (!e.target.closest('.form-group')) 
                   {
-                    setOpenSuggestion(false);
                   }
               };
               
@@ -106,7 +88,6 @@ const tabledata = users.map(user => {
             ,[]);
                 
 const [isLoading, setIsLoading] = useState(true);
-const existingUsertype = ["patient", "dentist","admin"];
       const [message, setMessage] = useState('');
         const [messageType, setMessageType] = useState(''); // 'success' or 'error'
               const [confirmDeleteId, setConfirmDeleteId] = useState(null); // holds id to delete
@@ -254,186 +235,6 @@ if (formValues.remove_image === true) {
     setMessage({ type: "error", text: errorMessage });
   }
 };
-
-
-      
-     
-      
-      const handleEditSubmit = async (e) => {
-        e.preventDefault();
-      
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{5,19}$/;
-        const nameRegex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
-        const phoneRegex = /^09\d{9}$/;
-      
-      // Username
-if (!editFormData.username.trim()) {
-  setMessage({ type: 'error', text: 'Username is required.' });
-  return;
-}
-if (!usernameRegex.test(editFormData.username.trim())) {
-  setMessage({ type: 'error', text: 'Username must be 6–20 characters and start with a letter. Only letters, numbers, underscores, or dots allowed.' });
-  return;
-}
-
-// Email
-if (!editFormData.email.trim()) {
-  setMessage({ type: 'error', text: 'Email is required.' });
-  return;
-}
-if (!emailRegex.test(editFormData.email.trim())) {
-  setMessage({ type: 'error', text: 'Invalid email format.' });
-  return;
-}
- // Password (optional – only required if user wants to change it)
-if (editFormData.password.trim() && editFormData.password.trim().length < 6) {
-  setMessage({ type: 'error', text: 'Password must be at least 6 characters long.' });
-  return;
-}
-
-// Usertype
-if (!editFormData.usertype.trim()) {
-  setMessage({ type: 'error', text: 'Usertype is required.' });
-  return;
-}
-
-const allowedUsertypes = ['patient', 'dentist', 'admin'];
-if (!allowedUsertypes.includes(editFormData.usertype.trim().toLowerCase())) {
-  setMessage({ type: 'error', text: 'Usertype must be either "patient", "dentist" or "admin".' });
-  return;
-}
-
-// Firstname
-if (!editFormData.firstname.trim()) {
-  setMessage({ type: 'error', text: 'Firstname is required.' });
-  return;
-}
-if (!nameRegex.test(editFormData.firstname.trim())) {
-  setMessage({ type: 'error', text: 'Firstname must contain only letters and valid characters (spaces, hyphens, apostrophes).' });
-  return;
-}
-     // Lastname
-if (!editFormData.lastname.trim()) {
-  setMessage({ type: 'error', text: 'Lastname is required.' });
-  return;
-}
-if (!nameRegex.test(editFormData.lastname.trim())) {
-  setMessage({ type: 'error', text: 'Lastname must contain only letters and valid characters (spaces, hyphens, apostrophes).' });
-  return;
-}
-
-// Birthdate (optional but validate if provided)
-if (editFormData.birthdate.trim()) {
-  const birthdate = new Date(editFormData.birthdate.trim());
-  if (isNaN(birthdate.getTime())) {
-    setMessage({ type: 'error', text: 'Birthdate must be a valid date.' });
-    return;
-  }
-
-  const today = new Date();
-  let age = today.getFullYear() - birthdate.getFullYear();
-  const m = today.getMonth() - birthdate.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-    age--;
-  }
-
-  if (age < 1) {
-    setMessage({ type: 'error', text: 'User must be at least 1 year old.' });
-    return;
-  }
-}
-
-// Contact
-if (!editFormData.contact.trim()) {
-  setMessage({ type: 'error', text: 'Contact is required.' });
-  return;
-}
-if (!phoneRegex.test(editFormData.contact.trim())) {
-  setMessage({ type: 'error', text: 'Contact must be a valid Philippine mobile number starting with 09 and 11 digits long.' });
-  return;
-}
-     // Address
-if (!editFormData.address.trim()) {
-  setMessage({ type: 'error', text: 'Address is required.' });
-  return;
-}
-
-// Gender (optional but validate if provided)
-if (editFormData.gender.trim()) {
-  const allowedGenders = ['female', 'male'];
-  if (!allowedGenders.includes(editFormData.gender.trim().toLowerCase())) {
-    setMessage({ type: 'error', text: 'Gender must be either "female" or "male" if provided.' });
-    return;
-  }
-}
-      const updatedUser = {
-          username: editFormData.username.trim(),
-          email: editFormData.email.trim(),
-          password: editFormData.password.trim(),
-          usertype: editFormData.usertype.trim(),
-          firstname: editFormData.firstname.trim(),
-          lastname: editFormData.lastname.trim(),
-          birthdate: editFormData.birthdate.trim(),
-          contact: editFormData.contact.trim(),
-          address: editFormData.address.trim(),
-          gender: editFormData.gender.trim(),
-          allergies: editFormData.allergies.trim(),
-          medicalhistory: editFormData.medicalhistory.trim(),
-        };
-      
-       try {
-          const response = await axios.put(
-            `${BASE_URL}/api/website/users/${editingUser.idusers}`,
-            updatedUser,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-              },
-            }
-          );
-      
-          if (response.status === 200) {
-            setUsers((prevUsers) =>
-              prevUsers.map((user) =>
-                user.idusers === editingUser.idusers
-                  ? { ...user, ...updatedUser }
-                  : user
-              )
-            );
-setMessage({ type: 'success', text: 'User updated successfully.' });
-            setIsEditing(false);
-        }
-        } catch (error) {
-          console.error('Error updating user:', error);
-     if (error.response) {
-  const status = error.response.status;
-  const serverMessage = error.response.data.message;
-
-  if (status === 409) {
-    setMessage({ type: 'error', text: serverMessage || 'Username or email already exists.' });
-  } else if (status === 400) {
-    setMessage({ type: 'error', text: serverMessage || 'Missing or invalid input fields.' });
-  } else if (status === 500) {
-    setMessage({ type: 'error', text: serverMessage || 'Internal server error occurred.' });
-  } else {
-    setMessage({ type: 'error', text: serverMessage || 'Unexpected error occurred.' });
-  }
-} else {
-  setMessage({ type: 'error', text: 'Could not connect to server. Please try again later.' });
-}
-
-        } 
-      };
-      
-      const handleEditFormChange = (e) => {
-        const { name, value } = e.target;
-        setEditFormData((prevData) => ({
-          ...prevData,
-          [name]: value,
-        }));
-      };
-    
       
        const handleSelect = (choice) => {
     setSelected(choice);
@@ -555,19 +356,7 @@ const handleAdd = async (formValues) => {
   </>
 )}
  
- {isEditing && (
-  <EditUserModal
-    editFormData={editFormData}
-    handleEditFormChange={handleEditFormChange}
-    handleEditSubmit={handleEditSubmit}
-    setIsEditing={setIsEditing}
-    openSuggestion={openSuggestion}
-    setOpenSuggestion={setOpenSuggestion}
-    existingUsertype={existingUsertype}
-    existingGender={existingGender}
-    setEditFormData={setEditFormData}
-  />
-)}
+
 
 {editingUser && (
 <EditModal
