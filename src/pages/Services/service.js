@@ -624,7 +624,7 @@ setShowSuggestions(false);
     datatype="Services"
     selected="Services"
     choices={["Services"]}
-    fields={fieldTemplates}
+    fields={fieldsWithCategories}
     row={editingService}
     onClose={() => setEditingService(null)}
     onSubmit={(formValues) => handleEdit(editingService.idservice, formValues)}
