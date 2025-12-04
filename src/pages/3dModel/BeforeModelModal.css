@@ -61,15 +61,3 @@
   transform: scale(0.6); /* scale down */
 }
 
-
-
-  /* Unity iframe fills container exactly */
-  .unity-container iframe {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    border: none;
-    
-  }

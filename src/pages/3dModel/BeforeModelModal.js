@@ -54,12 +54,13 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
   if (!isOpen) return null;
 
   return (
-    <div className="unity-overlay">
-      <div className="unity-content">
-        <button className="modal-close" onClick={onClose}>×</button>
-        <h2>Before 3D Teeth Editor</h2>
-        <div className="unity-container">
-          {recordId ? (
+    <div className="modal-backdrop">
+      <div className="modal-content">
+      <h2 className="modal-title" style={{ fontSize: "2rem", textAlign: "center", marginBottom: "1.5rem" }}>
+          Before 3D Teeth Editor</h2>
+        <div className="modal-body">
+         <div className="unity">
+           {recordId ? (
             <iframe
               key={iframeKey}
               src={`${process.env.PUBLIC_URL}/unity/TeethEditor/index.html`}
@@ -68,6 +69,12 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
           ) : (
             <p>Loading model...</p>
           )}
+         </div>
+        </div>
+      <div className="action-buttons" style={{ paddingTop: '1rem',marginBottom: "1.5rem" }}>
+          <button className="btn-cancel" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>
