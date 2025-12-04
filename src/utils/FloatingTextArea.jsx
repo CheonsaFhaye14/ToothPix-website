@@ -8,7 +8,7 @@ export default function FloatingTextArea({
   name,
   disabled = false,
   readOnly = false,
-  rows = 4, // default rows
+  rows = 2, // default rows
 }) {
   const [inputValue, setInputValue] = useState(value || "");
 

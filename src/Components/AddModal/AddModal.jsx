@@ -395,6 +395,7 @@ if (field.type === "picture") {
         name={field.name}
         value={formValues[field.name]}
         onChange={handleChange}
+        editable={true}
       />
       {errors[field.name] && (
         <p className="text-error" style={{ marginBottom: "1.5rem" }}>

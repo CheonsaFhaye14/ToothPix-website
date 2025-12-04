@@ -1,5 +1,6 @@
 export const showInfoFields = {
   admin: [
+    { key: "profile_image", label: "Picture" },   // 👈 added
     { key: "firstname", label: "First Name" },
     { key: "lastname", label: "Last Name" },
     { key: "username", label: "Username" },
@@ -9,6 +10,7 @@ export const showInfoFields = {
   ],
 
   patient: [
+    { key: "profile_image", label: "Picture" },   // 👈 added
     { key: "firstname", label: "First Name" },
     { key: "lastname", label: "Last Name" },
     { key: "username", label: "Username" },
@@ -24,6 +26,7 @@ export const showInfoFields = {
   ],
 
   dentist: [
+    { key: "profile_image", label: "Picture" },   // 👈 added
     { key: "firstname", label: "First Name" },
     { key: "lastname", label: "Last Name" },
     { key: "username", label: "Username" },

@@ -12,6 +12,8 @@ import Table from '../../Components/Table/Table.jsx';
 import { formatDateTime } from '../../utils/formatDateTime.jsx';
 import { showInfoFields } from '../../data/ShowInfoField/users.js';
 import MessageModal from '../../Components/MessageModal/MessageModal.jsx';
+import { exportAllPatientWaivers } from '../../Report/exportAllWaivers.js';
+import EditModal from '../../Components/AddModal/EditModal.jsx';
 
 const Users = () => {
   const choices = ["Admin", "Dentist" ,"Patient"];
@@ -25,27 +27,43 @@ const Users = () => {
     { header: "Type of User", accessor: "usertype" },
     { header: "Date Created", accessor: "dateCreated" } // new column
   ];
-  const tabledata = users.map(user => {
-    const firstname = user.firstname?.trim();
-    const lastname  = user.lastname?.trim();
+const tabledata = users.map(user => {
+  const firstname = user.firstname?.trim();
+  const lastname  = user.lastname?.trim();
 
-    const fullname = firstname && lastname ? `${firstname} ${lastname}` : "Unknown";
+  const fullname = firstname && lastname ? `${firstname} ${lastname}` : "Unknown";
+  const dateCreated = user.created_at ? formatDateTime(user.created_at) : "Unknown";
 
-    const dateCreated = user.created_at ? formatDateTime(user.created_at) : "Unknown";
+  return {
+    ...user,
+    fullname,
+    usertype: user.usertype,
+    dateCreated,
 
-    return {
-      ...user,
-      fullname,
-      usertype: user.usertype,
-      dateCreated, // formatted as MM/DD/YYYY hh:mm AM/PM using utility
+    // ACTION BUTTON HANDLERS
+    // onEdit: () => handleEdit(user),
+    onEdit: () => handleEditClick(user),
+    onDelete: () => handleDelete(user.idusers),
+  };
+});
 
-      // ACTION BUTTON HANDLERS
-      onEdit: () => handleEdit(user),
-      onDelete: () => handleDelete(user.idusers),
-    };
-  });
+ const handleEditClick = (user) => {
+    setEditingUser(user); // open modal with this user's data
+  };
 
-
+  const handleClose = () => {
+    setEditingUser(null); // close modal
+  };
+  const handleEditSave = (updatedValues) => {
+    console.log("Updated user:", updatedValues);
+    // 🔗 Call your backend PUT/PATCH API here
+    // fetch(`/api/website/users/${editingUser.idusers}`, {
+    //   method: "PUT",
+    //   body: JSON.stringify(updatedValues),
+    //   headers: { "Content-Type": "application/json" }
+    // })
+    handleClose();
+  };
 
   const [isEditing, setIsEditing] = useState(false);  // To toggle edit mode
   const [editingUser, setEditingUser] = useState(null);  // Holds the user being edited
@@ -161,26 +179,83 @@ const confirmDeletion = async () => {
   }
 };
   
-const handleEdit = (user) => {
-        const sanitize = (value) => (typeof value === 'string' ? value : value === null || value === undefined ? '' : String(value));
-      
-        setEditingUser(user);
-        setEditFormData({
-          username: sanitize(user.username),
-          email: sanitize(user.email),
-          password: '',
-          usertype: sanitize(user.usertype),
-          firstname: sanitize(user.firstname),
-          lastname: sanitize(user.lastname),
-          birthdate: sanitize(user.birthdate),
-          contact: sanitize(user.contact),
-          address: sanitize(user.address),
-          gender: sanitize(user.gender),
-          allergies: sanitize(user.allergies),
-          medicalhistory: sanitize(user.medicalhistory),
-        });
-        setIsEditing(true);
-      };
+const handleEdit = async (userId, formValues) => {
+  if (!token || !adminId) {
+    setMessage({ type: "error", text: "You must be logged in as admin." });
+    return;
+  }
+
+  try {
+    console.log("📝 Original Form Values (Edit):", formValues);
+
+    const formData = new FormData();
+    formData.append("admin_id", adminId);
+
+ Object.entries(formValues).forEach(([key, value]) => {
+  if (value !== null && value !== "" && value !== undefined) {
+    if (key === "profile_image" && value instanceof File) {
+      formData.append(key, value, value.name);
+    } else {
+      formData.append(key, value);
+    }
+  }
+});
+
+// 👇 Add this after the loop
+if (formValues.remove_image === true) {
+  formData.append("remove_image", "true");
+}
+
+
+    console.log("🧹 FormData ready for edit:", [...formData.entries()]);
+
+    // ✅ use userId, not formData.idusers
+    const response = await axios.put(
+      `${BASE_URL}/api/website/users/${userId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      await fetchUsers();
+      setMessage({
+        type: "success",
+        text: `✏️ ${formValues.usertype} updated successfully!`,
+      });
+
+      setTimeout(() => {
+        setEditingUser(null);
+        setMessage(null);
+      }, 2000);
+    } else {
+      setMessage({
+        type: "error",
+        text: response.data?.message || "Something went wrong.",
+      });
+    }
+  } catch (error) {
+    console.error("handleEdit error:", error);
+
+    let errorMessage = "Could not connect to server. Please try again later.";
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 409) errorMessage = "Username or email already exists.";
+      else if (status === 400) errorMessage = "Missing or invalid input fields.";
+      else if (status === 404) errorMessage = "User not found.";
+      else if (status === 500) errorMessage = "Internal server error occurred.";
+      else errorMessage = data?.message || errorMessage;
+    }
+
+    setMessage({ type: "error", text: errorMessage });
+  }
+};
+
+
       
      
       
@@ -445,6 +520,16 @@ const handleAdd = async (formValues) => {
           </button>
           {open && <AddChoice choices={choices} onSelect={handleSelect} />}
         </div>
+
+         {/* ✅ New bulk export button */}
+  <button
+    className="btn-pdf-all"
+    onClick={() =>
+      exportAllPatientWaivers(users.filter((u) => u.usertype === "patient"))
+    }
+  >
+    Export All Patient Waivers
+  </button>
    {/* Right side: Export buttons */}
     <div className="report-section">
   <UsersReportExport users={users} />
@@ -484,15 +569,30 @@ const handleAdd = async (formValues) => {
   />
 )}
 
+{editingUser && (
+<EditModal
+  datatype="usertype"
+  selected={editingUser.usertype}
+  choices={choices}
+  fields={fieldTemplates}
+  row={editingUser}
+  onClose={() => setEditingUser(null)}
+  onSubmit={(formValues) => handleEdit(editingUser.idusers, formValues)}
+/>
+)}
+
+      
 {showModal && (
     <div className="modal-overlay">
         <div className={`modal-box ${messageType}`}>
         <p>{confirmDeleteId ? confirmMessage : message}</p>
         {confirmDeleteId ? (
-            <div style={{ marginTop: '1rem' }}>
-            <button className="btn btn-danger me-2" onClick={confirmDeletion}>Yes</button>
-            <button className="btn btn-secondary" onClick={() => {
-                setShowModal(false);
+            <div className="action-buttons" style={{ marginTop: '1rem' }}>
+    
+            <button className="btn-submit" onClick={confirmDeletion}>Yes</button>
+            <button className="btn-cancel" onClick={() => {
+             
+             setShowModal(false);
                 setConfirmDeleteId(null);
             }}>Cancel</button>
             </div>

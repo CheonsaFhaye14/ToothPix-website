@@ -4,51 +4,79 @@ import CustomSelect from "../../utils/Select/CustomSelect";
 import CustomDate from "../../utils/CustomDate";
 import FloatingInput from "../../utils/InputForm"; // your floating label input
 import "./AddModal.css";
- import { validateForm } from "../../utils/validateForm"; // adjust path
+ import { validateFormEdit } from "./editvalidate"; // adjust path
 import CustomSelectMultiple from "../../utils/SelectMultiple/CustomSelectMultiple"; // import the new component
 import CustomPicInput from "../../utils/CustomPicInput"; // <-- new image input
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
-export default function EditModal({ datatype, choices, selected, fields, onClose, onSubmit })
-{
-  const [currentType, setCurrentType] = useState(selected?.[datatype] || choices?.[0] || "");
+export default function EditModal({ datatype, choices, selected, fields, row, onClose, onSubmit }) {
+const [currentType, setCurrentType] = useState(selected || choices?.[0] || "");
   const [showPasswordFields, setShowPasswordFields] = useState({}); 
   const [errors, setErrors] = useState({});
   const currentFields = fields[currentType] || [];  // fields for current type
   const [loading, setLoading] = useState(false);
+  
+useEffect(() => {
+  if (selected) {
+    const capitalized =
+      selected.charAt(0).toUpperCase() + selected.slice(1);
+    setCurrentType(capitalized);
+  }
+}, [selected]);
 
-  // Initialize form values based on current type
-const initializeFormValues = useCallback((type) => {
-    const currentFields = fields[type] || [];
 
-    // Set initial values based on field types
-    const initValues = currentFields.reduce((acc, field) => {
-    if (field.type === "checkbox") acc[field.name] = false;
-    else if (field.type === "multi-select") acc[field.name] = [];
-    else acc[field.name] = "";
+const initializeFormValues = useCallback((type, existingRow = {}) => {
+  const currentFields = fields[type] || [];
+
+  const initValues = currentFields.reduce((acc, field) => {
+    // 🚫 Skip password fields entirely (leave them blank)
+    if (field.type === "password") {
+      acc[field.name] = ""; 
+      return acc;
+    }
+
+    if (existingRow[field.name] !== undefined && existingRow[field.name] !== null) {
+      acc[field.name] = existingRow[field.name];
+    } else if (field.type === "checkbox") {
+      acc[field.name] = false;
+    } else if (field.type === "multi-select") {
+      acc[field.name] = [];
+    } else {
+      acc[field.name] = "";
+    }
     return acc;
   }, {});
 
-  const passwordStates = currentFields
-    .filter((f) => f.type === "password")
-    .reduce((acc, f) => {
-      acc[f.name] = false;
-      return acc;
-    }, {});
-
-  setShowPasswordFields(passwordStates);
+  // initialize password visibility toggles
+  setShowPasswordFields(
+    currentFields
+      .filter(f => f.type === "password")
+      .reduce((acc, f) => {
+        acc[f.name] = false;
+        return acc;
+      }, {})
+  );
 
   return initValues;
 }, [fields]);
 
-const [formValues, setFormValues] = useState(() => initializeFormValues(currentType));
+ console.log("EditModal props:", {
+    datatype,
+    choices,
+    selected,
+    fields,
+    row,
+    onClose,
+    onSubmit,
+  });
 
-// Reset form values and errors when currentType changes
+const [formValues, setFormValues] = useState(() => initializeFormValues(currentType, row));
+
 useEffect(() => {
-  setFormValues(initializeFormValues(currentType));
-  setErrors({}); // reset errors
-}, [currentType, initializeFormValues]);
+  setFormValues(initializeFormValues(currentType, row));
+  setErrors({});
+}, [currentType, row, initializeFormValues]);
 
 
 
@@ -69,7 +97,7 @@ const handleChange = (e) => {
   const updatedValues = { ...formValues, [name]: newValue };
   setFormValues(updatedValues);
 
-  const validationErrors = validateForm(updatedValues, fields, currentType);
+  const validationErrors = validateFormEdit(updatedValues, fields, currentType);
 
   // Show only current field error live (optional)
   setErrors(prev => ({
@@ -85,7 +113,7 @@ const handleSubmit = () => {
    setLoading(true);
 
   // Validate all fields
-  const validationErrors = validateForm(formValues, fields, currentType);
+  const validationErrors = validateFormEdit(formValues, fields, currentType);
   // If there are errors, mark all fields as touched and show errors
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
@@ -392,6 +420,7 @@ if (field.type === "picture") {
         name={field.name}
         value={formValues[field.name]}
         onChange={handleChange}
+        editable={true}
       />
       {errors[field.name] && (
         <p className="text-error" style={{ marginBottom: "1.5rem" }}>
@@ -476,13 +505,14 @@ if (field.type === "picture") {
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <FontAwesomeIcon icon={faSpinner} spin /> <span style={{ marginLeft: "0.5rem" }}>Adding...</span>
-              </>
-            ) : (
-              "Add"
-            )}
+           {loading ? (
+  <>
+    <FontAwesomeIcon icon={faSpinner} spin /> <span style={{ marginLeft: "0.5rem" }}>Saving...</span>
+  </>
+) : (
+  "Save"
+)}
+
           </button>
 
 

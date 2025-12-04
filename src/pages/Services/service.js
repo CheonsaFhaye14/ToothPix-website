@@ -602,9 +602,10 @@ setShowSuggestions(false);
         <div className={`modal-box ${messageType}`}>
         <p>{confirmDeleteId ? confirmMessage : message}</p>
         {confirmDeleteId ? (
-            <div style={{ marginTop: '1rem' }}>
-            <button className="btn btn-danger me-2" onClick={confirmDeletion}>Yes</button>
-            <button className="btn btn-secondary" onClick={() => {
+            <div className="action-buttons" style={{ marginTop: '1rem' }}>
+           
+            <button className="btn-submit" onClick={confirmDeletion}>Yes</button>
+            <button className="btn-cancel" onClick={() => {
                 setShowModal(false);
                 setConfirmDeleteId(null);
             }}>Cancel</button>

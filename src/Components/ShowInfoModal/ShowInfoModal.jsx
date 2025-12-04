@@ -1,8 +1,12 @@
 import FloatingInput from "../../utils/InputForm";
 import { formatDateTime } from "../../utils/formatDateTime"; 
+import CustomPicInput from "../../utils/CustomPicInput";
+import FloatingTextArea from "../../utils/FloatingTextArea";
 
-const ShowInfoModal = ({ row, onClose, fields, children }) => {
+const ShowInfoModal = ({ row, onClose, fields, children, title = "Information" }) => {
   if (!row) return null;
+
+  console.log("ShowInfoModal props:", { row, fields, children });
 
   const capitalizeWords = (str) =>
     str
@@ -10,9 +14,12 @@ const ShowInfoModal = ({ row, onClose, fields, children }) => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
-  const fullName =
-    capitalizeWords(`${row.firstname || ""} ${row.lastname || ""}`.trim()) ||
-    "User Info";
+// Build a default name if firstname/lastname or name exist
+const fullName =
+  capitalizeWords(
+    `${row.firstname || ""} ${row.lastname || ""}`.trim()
+  ) || (row.name ? capitalizeWords(row.name) : "");
+
 
   const displayedFields =
     fields?.filter(({ key }) => {
@@ -31,52 +38,65 @@ const ShowInfoModal = ({ row, onClose, fields, children }) => {
         className="modal-content show-info-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          className="modal-title"
-          style={{ fontSize: "2rem", textAlign: "center", marginBottom: "1.5rem" }}
-        >
-          {fullName}'s Information
-        </h2>
+      <h2 className="modal-title" style={{ fontSize: "2rem", textAlign: "center", marginBottom: "1.5rem" }}>
+  {fullName ? `${fullName}'s ${title}` : title}
+</h2>
+
 
         <div className="modal-body">
-          {displayedFields.map(({ key, label }) => (
-            <div className="input-container" key={key}>
-<FloatingInput
-  name={key}
-  value={
-    key === "created_at" || key === "updated_at"
-      ? formatDateTime(row[key])                // format timestamps
-      : key === "birthdate"
-      ? new Date(row[key]).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : key === "gender"
-      ? capitalizeWords(row[key].toString())
-      : key === "date"                          // 👈 add this branch
-      ? formatDateTime(row[key])                // format appointment date
-      : row[key].toString()
-  }
-  placeholder={label || capitalizeWords(key)}
-  disabled={true}
-/>
+          {displayedFields.map(({ key, label }) => {
+            console.log("Rendering field:", key, "with value:", row[key]);
 
-            </div>
-          ))}
+            return (
+              <div className="input-container" key={key}>
+           {key === "profile_image" ? (
+  <CustomPicInput
+    name={key}
+    value={row[key]}
+    editable={false}
+    label={label || "Picture"}
+  />
+) : key === "description" ? (
+  <FloatingTextArea
+    name={key}
+    value={row[key]}
+    placeholder={label || "Description"}
+    disabled={true}
+  />
+) : (
+  <FloatingInput
+    name={key}
+    value={
+      key === "created_at" || key === "updated_at"
+        ? formatDateTime(row[key])
+        : key === "birthdate"
+        ? new Date(row[key]).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : key === "gender"
+        ? capitalizeWords(row[key].toString())
+        : key === "date"
+        ? formatDateTime(row[key])
+        : row[key].toString()
+    }
+    placeholder={label || capitalizeWords(key)}
+    disabled={true}
+  />
+)}
+
+              </div>
+            );
+          })}
         </div>
 
-{/* Footer buttons with new design system */}
-<div className="action-buttons" style={{ marginBottom: "1.5rem" }}>
-  {/* Extra buttons injected via children */}
-  {children}
-
-  {/* Default cancel/close button */}
-  <button className="btn-cancel" onClick={onClose}>
-    Close
-  </button>
-</div>
-
+        <div className="action-buttons" style={{ marginBottom: "1.5rem" }}>
+          {children}
+          <button className="btn-cancel" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

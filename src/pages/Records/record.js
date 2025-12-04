@@ -654,13 +654,14 @@ const handleAdd = async (formValues) => {
       )}
 
  {showInfoModal && modalAppointment && (
-  <InfoModal
-    show={true}
-    modalAppointment={modalAppointment}
-    closeModal={closeModal}
-    formatAppointmentDate={formatAppointmentDate}
-    messageType={messageType}
-  />
+ <InfoModal
+  title="Record's Information"
+  show={true}
+  modalAppointment={modalAppointment}
+  closeModal={closeModal}
+  formatAppointmentDate={formatAppointmentDate}
+  messageType={messageType}
+/>
 )}
 {isEditing && (
   <EditAppointmentModal
@@ -697,9 +698,9 @@ const handleAdd = async (formValues) => {
         <div className={`modal-box ${messageType}`}>
         <p>{confirmDeleteId ? confirmMessage : message}</p>
         {confirmDeleteId ? (
-            <div style={{ marginTop: '1rem' }}>
-            <button className="btn btn-danger me-2" onClick={confirmDeletion}>Yes</button>
-            <button className="btn btn-secondary" onClick={() => {
+            <div className="action-buttons" style={{ marginTop: '1rem' }}>
+            <button className="btn-submit" onClick={confirmDeletion}>Yes</button>
+            <button className="btn-cancel" onClick={() => {
                 setShowModal(false);
                 setConfirmDeleteId(null);
             }}>Cancel</button>

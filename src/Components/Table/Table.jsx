@@ -5,6 +5,7 @@ import ShowInfoModal from "../ShowInfoModal/ShowInfoModal.jsx";
 import ActionButtons from "../../utils/ActionButton/ActionButtons";
 import CustomSelect from "../../utils/Select/CustomSelect";
 import CustomDate from "../../utils/CustomDate.jsx";
+import WaiverButton from "../../Report/generateWaiver.js";
 
 const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFields = {}, fieldColumn, filterFields = []}) => {
   const [search, setSearch] = useState("");
@@ -227,42 +228,45 @@ const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFiel
 {selectedRow && (
   <ShowInfoModal
     row={selectedRow}
-    fields={(
-      () => {
-        let matchKey = null;
-
-        // 1️⃣ Try: row[fieldColumn] value
-        if (fieldColumn && selectedRow[fieldColumn]) {
-          const v = String(selectedRow[fieldColumn]).toLowerCase();
-          if (showInfoFields[v]) matchKey = v;
-        }
-
-        // 2️⃣ Try: fieldColumn itself
-        if (!matchKey && fieldColumn) {
-          const v = String(fieldColumn).toLowerCase();
-          if (showInfoFields[v]) matchKey = v;
-        }
-
-        // 3️⃣ Use mapped fields if match found
-        if (matchKey) {
-          return showInfoFields[matchKey].map(f => ({
-            key: f.key,
-            label: f.label,
-            value: selectedRow[f.key] ?? ""
-          }));
-        }
-
-        // 4️⃣ Fallback: show all row fields
-        return Object.keys(selectedRow).map(key => ({
-          key,
-          label: key,
-          value: selectedRow[key]
+    fields={(() => {
+      let matchKey = null;
+      if (fieldColumn && selectedRow[fieldColumn]) {
+        const v = String(selectedRow[fieldColumn]).toLowerCase();
+        if (showInfoFields[v]) matchKey = v;
+      }
+      if (!matchKey && fieldColumn) {
+        const v = String(fieldColumn).toLowerCase();
+        if (showInfoFields[v]) matchKey = v;
+      }
+      if (matchKey) {
+        return showInfoFields[matchKey].map(f => ({
+          key: f.key,
+          label: f.label,
+          value: selectedRow[f.key] ?? ""
         }));
       }
-    )()}
+      return Object.keys(selectedRow).map(key => ({
+        key,
+        label: key,
+        value: selectedRow[key]
+      }));
+    })()}
     onClose={() => setSelectedRow(null)}
-  />
+  >
+    {/* ✅ Add waiver button only for patients */}
+    {selectedRow.usertype === "patient" && (
+      <WaiverButton
+        patient={{
+          name: `${selectedRow.firstname} ${selectedRow.lastname}`,
+          birthday: selectedRow.birthdate,
+          address: selectedRow.address,
+          phone: selectedRow.contact,
+        }}
+      />
+    )}
+  </ShowInfoModal>
 )}
+
 
     </div>
   );
