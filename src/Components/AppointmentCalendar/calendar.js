@@ -132,10 +132,13 @@ const eventsWithStyles = appointments.map((a) => {
     onClose={() => setSelectedEvent(null)}
     fields={[
       { key: "patient", label: "Patient" },
+      { key: "dentist", label: "Dentist" },
       { key: "services", label: "Services" },
       { key: "status", label: "Status" },
       { key: "notes", label: "Notes" },
-      { key: "date", label: "Date" },
+      { key: "date", label: "Appointment Date" },
+         { key: "created_at", label: "Date Created" },
+
     ]}
   >
     {/* Extra footer buttons */}

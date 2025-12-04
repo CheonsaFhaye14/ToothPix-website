@@ -61,16 +61,6 @@ const initializeFormValues = useCallback((type, existingRow = {}) => {
   return initValues;
 }, [fields]);
 
- console.log("EditModal props:", {
-    datatype,
-    choices,
-    selected,
-    fields,
-    row,
-    onClose,
-    onSubmit,
-  });
-
 const [formValues, setFormValues] = useState(() => initializeFormValues(currentType, row));
 
 useEffect(() => {

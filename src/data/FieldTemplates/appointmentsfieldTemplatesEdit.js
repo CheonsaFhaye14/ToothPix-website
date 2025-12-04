@@ -1,4 +1,4 @@
-export const fieldTemplates = {
+export const fieldTemplatesEdit = {
   Appointments: [
     {
   name: "patient",
@@ -36,5 +36,17 @@ export const fieldTemplates = {
 },
 
     { name: "services", placeholder: "Service", type: "select-multiple",required: true },
+  {
+  name: "status",
+  placeholder: "Status",
+  type: "select", 
+  options: [
+        { label: "Pending", value: "Pending" },
+            { label: "Approved", value: "approved" },
+             { label: "Cancelled", value: "Cancelled" },
+               
+  ],
+  required: true,
+},
   ]
 };

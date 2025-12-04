@@ -103,9 +103,6 @@ const [isLoading, setIsLoading] = useState(true);
       },
     });
 
-    console.log('API Response:', response);
-    console.log('Data:', response.data);
-
     const usersData = response.data.records || [];
     setUsers(usersData);
 
@@ -167,7 +164,6 @@ const handleEdit = async (userId, formValues) => {
   }
 
   try {
-    console.log("📝 Original Form Values (Edit):", formValues);
 
     const formData = new FormData();
     formData.append("admin_id", adminId);
@@ -188,7 +184,6 @@ if (formValues.remove_image === true) {
 }
 
 
-    console.log("🧹 FormData ready for edit:", [...formData.entries()]);
 
     // ✅ use userId, not formData.idusers
     const response = await axios.put(
@@ -250,7 +245,6 @@ const handleAdd = async (formValues) => {
   }
 
   try {
-    console.log("📝 Original Form Values:", formValues);
 
     // Create FormData for file upload
     const formData = new FormData();
@@ -266,7 +260,6 @@ const handleAdd = async (formValues) => {
       }
     });
 
-    console.log("🧹 FormData ready:", [...formData.entries()]);
 
     // Send request to API
     const response = await axios.post(`${BASE_URL}/api/website/users`, formData, {

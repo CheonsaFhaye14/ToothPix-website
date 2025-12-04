@@ -206,7 +206,6 @@ const handleEdit = async (serviceId, formValues) => {
   }
 
   try {
-    console.log("📝 Original Form Values (Edit):", formValues);
 
     const formData = new FormData();
     formData.append("admin_id", adminId); // ✅ backend expects admin_id
@@ -227,7 +226,6 @@ const handleEdit = async (serviceId, formValues) => {
       }
     });
 
-    console.log("🧹 FormData ready for edit:", [...formData.entries()]);
 
     const response = await axios.put(
       `${BASE_URL}/api/website/services/${serviceId}`,
@@ -350,7 +348,6 @@ const handleAdd = async (formValues) => {
   }
 
   try {
-    console.log("📝 Original Form Values:", formValues);
 
     // Create FormData for file upload
     const formData = new FormData();
@@ -367,7 +364,6 @@ const handleAdd = async (formValues) => {
       }
     });
 
-    console.log("🧹 FormData ready:", [...formData.entries()]); // log FormData entries
 
     // Send request to API
     const response = await axios.post(`${BASE_URL}/api/website/services`, formData, {

@@ -118,10 +118,7 @@ const handleMarkAsPaid = async (payment, selectedMonths = {}) => {
   const { idappointment, total_price } = payment;
 
   try {
-    console.log("🔔 handleMarkAsPaid called");
-    console.log("📦 Payment object:", payment);
-    console.log("🗓 Selected months:", selectedMonths);
-
+ 
     const adminId = localStorage.getItem("adminId");
     if (!adminId) throw new Error("Admin ID missing");
 
@@ -137,20 +134,15 @@ const handleMarkAsPaid = async (payment, selectedMonths = {}) => {
       const svc = payment.services.find(s => s.name === svcName);
       if (!svc) throw new Error("Service not found");
 
-      console.log("🔍 Matched service:", svc);
-      console.log(`📝 Marking installment #${installmentNumber}`);
-
+   
       // Backend expects AMOUNT = exact installment payment
       const amount = svc.price / svc.installment_times;
 
       payload.installment_number = installmentNumber;
       payload.amount = amount;
 
-      console.log("📤 Installment payload:", payload);
 
     } else {
-      // Full payment mode → only send admin_id
-      console.log("📤 Full payment payload (no total_paid):", payload);
     }
 
     const response = await fetch(`${BASE_URL}/api/website/payment/${idappointment}`, {
@@ -162,15 +154,11 @@ const handleMarkAsPaid = async (payment, selectedMonths = {}) => {
       body: JSON.stringify(payload)
     });
 
-    console.log("📨 Request sent to backend:", {
-      url: `${BASE_URL}/api/website/payment/${idappointment}`,
-      payload
-    });
+   
 
     if (!response.ok) throw new Error("Failed to mark as paid");
 
     const result = await response.json();
-    console.log("✅ Backend response:", result);
 
     setPayments(prev =>
       prev.map(p =>

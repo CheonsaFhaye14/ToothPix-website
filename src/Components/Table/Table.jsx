@@ -79,6 +79,12 @@ const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFiel
         : String(bVal).localeCompare(String(aVal), undefined, { sensitivity: "base" });
     });
   }, [filteredData, sortConfig]);
+const toTitleCase = (str) =>
+  str
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
   const paginatedData = showAll
@@ -95,6 +101,14 @@ const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFiel
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
+const isDateLike = (val) => {
+  if (!val) return false;
+  // Try parsing with Date
+  const parsed = Date.parse(val);
+  if (!isNaN(parsed)) return true;
+  // Also treat formatted strings with slashes or dashes as dates
+  return /\d{1,2}\/\d{1,2}\/\d{4}/.test(val) || /\d{4}-\d{2}-\d{2}/.test(val);
+};
 
   return (
     <div className="table-wrapper">
@@ -158,61 +172,71 @@ const Table = ({ columns = [], data = [], filters = {}, setFilters, showInfoFiel
 
 
 
-      <table className="custom-table">
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th
-                key={col.accessor}
-                onClick={() => handleSort(col.accessor)}
-                className="sortable"
-              >
-                {col.header}
-                {sortConfig.key === col.accessor && (sortConfig.direction === "asc" ? " ▲" : " ▼")}
-              </th>
-            ))}
-          {hasActions && <th>Actions</th>}
-          </tr>
-        </thead>
+  <table className="custom-table">
+  <thead>
+    <tr>
+      {columns.map((col) => (
+        <th
+          key={col.accessor}
+          onClick={() => handleSort(col.accessor)}
+          className="sortable"
+        >
+          {toTitleCase(String(col.header))}   {/* ✅ Title Case headers */}
+          {sortConfig.key === col.accessor && (sortConfig.direction === "asc" ? " ▲" : " ▼")}
+        </th>
+      ))}
+      {hasActions && <th>{toTitleCase("actions")}</th>}   {/* ✅ Title Case Actions */}
+    </tr>
+  </thead>
 
-        <tbody>
-          {paginatedData.length > 0 ? (
-            paginatedData.map((row, i) => (
-              <tr key={i}>
-                {columns.map((col) => (
-                  <td key={col.accessor} onClick={() => setSelectedRow(row)} style={{ cursor: "pointer" }}>
-                    {col.render ? col.render(row) : row[col.accessor]}
-                  </td>
-                ))}
+  <tbody>
+    {paginatedData.length > 0 ? (
+      paginatedData.map((row, i) => (
+        <tr key={i}>
+          {columns.map((col) => (
+            <td
+              key={col.accessor}
+              onClick={() => setSelectedRow(row)}
+              style={{ cursor: "pointer" }}
+            >
+              {col.render
+                ? col.render(row)
+                : row[col.accessor] !== undefined && row[col.accessor] !== null
+                ? isDateLike(row[col.accessor])
+  ? String(row[col.accessor]) // ✅ leave dates as-is
+  : toTitleCase(String(row[col.accessor])) // ✅ capitalize others
+: ""
+}
+            </td>
+          ))}
 
-           {hasActions && (
-  <td onClick={(e) => e.stopPropagation()}>
-    <ActionButtons
-      onEdit={row.onEdit}
-      onDelete={row.onDelete}
-      onUndo={row.onUndo}
-      editLabel={row.editLabel}
-      deleteLabel={row.deleteLabel}
-      undoLabel={row.undoLabel}
-    />
-  </td>
-)}
-
-              </tr>
-            ))
-          ) : (
-           <tr>
-  <td
-    colSpan={hasActions ? columns.length + 1 : columns.length}
-    className="no-data"
-  >
-    No data available
-  </td>
-</tr>
-
+          {hasActions && (
+            <td onClick={(e) => e.stopPropagation()}>
+              <ActionButtons
+                onEdit={row.onEdit}
+                onDelete={row.onDelete}
+                onUndo={row.onUndo}
+                editLabel={row.editLabel}
+                deleteLabel={row.deleteLabel}
+                undoLabel={row.undoLabel}
+              />
+            </td>
           )}
-        </tbody>
-      </table>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td
+          colSpan={hasActions ? columns.length + 1 : columns.length}
+          className="no-data"
+        >
+          {toTitleCase("no data available")}   {/* ✅ Title Case message */}
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
 
       {!showAll && (
         <div className="pagination">

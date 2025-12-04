@@ -179,7 +179,6 @@ const handleEditSubmit = async (e) => {
     adminId
   };
 
-  console.log('PUT payload:', payload);
 
   try {
     const response = await axios.put(
@@ -192,7 +191,6 @@ const handleEditSubmit = async (e) => {
       }
     );
 
-    console.log('PUT response:', response.data);
     if (response.status === 200) {
       showTemporaryModal('Record updated successfully.', 'success');
       setIsEditing(false);
@@ -368,7 +366,6 @@ const fetchPatients = async () => {
   }
 };
   const handleDelete = (id) => {
-    console.log("Deleting ID:", id);
     setConfirmDeleteId(id);
     setMessageType('error');
     setConfirmMessage("Are you sure you want to delete this Record?");
@@ -503,7 +500,6 @@ const handleAdd = async (formValues) => {
   }
 
   try {
-    console.log("📝 Original Form Values:", formValues);
 
     // Build payload as JSON
     const payload = {
@@ -559,8 +555,6 @@ const handleAdd = async (formValues) => {
         payload[key] = value;
       }
     });
-
-    console.log("🧹 Payload ready:", payload);
 
     // Send request as JSON
     const response = await axios.post(`${BASE_URL}/api/website/record`, payload, {

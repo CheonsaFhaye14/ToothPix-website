@@ -6,5 +6,7 @@ export const showInfoFields = {
     { key: "category", label: "Category" },
     { key: "allow_installment", label: "Allow Installment" },
     { key: "installment_times", label: "Installment Count" },
+      { key: "created_at", label: "Date Created" }
+
   ],
 };

@@ -33,7 +33,6 @@ export default function RecordListTable({
 const [innerSortKey, setInnerSortKey] = useState("");
 const [innerSortDirection, setInnerSortDirection] = useState("asc");
 const [selectedRecord, setSelectedRecord] = useState(null);
-
 // helper to sort appointments
 const sortAppointments = (list) => {
   return [...list].sort((a, b) => {
@@ -62,13 +61,10 @@ const sortAppointments = (list) => {
 const groupedRecords = records.reduce((acc, rec) => {
   const key = groupBy === "patient" ? rec.patient_name : rec.dentist_name;
 
-  console.log("record:", rec);
-  console.log("generated key:", key);
 
   if (!key) return acc;
   const normalized = key.trim().toLowerCase();
 
-  console.log("normalized key:", normalized);
 
   if (!acc[normalized]) acc[normalized] = [];
   acc[normalized].push(rec);
@@ -327,6 +323,7 @@ const paginatedKeys = showAll
       { key: "dentist_name", label: "Dentist Name" },
       { key: "date", label: "Appointment Date" },   // 👈 keep raw key
       { key: "notes", label: "Notes" },
+      { key: "created_at", label: "Date Created" },
     ]}
   />
 )}
