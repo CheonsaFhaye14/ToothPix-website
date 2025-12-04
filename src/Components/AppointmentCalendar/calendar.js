@@ -56,11 +56,12 @@ const eventsWithStyles = appointments.map((a) => {
     borderColor: borderColors[a.extendedProps.status] || "#808080",
     textColor: "#000",
     extendedProps: {
-      ...a.extendedProps,
-      time: formattedTime, // keep it in extendedProps if you want to show in modal
+      ...a.extendedProps,   // ✅ keep everything you attached earlier
+      time: formattedTime,  // add formatted time
     },
   };
 });
+
 
 
 
@@ -133,10 +134,10 @@ const eventsWithStyles = appointments.map((a) => {
     fields={[
       { key: "patient", label: "Patient" },
       { key: "dentist", label: "Dentist" },
+            { key: "date", label: "Appointment Date" },
       { key: "services", label: "Services" },
       { key: "status", label: "Status" },
       { key: "notes", label: "Notes" },
-      { key: "date", label: "Appointment Date" },
          { key: "created_at", label: "Date Created" },
 
     ]}

@@ -95,7 +95,8 @@ const fetchAppointmentsForCalendar = async () => {
     const events = response.data.appointments
       .filter(a => new Date(a.date) >= now)
       .map((a) => {
-        const formattedTime = new Date(a.date).toLocaleTimeString([], {
+        const dateObj = new Date(a.date);
+        const formattedTime = dateObj.toLocaleTimeString([], {
           hour: "numeric",
           minute: "2-digit",
           hour12: true,
@@ -107,14 +108,24 @@ const fetchAppointmentsForCalendar = async () => {
           start: a.date,
           end: a.date,
           extendedProps: {
+            // ✅ include everything you might need later
+            idappointment: a.idappointment,
+            idpatient: a.idpatient,
             patient: a.patientfullname || a.patient_name,
-            services: a.services?.map((s) => s.name).join(", "),
-            notes: a.notes,
+            iddentist: a.iddentist,
+            dentist: a.dentistfullname,
+            date: a.date,
+            created_at: a.created_at,
             status: a.status,
+            notes: a.notes,
+            // services both as names and IDs
+            services: a.services?.map(s => s.name).join(", ") || "",
+            serviceIds: a.services?.map(s => s.idservice) || [],
           },
         };
       });
 
+    console.log("Events sent to calendar:", events);
     setAppointmentData(events);
   } catch (error) {
     console.error("Error fetching appointments:", error);
@@ -652,17 +663,9 @@ if (field.name === "patient") {
 <AppointmentCalendar
   appointments={appointmentData}
   table="Appointment"
-  onEdit={(id) => {
-
-    // Find the raw appointment from your data array
-    const appointment = appointmentData.find(a => a.idappointment === id);
-    if (!appointment) {
-      console.warn("No appointment found for ID:", id);
-      return;
-    }
-
-
-    const rawDate = new Date(appointment.date);
+  onEdit={(event) => {
+    // event here is the FullCalendar event object you clicked
+    const rawDate = new Date(event.start);
 
     // Manila-local date and time
     const manilaDate = rawDate.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" }); // "YYYY-MM-DD"
@@ -674,19 +677,17 @@ if (field.name === "patient") {
     }).format(rawDate); // e.g. "18:00"
 
     const normalizedRow = {
-      idappointment: appointment.idappointment,
-      patient: appointment.idpatient || appointment.patient_name,
-      dentist: appointment.iddentist,
+      idappointment: event.id,
+      patient: event.extendedProps.idpatient || event.extendedProps.patient,
+      dentist: event.extendedProps.iddentist,
       date: manilaDate,
       time: manilaHours.slice(0, 5),
-      services: appointment.services
-        ? appointment.services.map(s => s.idservice)
-        : [],
-      status: appointment.status,
-      notes: appointment.notes || "",
+      services: event.extendedProps.serviceIds || [],
+      status: event.extendedProps.status,
+      notes: event.extendedProps.notes || "",
     };
 
-
+    console.log("Normalized row for edit:", normalizedRow);
     setEditingAppointment(normalizedRow);
   }}
   onDelete={(id) => {
