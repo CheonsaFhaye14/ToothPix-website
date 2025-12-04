@@ -91,7 +91,7 @@ const fullName =
           })}
         </div>
 
-        <div className="action-buttons" style={{ marginBottom: "1.5rem" }}>
+        <div className="action-buttons" style={{ paddingTop: '1rem',marginBottom: "1.5rem" }}>
           {children}
           <button className="btn-cancel" onClick={onClose}>
             Close

@@ -89,6 +89,15 @@ const paginatedKeys = showAll
   : sortedKeys.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const isResetDisabled = !searchTerm && !sortKey && sortDirection === "asc" && !showAll;
+// Helper: capitalize first letter of each word
+const capitalizeWords = (str) => {
+  if (!str) return "";
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
 
   return (
     <div className="table-wrapper">
@@ -185,7 +194,7 @@ const paginatedKeys = showAll
 }}
             className={`group-row ${isExpanded ? "active-group" : ""}`}
           >
-            <td>{displayName}</td>
+<td>{capitalizeWords(displayName)}</td>
           </tr>
 
           {isExpanded && (
@@ -253,8 +262,8 @@ const paginatedKeys = showAll
                           <td>{formatDateTime(appt.date)}</td>
                           <td>
                             {groupBy === "patient"
-                              ? appt.dentist_name
-                              : appt.patient_name}
+                              ? capitalizeWords(appt.dentist_name)
+                              : capitalizeWords(appt.patient_name)}
                           </td>
                           <td onClick={(e) => e.stopPropagation()}>
                             <div className="action-buttons">
@@ -344,16 +353,19 @@ console.log(appt)
   <ShowInfoModal
  row={{
     ...selectedRecord,
+    patient_name: capitalizeWords(selectedRecord.patient_name),
+    dentist_name: capitalizeWords(selectedRecord.dentist_name),
     services: (() => {
       try {
         const parsed = typeof selectedRecord.services === "string"
           ? JSON.parse(selectedRecord.services)
           : selectedRecord.services;
-        return Array.isArray(parsed) ? parsed.map(s => s.name).join(", ") : "";
+        return Array.isArray(parsed) ? parsed.map(s => capitalizeWords(s.name)).join(", ") : "";
       } catch {
         return "";
       }
     })(),
+    treatment_notes: capitalizeWords(selectedRecord.treatment_notes),
   }}    onClose={() => setSelectedRecord(null)}
     fields={[
       { key: "patient_name", label: "Patient Name" },
