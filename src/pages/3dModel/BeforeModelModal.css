@@ -27,12 +27,10 @@
   flex-direction: column;
   width: 700px;
   height: 500px;
-  margin-left: 230px;        /* shift modal 100px to the right */
     /* Center content vertically, move slightly to the right */
   justify-content: center;  
   align-items: center;       
 }
-
 
 
   /* Close button */
@@ -54,10 +52,22 @@
   border-radius: 12px;
   overflow: hidden;
   margin-left: -160px;
-  margin-top: -150px;    /* adjust vertical position */
+  margin-top: -130px;    /* adjust vertical position */
   position: relative;  
   box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
   background-color: #d0e7ff; 
   transform: scale(0.6); /* scale down */
 }
 
+
+
+  /* Unity iframe fills container exactly */
+  .unity-container iframe {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: none;
+    
+  }
