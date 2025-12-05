@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./BeforeModelModal.css";
 
-function BeforeModelModal({ isOpen, onClose, recordId }) {
+function BeforeModelModal({ isOpen, onClose, recordId, patientName, beforeDate }) {
   const [iframeKey, setIframeKey] = useState(0);
 
   // Reload iframe each time modal opens
@@ -13,43 +13,37 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
   }, [isOpen, recordId]);
 
   // ✅ Send both recordId and token to Unity iframe
-  useEffect(() => {
+    useEffect(() => {
     if (!isOpen || !recordId) return;
 
     const iframe = document.querySelector("iframe");
     if (!iframe) return;
 
-    // 🧠 Use the same key your backend expects:
     const token = localStorage.getItem("adminId");
-    
 
     const sendDataToIframe = () => {
-      console.log("🔹 Sending recordId and token to Unity iframe...", recordId);
+      console.log("🔹 Sending record info to Unity iframe", {
+        recordId,
+        token,
+        patientName,
+      });
 
-      // ✅ Send record ID
       iframe.contentWindow.postMessage(
-        { type: "SET_RECORD_ID", recordId: String(recordId) },
+        {
+          type: "SET_RECORD_INFO",
+          recordId: String(recordId),
+          token: token || "",
+          patientName: patientName || "",
+          beforeDate: beforeDate || "",
+        },
         "*"
       );
-
-      // ✅ Send token
-      if (token) {
-        iframe.contentWindow.postMessage(
-          { type: "SET_AUTH_TOKEN", token },
-          "*"
-        );
-        console.log("✅ Token sent to Unity iframe");
-      } else {
-        console.warn("⚠️ No auth token found in localStorage");
-      }
     };
 
-    // Wait for iframe to load
     iframe.onload = sendDataToIframe;
-
-    // Also try sending immediately (in case it’s already loaded)
     sendDataToIframe();
-  }, [isOpen, recordId, iframeKey]);
+  }, [isOpen, recordId, iframeKey, patientName]);
+
 
   if (!isOpen) return null;
 
@@ -57,13 +51,13 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
     <div className="unity-overlay">
       <div className="unity-content">
         <button className="modal-close" onClick={onClose}>×</button>
-        <h2>Before 3D Teeth Editor</h2>
         <div className="unity-container">
           {recordId ? (
             <iframe
               key={iframeKey}
               src={`${process.env.PUBLIC_URL}/unity/TeethEditor/index.html`}
               title="Before Editor"
+              className="unity-iframe"
             />
           ) : (
             <p>Loading model...</p>

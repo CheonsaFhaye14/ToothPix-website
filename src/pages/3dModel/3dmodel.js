@@ -18,6 +18,8 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [sortKey, setSortKey] = useState(null);            // 'date' or other field
   const [sortDirection, setSortDirection] = useState('asc');
+  const [selectedPatientName, setSelectedPatientName] = useState('');
+
 
 
   useEffect(() => {
@@ -68,14 +70,15 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
     setSortDirection('asc');
   };
 
-const handleViewModel = (type, url, idrecord) => { 
+const handleViewModel = (type, url, idrecord, patientName) => { 
   const recordIdStr = String(idrecord);
 
   setModelType(type);
-  //setSelectedModelUrl(url);
   setSelectedIdRecord(recordIdStr);
+  setSelectedPatientName(patientName || '');   // 👈 store name
   setShowModelModal(true);
 };
+
 const handleSort = (key) => {
   if (sortKey === key) {
     setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -215,20 +218,22 @@ style={{
                             className="btn-edit"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleViewModel('Before', appt.beforeModelUrl, appt.idrecord);
+                              handleViewModel('Before', appt.beforeModelUrl, appt.idrecord, patientName);
                             }}
                           >
                             Before
                           </button>
+
                           <button
                             className="btn-edit"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleViewModel('After', appt.afterModelUrl, appt.idrecord);
+                              handleViewModel('After', appt.afterModelUrl, appt.idrecord, patientName);
                             }}
                           >
                             After
                           </button>
+
                         </td>
                       </tr>
                     ))}
@@ -271,9 +276,11 @@ style={{
   <BeforeModelModal
     isOpen={showModelModal}
     onClose={() => setShowModelModal(false)}
-    recordId={selectedIdRecord}  // ✅ pass the ID to the modal
+    recordId={selectedIdRecord}
+    patientName={selectedPatientName}   // 👈 NEW
   />
 )}
+
 
 
 
