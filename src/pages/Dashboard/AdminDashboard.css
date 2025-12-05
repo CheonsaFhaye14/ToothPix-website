@@ -10,6 +10,47 @@
 .row:first-of-type { /* First row: 2 cards */
   grid-template-columns: repeat(2, 1fr);
 }
+.cute-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fafeff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
+}
+
+.cute-table thead {
+  background: #e4faff;
+}
+
+.cute-table th {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #444444;
+  font-size: 0.95rem;
+}
+
+.cute-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.cute-table td {
+  padding: 12px;
+  border-top: 1px solid #f5d6e0;
+  font-size: 0.9rem;
+  color: #555555;
+}
+
+.cute-table tbody tr:hover {
+  background: #f0faff;
+}
+
+.cute-table tbody tr:nth-child(even) {
+  background: #f7fdff;
+}
 
 .row:nth-of-type(2) { /* Second row: 1 card */
   grid-template-columns: 1fr;

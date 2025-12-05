@@ -16,6 +16,7 @@ import { fieldTemplatesEdit } from '../../data/FieldTemplates/appointmentsfieldT
 const Appointment = () => {
 const [modalOpen, setModalOpen] = useState(false); // modal open/close
 const { token, adminId } = useAdminAuth(); // get token from context
+
 const column = [
   { header: "Patient Name", accessor: "patientname" },
   { header: "Dentist Name", accessor: "dentistname" },
@@ -125,7 +126,6 @@ const fetchAppointmentsForCalendar = async () => {
         };
       });
 
-    console.log("Events sent to calendar:", events);
     setAppointmentData(events);
   } catch (error) {
     console.error("Error fetching appointments:", error);
@@ -687,7 +687,6 @@ if (field.name === "patient") {
       notes: event.extendedProps.notes || "",
     };
 
-    console.log("Normalized row for edit:", normalizedRow);
     setEditingAppointment(normalizedRow);
   }}
   onDelete={(id) => {

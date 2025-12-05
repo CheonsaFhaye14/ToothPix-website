@@ -45,7 +45,7 @@
 /* --- Page Titles inside content --- */
 .admin-content h1 {
   display: inline-block; /* underline fits the text width only */
-  font-size: 2rem;
+  font-size: 2.2rem;
   padding-right: 15px;
   color: #087aaa; /* deep navy blue */
   font-weight: 700;
@@ -56,7 +56,6 @@
   border-bottom: 2px solid #a6d4f5;
   padding-bottom: 10px;
   padding-left: 12px;
-  font-family: "Poppins", sans-serif;
   letter-spacing: 0.5px;
 }
 

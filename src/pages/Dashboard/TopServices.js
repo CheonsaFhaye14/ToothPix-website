@@ -18,10 +18,10 @@ export default function TopServices({ services, onOpenReport }) {
               className="list-group-item d-flex justify-content-between align-items-center"
             >
               <FontAwesomeIcon icon={faTooth} className="me-2 text-primary" />
-              {service.name}
-              <span className="badge bg-primary rounded-pill">
-                {service.usage_count} uses
-              </span>
+         {service.name}{": "}
+<span>
+  {service.usage_count} uses
+</span>
             </li>
           ))}
         </ul>

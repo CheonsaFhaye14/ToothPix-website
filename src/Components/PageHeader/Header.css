@@ -21,7 +21,6 @@
 .admin-header-title {
   color: #007acc;
   font-weight: 800;
-  font-family: "Poppins", "Nunito", sans-serif;
   font-size: 2rem; /* 🦷 Bigger and friendlier title */
   display: flex;
   align-items: center;
@@ -49,7 +48,6 @@
   border-radius: 14px;
   font-weight: 600;
   font-size: 1rem;
-  font-family: "Poppins", sans-serif;
   transition: all 0.25s ease;
   box-shadow: 0 3px 6px rgba(0, 123, 255, 0.15);
 }
@@ -69,7 +67,6 @@
 .admin-header-desc {
   font-size: 1rem;
   color: #5a6d7e;
-  font-family: "Nunito", sans-serif;
   margin-top: 10px;
   line-height: 1.4;
 }

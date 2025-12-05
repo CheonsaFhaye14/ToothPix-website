@@ -5,7 +5,7 @@ const AfterModelModal = ({ onClose }) => (
     <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
       <h3 style={styles.header}>After 3D Model</h3>
       <div style={styles.modelBox}> </div>
-      <button className="btn btn-danger mt-3" onClick={onClose} style={styles.closeButton}>
+      <button className="btn-cancel" onClick={onClose} style={styles.closeButton}>
         Close
       </button>
     </div>

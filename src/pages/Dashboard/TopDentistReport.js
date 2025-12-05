@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import Papa from 'papaparse';
+import { jsPDF } from 'jspdf';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { BASE_URL } from '../../config';
+import formBackground from '../../assets/ServicesReport.png'; // ✅ import the background image
 
 export default function TopDentistsReport({ onClose }) {
   const [dentists, setDentists] = useState([]);
@@ -40,53 +39,82 @@ export default function TopDentistsReport({ onClose }) {
     fetchTopDentists();
   }, []);
 
-  // CSV Export
-  const exportCSV = () => {
-    if (!dentists.length) return;
-
-    const csv = Papa.unparse(
-      dentists.map((d) => ({
-        'Dentist Name': d.fullname,
-        'Patients Helped': d.patients_helped,
-      }))
-    );
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'top_dentists_report.csv';
-    a.click();
-
-    URL.revokeObjectURL(url);
-  };
-
-  // PDF Export
+  // PDF Export (chart + background only)
   const exportPDF = () => {
     if (!dentists.length) return;
 
-    const doc = new jsPDF('portrait');
-    doc.text('Top Dentists Report', 14, 15);
+    const doc = new jsPDF('landscape');
+    const img = new Image();
+    img.src = formBackground;
 
-    autoTable(doc, {
-      head: [['Dentist Name', 'Patients Helped']],
-      body: dentists.map((d) => [d.fullname, d.patients_helped]),
-    });
+    img.onload = () => {
+      // Full-page background
+      doc.addImage(
+        img,
+        'PNG',
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        doc.internal.pageSize.getHeight()
+      );
 
-    doc.save('top_dentists_report.pdf');
+      // Title
+      doc.setFontSize(16);
+
+      // Chart
+      const chartCanvas = document.querySelector('canvas');
+      const chartImage = chartCanvas.toDataURL('image/png', 1.0);
+      doc.addImage(chartImage, 'PNG',  50, 50, 200, 105); // smaller chart for landscape
+
+      doc.save('top_dentists_report.pdf');
+    };
   };
 
-  // Chart Data
+  // Chart Data with improved design
   const chartData = {
     labels: dentists.slice(0, 10).map((d) => d.fullname),
     datasets: [
       {
         label: 'Patients Helped',
         data: dentists.slice(0, 10).map((d) => d.patients_helped),
-        backgroundColor: '#6bb8fa',
+        backgroundColor: [
+          'rgba(173, 216, 230, 0.8)', // light blue
+          'rgba(135, 206, 250, 0.8)', // sky blue
+          'rgba(100, 149, 237, 0.8)', // cornflower blue
+          'rgba(70, 130, 180, 0.8)',  // steel blue
+          'rgba(65, 105, 225, 0.8)',  // royal blue
+          'rgba(30, 144, 255, 0.8)',  // dodger blue
+          'rgba(0, 191, 255, 0.8)',   // deep sky blue
+          'rgba(25, 25, 112, 0.8)',   // midnight blue
+          'rgba(0, 0, 255, 0.8)',     // pure blue
+          'rgba(0, 0, 139, 0.8)',     // dark blue
+        ],
+        borderRadius: 6, // rounded edges
       },
     ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#4682b4',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#4682b4', font: { size: 12, weight: 'bold' } },
+      },
+      y: {
+        grid: { color: 'rgba(173, 216, 230, 0.2)' },
+        ticks: { color: '#4682b4', font: { size: 12 } },
+      },
+    },
   };
 
   return (
@@ -102,63 +130,38 @@ export default function TopDentistsReport({ onClose }) {
         {!loading && !error && (
           <>
             {dentists.length > 0 ? (
-              <>
-                {/* Chart */}
-                <div style={{ height: 300, marginBottom: '1rem' }}>
-                  <Bar
-                    data={chartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: { legend: { display: false } },
-                    }}
-                  />
-                </div>
-              </>
+              <div style={{ height: 250}}>
+                <Bar data={chartData} options={chartOptions} />
+              </div>
             ) : (
-              <p
-                style={{
-                  textAlign: 'center',
-                  margin: '1rem 0',
-                  fontStyle: 'italic',
-                }}
-              >
+              <p style={{ textAlign: 'center', margin: '1rem 0', fontStyle: 'italic' }}>
                 No dentist data available.
               </p>
             )}
 
-            {/* Actions */}
-            <div
-              className="modal-actions"
-              style={{
-                marginTop: '1.5rem',
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '1rem',
-                flexWrap: 'wrap',
-              }}
-            >
-              {dentists.length > 0 && (
-                <>
-                  <button className="btn btn-primary" onClick={exportCSV}>
-                    Download CSV
-                  </button>
-
-                  <button className="btn btn-danger" onClick={exportPDF}>
-                    Download PDF
-                  </button>
-                </>
-              )}
-
-              
-            </div>
+            {dentists.length > 0 && (
+              <div
+                className="modal-actions"
+                style={{
+                  marginTop: '1.5rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  marginBottom: '8px'
+                }}
+              >
+                <button className="btn-pdf" onClick={exportPDF}>
+                  Download PDF
+                </button>
+              </div>
+            )}
           </>
         )}
-        <div className="modal-actions" style={{ marginTop: '1.5rem' }}> 
-        <button className="btn btn-secondary" onClick={onClose}>
-                Close
-              </button>
-      </div>
+
+          <button className="btn-cancel" onClick={onClose}>
+            Close
+          </button>
+   
       </div>
     </div>
   );

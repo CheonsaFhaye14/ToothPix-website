@@ -59,10 +59,6 @@ const handleSelect = (option) => {
   const label = capitalizeWords(rawLabel);  // pretty for the UI
   const val   = String(rawVal);             // stable for logic
 
-  console.log("Selected option:", option);
-  console.log("Label:", label);
-  console.log("Value:", val);
-
   setInputValue(label);
   onChange && onChange({ target: { name, value: val } });
   setOpen(false);

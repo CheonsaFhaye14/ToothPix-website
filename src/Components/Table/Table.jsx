@@ -194,20 +194,21 @@ const isDateLike = (val) => {
       paginatedData.map((row, i) => (
         <tr key={i}>
           {columns.map((col) => (
-            <td
-              key={col.accessor}
-              onClick={() => setSelectedRow(row)}
-              style={{ cursor: "pointer" }}
-            >
-              {col.render
-                ? col.render(row)
-                : row[col.accessor] !== undefined && row[col.accessor] !== null
-                ? isDateLike(row[col.accessor])
-  ? String(row[col.accessor]) // ✅ leave dates as-is
-  : toTitleCase(String(row[col.accessor])) // ✅ capitalize others
-: ""
-}
-            </td>
+       <td
+  key={col.accessor}
+  onClick={() => setSelectedRow(row)}
+  style={{ cursor: "pointer" }}
+>
+  {col.render
+    ? col.render(row)
+    : row[col.accessor] !== undefined && row[col.accessor] !== null
+    ? isDateLike(row[col.accessor])
+      ? String(row[col.accessor])              // ✅ leave dates as-is
+      : toTitleCase(String(row[col.accessor])) // ✅ capitalize others
+    : ""
+  }
+</td>
+
           ))}
 
           {hasActions && (

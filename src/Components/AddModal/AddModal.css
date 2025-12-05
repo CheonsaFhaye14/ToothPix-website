@@ -28,7 +28,6 @@
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(117, 197, 241, 0.35);
   animation: fadeIn 0.4s ease;
-  font-family: "Poppins", sans-serif;
 }
 
 /* Modal title */
@@ -83,7 +82,7 @@
   border-radius: 25px;
   border: none;
   background: #f0f0f0;
-  color: #333;
+  color: #322f2f;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -94,6 +93,29 @@
   background: #e0e0e0;
   transform: scale(1.05) translateY(-1px);
 }
+
+.btn-exit {
+  position: absolute;
+  bottom: 20px;       /* place at bottom of modal */
+  left: 45%;       /* or center with left:50%; transform:translateX(-50%) */
+  z-index: 9999;      /* keep above Unity iframe */
+  padding: 10px 22px;
+  border-radius: 25px;
+  border: none;
+  background: #eaf9fa;
+  color: #322f2f;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+
+.btn-exit:hover {
+  background: #e0e0e0;
+  transform: scale(1.05) translateY(-1px);
+}
+
 
 /* Fade-in animation */
 @keyframes fadeIn {

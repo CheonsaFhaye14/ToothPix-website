@@ -23,7 +23,8 @@ export default function RecordListTable({
   setEditFormData,
   setIsEditing,
   handleDelete,
-  formatAppointmentDate
+  formatAppointmentDate,
+  onEdit
 }) {
   // 🔹 Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,6 +89,15 @@ const paginatedKeys = showAll
   : sortedKeys.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const isResetDisabled = !searchTerm && !sortKey && sortDirection === "asc" && !showAll;
+// Helper: capitalize first letter of each word
+const capitalizeWords = (str) => {
+  if (!str) return "";
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
 
   return (
     <div className="table-wrapper">
@@ -184,7 +194,7 @@ const paginatedKeys = showAll
 }}
             className={`group-row ${isExpanded ? "active-group" : ""}`}
           >
-            <td>{displayName}</td>
+<td>{capitalizeWords(displayName)}</td>
           </tr>
 
           {isExpanded && (
@@ -252,22 +262,46 @@ const paginatedKeys = showAll
                           <td>{formatDateTime(appt.date)}</td>
                           <td>
                             {groupBy === "patient"
-                              ? appt.dentist_name
-                              : appt.patient_name}
+                              ? capitalizeWords(appt.dentist_name)
+                              : capitalizeWords(appt.patient_name)}
                           </td>
                           <td onClick={(e) => e.stopPropagation()}>
                             <div className="action-buttons">
-                              <button
-                                className="btn-edit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const editData = { /* ... */ };
-                                  setEditFormData(editData);
-                                  setIsEditing(true);
-                                }}
-                              >
-                                ✏️ Edit
-                              </button>
+ <button
+  className="btn-edit"
+  onClick={(e) => {
+    e.stopPropagation();
+
+    const rawDate = new Date(appt.date);
+    const manilaDate = rawDate.toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+    const manilaHours = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Manila"
+    }).format(rawDate);
+    const normalizedRow = {
+      idappointment: appt.idappointment,
+      patient: appt.idpatient || appt.patient_name,
+      dentist: appt.iddentist, // numeric ID
+      date: manilaDate,
+      time: manilaHours.slice(0, 5),
+      services: Array.isArray(appt.services)
+        ? appt.services.map(s => s.idservice) // must be array of IDs
+        : [],
+      status: appt.status,
+      treatment_notes: appt.treatment_notes ||"",
+    };
+
+    if (onEdit) {
+      onEdit(normalizedRow);
+    }
+  }}
+>
+  ✏️ Edit
+</button>
+
+
                               <button
                                 className="btn-delete"
                                 onClick={(e) => {
@@ -316,13 +350,28 @@ const paginatedKeys = showAll
       )}
       {selectedRecord && (
   <ShowInfoModal
-    row={selectedRecord}
-    onClose={() => setSelectedRecord(null)}
+ row={{
+    ...selectedRecord,
+    patient_name: capitalizeWords(selectedRecord.patient_name),
+    dentist_name: capitalizeWords(selectedRecord.dentist_name),
+    services: (() => {
+      try {
+        const parsed = typeof selectedRecord.services === "string"
+          ? JSON.parse(selectedRecord.services)
+          : selectedRecord.services;
+        return Array.isArray(parsed) ? parsed.map(s => capitalizeWords(s.name)).join(", ") : "";
+      } catch {
+        return "";
+      }
+    })(),
+    treatment_notes: capitalizeWords(selectedRecord.treatment_notes),
+  }}    onClose={() => setSelectedRecord(null)}
     fields={[
       { key: "patient_name", label: "Patient Name" },
       { key: "dentist_name", label: "Dentist Name" },
       { key: "date", label: "Appointment Date" },   // 👈 keep raw key
-      { key: "notes", label: "Notes" },
+      { key: "services", label: "Services" },
+      { key: "treatment_notes", label: "Notes" },
       { key: "created_at", label: "Date Created" },
     ]}
   />
