@@ -67,7 +67,6 @@ const eventsWithStyles = appointments.map((a) => {
 
 
   const handleEditSubmit = (updatedData) => {
-    console.log("Updated Event:", updatedData);
     setIsEditing(false);
     setSelectedEvent(null);
   };

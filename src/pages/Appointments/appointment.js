@@ -126,7 +126,6 @@ const fetchAppointmentsForCalendar = async () => {
         };
       });
 
-    console.log("Events sent to calendar:", events);
     setAppointmentData(events);
   } catch (error) {
     console.error("Error fetching appointments:", error);
@@ -688,7 +687,6 @@ if (field.name === "patient") {
       notes: event.extendedProps.notes || "",
     };
 
-    console.log("Normalized row for edit:", normalizedRow);
     setEditingAppointment(normalizedRow);
   }}
   onDelete={(id) => {

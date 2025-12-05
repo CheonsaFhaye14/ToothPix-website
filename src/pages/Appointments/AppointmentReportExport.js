@@ -5,7 +5,6 @@ import { formatDateTime } from '../../utils/formatDateTime';
 import formBackground from '../../assets/landscape.png';
 
 export default function AppointmentReportExport({ appointments = [] }) {
-  console.log("Raw appointments data:", appointments);
 
   // Pre-compute enriched records for PDF
   const enrichedRecords = appointments.map(a => ({
@@ -19,7 +18,6 @@ const handleDownloadCSV = () => {
     return;
   }
 
-  console.log("Appointments before CSV export:", appointments);
 
   const filtered = appointments.map(a => ({
     ID: a.idappointment ?? 'N/A',
@@ -33,7 +31,6 @@ const handleDownloadCSV = () => {
     'Created At': a.created_at ? formatDateTime(a.created_at) : '—',
   }));
 
-  console.log("Filtered CSV data:", filtered);
 
   try {
     const csv = Papa.unparse(filtered);

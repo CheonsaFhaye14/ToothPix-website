@@ -54,11 +54,12 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
   if (!isOpen) return null;
 
   return (
+    
     <div className="modal-backdrop">
       <div className="unity-content">
-        <button className="modal-close" onClick={onClose}>×</button>
-        <h2>Before 3D Teeth Editor</h2>
-        <div className="unity-container">
+        <h2 className="unity-title">Before 3D Teeth Editor</h2>
+        
+         <div className="unity-container">
           {recordId ? (
             <iframe
               key={iframeKey}
@@ -69,6 +70,8 @@ function BeforeModelModal({ isOpen, onClose, recordId }) {
             <p>Loading model...</p>
           )}
         </div>
+         <button className="btn-exit" onClick={onClose}>close</button>
+       
       </div>
     </div>
   );

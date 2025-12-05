@@ -280,7 +280,6 @@ const capitalizeWords = (str) => {
       hour12: false,
       timeZone: "Asia/Manila"
     }).format(rawDate);
-console.log(appt)
     const normalizedRow = {
       idappointment: appt.idappointment,
       patient: appt.idpatient || appt.patient_name,

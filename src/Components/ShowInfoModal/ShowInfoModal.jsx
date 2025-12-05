@@ -6,7 +6,6 @@ import FloatingTextArea from "../../utils/FloatingTextArea";
 const ShowInfoModal = ({ row, onClose, fields, children, title = "Information" }) => {
   if (!row) return null;
 
-  console.log("ShowInfoModal props:", { row, fields, children });
 
   const capitalizeWords = (str) =>
     str
@@ -45,7 +44,6 @@ const fullName =
 
         <div className="modal-body">
           {displayedFields.map(({ key, label }) => {
-            console.log("Rendering field:", key, "with value:", row[key]);
 
             return (
           <div className="input-container" key={key}>

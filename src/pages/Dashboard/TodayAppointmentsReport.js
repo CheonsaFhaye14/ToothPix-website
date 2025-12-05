@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BASE_URL } from '../../config';
+import { Center } from '@react-three/drei';
 
 export default function TodayAppointmentsReport({ onClose }) {
   const [appointments, setAppointments] = useState([]);

@@ -140,7 +140,6 @@ const handleSubmit = () => {
     [datatype]: currentType.toLowerCase(),
   };
 
-  console.log("Form Submission Data:", finalValues);
 
   if (onSubmit) {
     onSubmit(finalValues);

@@ -1,11 +1,9 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import Papa from 'papaparse';
 import { formatDateTime } from '../../utils/formatDateTime';
 import formBackground from '../../assets/formbackground.png'; // ✅ import the background image
 export default function RecordReportExport({ records = [] }) {
-  console.log(records);
 
   // Safely sort the records
   const sortedRecords = [...records].sort((a, b) => {
@@ -49,12 +47,19 @@ export default function RecordReportExport({ records = [] }) {
 }));
 
 
-    console.log("CSV export data:", csvData);
 
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'record_report.csv');
   };
+    const capitalizeWords = (str) => {
+  if (!str || typeof str !== 'string') return str;
+  return str
+    .split(' ')
+    .map(word => word.length > 0 ? word[0].toUpperCase() + word.slice(1).toLowerCase() : '')
+    .join(' ');
+};
+
 
 const handleDownloadPDF = () => {
   if (!Array.isArray(enrichedRecords) || enrichedRecords.length === 0) {
@@ -62,91 +67,126 @@ const handleDownloadPDF = () => {
     return;
   }
 
-  const doc = new jsPDF({ orientation: 'portrait' });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  // ✅ Log the enriched records before processing
 
-  const img = formBackground;
+  const doc = new jsPDF('portrait');
+  const img = new Image();
+  img.src = formBackground;
 
-  const addBackground = () => {
-    doc.addImage(img, 'PNG', 0, 0, pageWidth, pageHeight);
-  };
+  img.onload = () => {
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
- // First page background
-addBackground();
+    // --- HEADER ---
+    const addHeader = () => {
+      doc.addImage(img, 'PNG', 0, 0, pageWidth, pageHeight);
+      doc.setFontSize(22);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Dental Record Report', pageWidth / 2, 23, { align: 'center' });
+    };
 
-// Title stays white
-doc.setFontSize(16);
-doc.setTextColor(255, 255, 255);
-doc.setFont('helvetica', 'bold');
-doc.text('Dental Record Report', pageWidth / 2, 20, { align: 'center' });
+    // --- GROUP BY PATIENT ---
+    const grouped = enrichedRecords.reduce((acc, r) => {
+      const name = r.patient_name?.trim() || 'Unknown';
+      if (!acc[name]) acc[name] = [];
+      acc[name].push(r);
+      return acc;
+    }, {});
 
-// Group by patient
-const grouped = enrichedRecords.reduce((acc, r) => {
-  const name = r.patient_name?.trim() || 'Unknown';
-  if (!acc[name]) acc[name] = [];
-  acc[name].push(r);
-  return acc;
-}, {});
+    // ✅ Log grouped data
 
-let y = 35;
+    Object.keys(grouped).forEach((patient, patientIndex) => {
+if (patientIndex > 0) {
+  doc.addPage();
+  addHeader();
+} else {
+  addHeader();
+}
 
-Object.entries(grouped).forEach(([patient, items], index) => {
-  doc.setFontSize(13);
-  doc.setTextColor(0, 0, 0); // ✅ patient info in black
+// reset text color back to black after header
+doc.setTextColor(0, 0, 0);
+
+let y = 40;
+
+      // --- PATIENT BOX ---
+      const patientTop = y;
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Patient: ${capitalizeWords(patient)}`, 18, y + 8);
+      y += 20;
+
+      const boxPadding = 7;
+      doc.setDrawColor(0);
+      doc.rect(14, patientTop, pageWidth - 28, (y - patientTop) - boxPadding);
+
+      grouped[patient]
+        .sort((a, b) => a.idappointment - b.idappointment)
+        .forEach((record, index) => {
+          // ✅ Log each record before drawing
+
+          const recordTop = y + 6;
+          y = recordTop;
+
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Appointment: ${index + 1}`, 18, y);
+          y += 10;
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+
+          const addLineText = (label, value) => {
+            doc.text(`${label}: ${value}`, 24, y);
+            doc.setDrawColor(0);
+            doc.line(22, y + 2, pageWidth - 22, y + 2);
+            y += 8;
+          };
+
+          addLineText('ID', record.idappointment || 'N/A');
+          addLineText('Dentist', record.dentist_name || 'Unknown');
+          addLineText('Date', record.formattedDate || '—');
+          addLineText(
+            'Services',
+            Array.isArray(record.services)
+              ? record.services.map(s => capitalizeWords(s.name)).join(', ')
+              : record.services?.name
+                ? capitalizeWords(record.services.name)
+                : 'None'
+          );
+          addLineText('Treatment Notes', record.treatment_notes?.replace(/\n/g, ' ') || '—');
+          addLineText('Total Price', record.total_price != null ? `PHP ${parseFloat(record.total_price).toFixed(2)}` : 'PHP 0.00');
+
+          // draw record box
+          const recordHeight = y - recordTop + 4;
+          doc.rect(14, recordTop - 6, pageWidth - 28, recordHeight);
+
+          y += 10;
+
+        // --- PAGE BREAK CHECK ---
+if (y > pageHeight - 30) {
+  doc.addPage();
+  addHeader();
+
+  // reset text color back to black after header
+  doc.setTextColor(0, 0, 0);
+
+  y = 40;
+  const newPatientTop = y;
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Patient: ${patient}`, 14, y);
-  y += 6;
+  doc.text(`Patient: ${capitalizeWords(patient)}`, 18, y + 8);
+  y += 20;
+  doc.rect(14, newPatientTop, pageWidth - 28, (y - newPatientTop) - boxPadding);
+}
 
-  const headers = [['ID', 'Dentist', 'Treatment Done', 'Services', 'Treatment Notes', 'Total Price']];
-  const body = items.map(r => [
-    r.idappointment || 'N/A',
-    r.dentist_name || 'Unknown',
-    r.formattedDate,
-    Array.isArray(r.services)
-      ? r.services.map(s => s.name.charAt(0).toUpperCase() + s.name.slice(1).toLowerCase()).join(', ')
-      : r.services?.name
-        ? r.services.name.charAt(0).toUpperCase() + r.services.name.slice(1).toLowerCase()
-        : 'None',
-    r.treatment_notes?.replace(/\n/g, ' ') || '',
-    r.total_price != null ? r.total_price : '0',
-  ]);
+        });
+    });
 
-autoTable(doc, {
-  startY: y,
-  head: headers,
-  body,
-  styles: { fontSize: 9, textColor: [0, 0, 0] }, // table text black
-  headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-  theme: "striped",
-  willDrawPage: () => {
-    // ✅ draw background first
-    addBackground();
-
-    // Title stays white
-    doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Dental Record Report', pageWidth / 2, 22, { align: 'center' });
-
-    // Reset to black for rest of content
-    doc.setTextColor(0, 0, 0);
-  }
-});
-
-
-  y = doc.lastAutoTable.finalY + 12;
-
-  if (y > pageHeight - 30 && index < Object.keys(grouped).length - 1) {
-    doc.addPage();
-    addBackground();
-    y = 25;
-  }
-});
-
-  doc.save('record_report.pdf');
+    doc.save('record_report.pdf');
+  };
 };
-
 
 
   return (

@@ -20,9 +20,9 @@ export default function TopDentists({ dentists, onOpenReport }) {
               >
                 <span className="d-flex align-items-center">
                   <FontAwesomeIcon icon={faUserDoctor} className="me-2 text-primary" />
-                  {dentist.fullname}
+                  {dentist.fullname}{": "}
                 </span>
-                <span className="badge bg-primary rounded-pill">
+                <span>
                   {dentist.patients_helped} Patient
                 </span>
               </li>

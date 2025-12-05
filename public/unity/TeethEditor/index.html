@@ -88,7 +88,6 @@
 
       // 🚨 If React already sent a recordId, send it now
       if (pendingRecordId) {
-        console.log("[WebGL] Sending queued recordId:", pendingRecordId);
         unityInstance.SendMessage("WebBridge", "SetIdRecord", String(pendingRecordId));
         pendingRecordId = null;
       }
@@ -102,7 +101,6 @@
   // ✅ Listen for messages from React
   window.addEventListener("message", (event) => {
     if (event.data.type === "SET_RECORD_ID") {
-      console.log("[WebGL] Received recordId:", event.data.recordId);
 
       if (unityInstance) {
         unityInstance.SendMessage("WebBridge", "SetIdRecord", String(event.data.recordId));
