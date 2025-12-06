@@ -19,6 +19,7 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
   const [sortKey, setSortKey] = useState(null);            // 'date' or other field
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedPatientName, setSelectedPatientName] = useState('');
+  const [selectedBeforeDate, setSelectedBeforeDate] = useState('');
 
 
 
@@ -70,12 +71,19 @@ const [selectedIdRecord, setSelectedIdRecord] = useState('');
     setSortDirection('asc');
   };
 
-const handleViewModel = (type, url, idrecord, patientName) => { 
+const handleViewModel = (type, url, idrecord, patientName, appointmentDate) => { 
   const recordIdStr = String(idrecord);
 
   setModelType(type);
   setSelectedIdRecord(recordIdStr);
-  setSelectedPatientName(patientName || '');   // 👈 store name
+  setSelectedPatientName(patientName || '');
+
+  if (type === 'Before') {
+    setSelectedBeforeDate(appointmentDate || '');
+  } else {
+    setSelectedBeforeDate('');
+  }
+
   setShowModelModal(true);
 };
 
@@ -215,24 +223,37 @@ style={{
                         <td>{formatDateTime(appt.appointmentDate)}</td>
                         <td className="action-buttons">
                           <button
-                            className="btn-edit"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewModel('Before', appt.beforeModelUrl, appt.idrecord, patientName);
-                            }}
-                          >
-                            Before
-                          </button>
+                              className="btn-edit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewModel(
+                                  'Before',
+                                  appt.beforeModelUrl,
+                                  appt.idrecord,
+                                  patientName,
+                                  appt.appointmentDate            // 👈 pass date here
+                                );
+                              }}
+                            >
+                              Before
+                            </button>
 
-                          <button
-                            className="btn-edit"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewModel('After', appt.afterModelUrl, appt.idrecord, patientName);
-                            }}
-                          >
-                            After
-                          </button>
+                            <button
+                              className="btn-edit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewModel(
+                                  'After',
+                                  appt.afterModelUrl,
+                                  appt.idrecord,
+                                  patientName,
+                                  appt.appointmentDate            // optional for After, if you want it later
+                                );
+                              }}
+                            >
+                              After
+                            </button>
+
 
                         </td>
                       </tr>
@@ -277,9 +298,11 @@ style={{
     isOpen={showModelModal}
     onClose={() => setShowModelModal(false)}
     recordId={selectedIdRecord}
-    patientName={selectedPatientName}   // 👈 NEW
+    patientName={selectedPatientName}
+    beforeDate={selectedBeforeDate}     // 👈 pass it in
   />
 )}
+
 
 
 
