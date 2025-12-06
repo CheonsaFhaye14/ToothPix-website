@@ -2,13 +2,14 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <title>Unity Web Player | My project</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | Smart Dental Model Editor</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -19,98 +20,154 @@
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">My project</div>
+        <div id="unity-build-title">Smart Dental Model Editor</div>
       </div>
     </div>
     <script>
-  function unityShowBanner(msg, type) {
-    var warningBanner = document.querySelector("#unity-warning");
-    function updateBannerVisibility() {
-      warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-    }
-    var div = document.createElement('div');
-    div.innerHTML = msg;
-    warningBanner.appendChild(div);
-    if (type == 'error') div.style = 'background: red; padding: 10px;';
-    else {
-      if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-      setTimeout(function () {
-        warningBanner.removeChild(div);
+      var canvas = document.querySelector("#unity-canvas");
+
+      // 🔹 Global reference to Unity instance
+      var unityInstance = null;
+
+      // 🔹 If messages arrive before Unity is ready, we buffer the latest one
+      var pendingRecordInfoJson = null;
+
+      // 🔹 Listen for messages from the parent window (React app)
+      window.addEventListener("message", function (event) {
+        var data = event.data;
+        if (!data || typeof data !== "object") return;
+
+        // We only care about our custom message type
+        if (data.type === "SET_RECORD_INFO") {
+          console.log("[index.html] Received SET_RECORD_INFO:", data);
+
+          var payload = {
+            recordId: String(data.recordId || ""),
+            token: String(data.token || ""),
+            patientName: data.patientName || "",
+            beforeDate: data.beforeDate || "",
+          };
+
+          var json = JSON.stringify(payload);
+
+          if (unityInstance) {
+            // ✅ Unity is ready, send immediately
+            unityInstance.SendMessage("WebBridge", "SetRecordInfo", json);
+          } else {
+            // ⏳ Unity not ready yet, store for later
+            pendingRecordInfoJson = json;
+          }
+        }
+      });
+
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
         updateBannerVisibility();
-      }, 5000);
-    }
-    updateBannerVisibility();
-  }
+      }
 
-  var canvas = document.querySelector("#unity-canvas");
-  var buildUrl = "Build";
-  var loaderUrl = buildUrl + "/TeethEditor.loader.js";
-  var config = {
-    arguments: [],
-    dataUrl: buildUrl + "/TeethEditor.data",
-    frameworkUrl: buildUrl + "/TeethEditor.framework.js",
-    codeUrl: buildUrl + "/TeethEditor.wasm",
-    streamingAssetsUrl: "StreamingAssets",
-    companyName: "DefaultCompany",
-    productName: "My project",
-    productVersion: "0.1.0",
-    showBanner: unityShowBanner,
-  };
-
-  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-    document.getElementsByTagName('head')[0].appendChild(meta);
-    document.querySelector("#unity-container").className = "unity-mobile";
-    canvas.className = "unity-mobile";
-  } else {
-    canvas.style.width = "960px";
-    canvas.style.height = "600px";
-  }
-
-  document.querySelector("#unity-loading-bar").style.display = "block";
-
-  let unityInstance = null; 
-  let pendingRecordId = null; // 🚨 store recordId if sent early
-
-  var script = document.createElement("script");
-  script.src = loaderUrl;
-  script.onload = () => {
-    createUnityInstance(canvas, config, (progress) => {
-      document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-    }).then((instance) => {
-      unityInstance = instance;
-      document.querySelector("#unity-loading-bar").style.display = "none";
-      document.querySelector("#unity-fullscreen-button").onclick = () => {
-        unityInstance.SetFullscreen(1);
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Build.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/Build.data",
+        frameworkUrl: buildUrl + "/Build.framework.js",
+        codeUrl: buildUrl + "/Build.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Smart Dental Model Editor",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
       };
 
-      // 🚨 If React already sent a recordId, send it now
-      if (pendingRecordId) {
-        unityInstance.SendMessage("WebBridge", "SetIdRecord", String(pendingRecordId));
-        pendingRecordId = null;
-      }
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
 
-    }).catch((message) => {
-      alert(message);
-    });
-  };
-  document.body.appendChild(script);
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
 
-  // ✅ Listen for messages from React
-  window.addEventListener("message", (event) => {
-    if (event.data.type === "SET_RECORD_ID") {
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
 
-      if (unityInstance) {
-        unityInstance.SendMessage("WebBridge", "SetIdRecord", String(event.data.recordId));
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
       } else {
-        console.warn("[WebGL] Unity not ready yet, queuing recordId");
-        pendingRecordId = event.data.recordId; // 🚨 save until ready
+        // Desktop style: Let canvas fill its parent (the iframe)
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
       }
-    }
-  });
-</script>
 
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+          }).then((instance) => {
+            // 🔹 Save globally so our message handler can use it
+            unityInstance = instance;
+
+            document.querySelector("#unity-loading-bar").style.display = "none";
+            document.querySelector("#unity-fullscreen-button").onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+
+            // 🔹 If we received SET_RECORD_INFO before Unity was ready, send it now
+            if (pendingRecordInfoJson) {
+              console.log("[index.html] Sending buffered record info to WebBridge");
+              unityInstance.SendMessage("WebBridge", "SetRecordInfo", pendingRecordInfoJson);
+              pendingRecordInfoJson = null;
+            }
+
+          }).catch((message) => {
+            alert(message);
+          });
+        };
+
+        document.body.appendChild(script);
+
+
+    </script>
   </body>
 </html>
